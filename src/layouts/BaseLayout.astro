@@ -11,8 +11,8 @@ interface Props {
   ogImage?: string;
 }
 const {
-  title = 'Nevalen Aginda Prasetyo — Software Engineer Technical Lead',
-  description = 'Backend systems for payments, merchant operations, and secure identity journeys.',
+  title = 'Nevalen Aginda Prasetyo — Tech Lead & Backend Engineer',
+  description = 'Tech lead and backend engineer in Jakarta working on payment infrastructure, merchant acquiring, and distributed backend systems.',
   canonicalUrl = new URL(Astro.url.pathname, Astro.site).href,
   ogImage = new URL('/og.png', Astro.site).href,
 } = Astro.props;
@@ -22,12 +22,12 @@ const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: siteName,
-  jobTitle: 'Software Engineer Technical Lead',
+  jobTitle: 'Tech Lead & Backend Engineer',
   url: new URL('/', Astro.site).href,
   email: 'mailto:nevalenaginda10@gmail.com',
   address: { '@type': 'PostalAddress', addressLocality: 'Jakarta', addressCountry: 'ID' },
   sameAs: ['https://linkedin.com/in/nevalen-aginda-prasetyo-57ba3a120', 'https://github.com/nevalenaginda'],
-  knowsAbout: ['Node.js', 'Apache Kafka', 'MongoDB', 'Distributed systems', 'Backend leadership'],
+  knowsAbout: ['Node.js', 'Python', 'Apache Kafka', 'MongoDB', 'Redis', 'Distributed systems', 'Payment systems', 'Backend leadership'],
 });
 ---
 <!doctype html>

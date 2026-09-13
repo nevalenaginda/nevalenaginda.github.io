@@ -3,22 +3,23 @@
 @theme {
   --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --color-ink: #e8e6e1;
-  --color-paper: #10110f;
-  --color-panel: #171916;
-  --color-line: #343832;
-  --color-moss: #b8c694;
-  --color-muted: #aaa9a1;
+  --color-ink: #17170f;
+  --color-body: #4a463c;
+  --color-paper: #faf8f3;
+  --color-panel: #f1eee5;
+  --color-line: #ddd6c7;
+  --color-moss: #0f7a63;
+  --color-muted: #6e6a5f;
 }
 
-:root { color-scheme: dark; scroll-behavior: smooth; }
+:root { color-scheme: light; scroll-behavior: smooth; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); line-height: 1.6; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
 a:hover { color: var(--color-moss); }
-::selection { background: #b8c694; color: #10110f; }
-.grid-paper { background-image: linear-gradient(#232620 1px, transparent 1px), linear-gradient(90deg, #232620 1px, transparent 1px); background-size: 32px 32px; }
-.flow-line { background: linear-gradient(90deg, transparent, #b8c694 15%, #b8c694 85%, transparent); height: 1px; }
+::selection { background: #0f7a63; color: #faf8f3; }
+.grid-paper { background-image: linear-gradient(#ebe6da 1px, transparent 1px), linear-gradient(90deg, #ebe6da 1px, transparent 1px); background-size: 32px 32px; }
+.flow-line { background: linear-gradient(90deg, transparent, #0f7a63 15%, #0f7a63 85%, transparent); height: 1px; opacity: .55; }
 :focus-visible { outline: 2px solid var(--color-moss); outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { :root { scroll-behavior: auto; } *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
 @media (max-width: 640px) { body { line-height: 1.68; } }
