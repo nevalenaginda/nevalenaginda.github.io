@@ -28,7 +28,7 @@ The public product gives users two explicit paths when scheduling a bill: automa
 
 ## Role
 
-Backend Tech Lead for delivery and release coordination. I owned backend scope, review, and release readiness on a backend currently serving roughly 500,000 active users at p99 latency under 500 ms and an unexpected error rate under 2.5%.
+Backend Tech Lead for delivery and release coordination. I owned backend scope, review, and release readiness on a backend serving roughly 500,000 active users of the Jenius consumer app, at p99 latency under 500 ms and an unexpected error rate under 2.5%.
 
 ## Public outcome
 
