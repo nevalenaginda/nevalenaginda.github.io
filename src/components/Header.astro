@@ -1,39 +1,65 @@
 ---
+import { Download, Moon, Sun } from 'lucide-astro';
+
 const nav = [
   ['Work', '/#work'], ['Toolkit', '/#toolkit'], ['Experience', '/#log'], ['About', '/#about'], ['Contact', '/#contact'],
 ];
 ---
-<header class="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur-sm">
-  <div data-reading-progress class="pointer-events-none absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-moss/80 [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
-  <nav class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 lg:px-8" aria-label="Primary navigation">
-    <a class="font-mono text-sm font-semibold tracking-tight no-underline" href="/">NAP<span class="text-moss">/</span>index</a>
-    <div class="hidden items-center gap-5 text-sm md:flex">
+<header class="no-print sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-sm">
+  <div data-reading-progress class="pointer-events-none absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 gradient-rail [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
+  <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3 lg:px-8" aria-label="Primary navigation">
+    <a class="font-mono text-sm font-semibold tracking-tight no-underline" href="/">NAP<span class="gradient-text">/</span>index</a>
+    <div class="hidden items-center gap-5 text-sm lg:flex">
       {nav.map(([label, href]) => <a href={href}>{label}</a>)}
     </div>
-    <button class="min-h-11 rounded border border-line px-3 font-mono text-xs hover:border-moss hover:text-moss" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
-      <span class="hidden sm:inline">Navigate </span><kbd class="font-sans">⌘K</kbd>
-    </button>
+    <div class="flex items-center gap-2">
+      <a class="inline-flex min-h-11 items-center gap-2 rounded border border-line px-3 font-mono text-xs no-underline hover:border-primary hover:text-primary" href="/cv" aria-label="Open the printable CV, A4 layout">
+        <Download size={15} aria-hidden="true" /><span class="hidden sm:inline">CV</span>
+      </a>
+      <button
+        type="button"
+        data-theme-toggle
+        class="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded border border-line hover:border-primary hover:text-primary"
+        aria-label="Switch between light and dark theme"
+        aria-pressed="false"
+      >
+        <span data-theme-icon-light class="hidden"><Moon size={16} aria-hidden="true" /></span>
+        <span data-theme-icon-dark><Sun size={16} aria-hidden="true" /></span>
+      </button>
+      <button class="min-h-11 rounded border border-line px-3 font-mono text-xs hover:border-primary hover:text-primary" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
+        <span class="hidden sm:inline">Navigate </span><kbd class="font-sans">⌘K</kbd>
+      </button>
+    </div>
   </nav>
 </header>
-<style>
-  @media (prefers-reduced-motion: reduce) {
-    [data-reading-progress] { display: none; }
-  }
-</style>
 <script>
+  // Theme: inline script in BaseLayout already applied the stored class before paint.
+  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const sun = document.querySelector<HTMLElement>('[data-theme-icon-dark]');
+  const moon = document.querySelector<HTMLElement>('[data-theme-icon-light]');
+  const label = (dark: boolean) => {
+    if (sun) sun.hidden = dark;
+    if (moon) moon.hidden = !dark;
+    toggle?.setAttribute('aria-pressed', String(dark));
+  };
+  label(document.documentElement.classList.contains('dark'));
+  toggle?.addEventListener('click', () => {
+    const dark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
+    label(dark);
+  });
+
   const bar = document.querySelector<HTMLElement>('[data-reading-progress]');
   if (bar) {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (reduced.matches) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       bar.remove();
     } else {
       const update = () => {
         const max = document.documentElement.scrollHeight - window.innerHeight;
-        const ratio = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
-        bar.style.transform = `scaleX(${ratio})`;
+        bar.style.transform = `scaleX(${max > 0 ? Math.min(window.scrollY / max, 1) : 0})`;
       };
-      window.addEventListener('scroll', update, { passive: true });
-      window.addEventListener('resize', update, { passive: true });
+      addEventListener('scroll', update, { passive: true });
+      addEventListener('resize', update, { passive: true });
       update();
     }
   }

@@ -1,85 +1,60 @@
 ---
 import { getCollection } from 'astro:content';
-import { ArrowUpRight, Github, Linkedin, Mail, MapPin } from 'lucide-astro';
+import { ArrowUpRight, Download, Github, Linkedin, Mail, MapPin } from 'lucide-astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import CommandPalette from '../components/CommandPalette.astro';
 import Footer from '../components/Footer.astro';
+import { metrics, skills, experience, principles, education, site } from '../data/site';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-
-const toolkit = [
-  {
-    group: 'Languages & runtime',
-    items: [['Node.js', 'Daily use'], ['Python', 'Daily use']],
-  },
-  {
-    group: 'Messaging, data & cache',
-    items: [['Apache Kafka', 'Daily use'], ['MongoDB', 'Daily use'], ['Redis', 'Working knowledge']],
-  },
-  {
-    group: 'Platform & delivery',
-    items: [['OpenShift', 'Working knowledge'], ['Jenkins', 'Working knowledge'], ['OpenCV', 'Working knowledge']],
-  },
-  {
-    group: 'Engineering practice',
-    items: [['Performance testing', 'Daily use'], ['Distributed systems design', 'Practice area'], ['Backend team leadership', 'Practice area'], ['AI exploration', 'Learning']],
-  },
-];
-
-const metrics = [
-  ['~500k', 'active users of the Jenius consumer app'],
-  ['~2,000', 'active merchant businesses on the QRIS merchant product'],
-  ['< 500 ms', 'p99 latency across the backend services I own'],
-  ['< 2.5%', 'unexpected error rate'],
-];
-
-const log = [
-  { when: 'Since 2024', role: 'Tech Lead', detail: 'Leading backend delivery end to end — a variable number of engineers depending on the project, from design and review through release. Scope covers the payment and merchant backend serving roughly 500,000 active Jenius users, at p99 latency under 500 ms and an unexpected error rate under 2.5%.' },
-  { when: '2025 – 2026', role: 'Two product releases', detail: 'Merchant operations (2025) and scheduled bill payments (2026), from design review through release.' },
-  { when: '2023', role: 'Backend Developer', detail: 'Secure identity verification and device recovery flows, including multi-step verification paths.' },
-];
+const stats = [metrics[4], metrics[5], ['Team lead', 'scope and release ownership']];
 ---
 <BaseLayout
   title="Nevalen Aginda Prasetyo — Tech Lead"
-  description="Tech lead in Jakarta working on payment infrastructure, merchant acquiring, and distributed backend systems. Selected work and engineering notes."
+  description="Tech lead in Jakarta working on payment infrastructure, merchant acquiring, and distributed backend systems. Selected work, engineering principles, and a printable CV."
 >
   <Header />
   <CommandPalette />
   <main id="main">
-    <section class="grid-paper relative overflow-hidden border-b border-line">
-      <div class="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-28">
-        <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">Tech Lead · Payment Infrastructure · Jakarta, Indonesia</p>
+    <section class="grid-paper hero-wash relative overflow-hidden border-b border-line">
+      <div class="glow-orb glow-orb--one" aria-hidden="true"></div>
+      <div class="glow-orb glow-orb--two" aria-hidden="true"></div>
+      <div class="glow-orb glow-orb--three" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-24">
+        <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">Tech Lead · Payment Infrastructure · Jakarta, Indonesia</p>
         <h1 class="mt-6 max-w-4xl text-5xl font-semibold tracking-[-.06em] text-balance sm:text-7xl">Nevalen Aginda Prasetyo</h1>
-        <p class="mt-7 max-w-2xl text-lg text-body sm:text-xl">I lead backend work on payment infrastructure and merchant acquiring: scheduled payments, QRIS merchant operations, and account-verification flows.</p>
-        <div class="mt-10 flow-line max-w-2xl"></div>
-        <dl class="mt-7 grid max-w-3xl gap-x-10 gap-y-6 sm:grid-cols-3">
-          {metrics.map(([value, label]) => <div>
-            <dt class="font-mono text-2xl font-semibold text-moss">{value}</dt>
+        <p class="mt-7 max-w-2xl text-lg text-body sm:text-xl">I lead backend delivery for payment infrastructure and merchant acquiring — scheduled payments, QRIS merchant operations, and account verification — on a distributed stack of <span class="text-ink">Node.js, Python, Apache Kafka, MongoDB, and Redis</span>.</p>
+        <dl class="mt-10 grid max-w-3xl gap-x-10 gap-y-6 sm:grid-cols-3">
+          {stats.map(([value, label]) => <div class="border-t border-line pt-4">
+            <dt class="font-mono text-3xl font-semibold gradient-text">{value}</dt>
             <dd class="mt-1 text-sm text-muted">{label}</dd>
           </div>)}
         </dl>
-        <div class="mt-9 flex flex-wrap gap-3">
-          <a class="inline-flex min-h-11 items-center gap-2 border border-moss px-4 text-sm no-underline hover:bg-moss hover:text-paper" href="#work">Read selected work <ArrowUpRight size={16} /></a>
-          <a class="inline-flex min-h-11 items-center gap-2 border border-line px-4 text-sm no-underline hover:border-moss hover:text-moss" href="mailto:nevalenaginda10@gmail.com"><Mail size={16} /> Email me</a>
+        <div class="mt-10 flex flex-wrap gap-3">
+          <a class="gradient-cta inline-flex min-h-11 items-center gap-2 rounded px-5 text-sm font-medium no-underline" href="#work">Read selected work <ArrowUpRight size={16} aria-hidden="true" /></a>
+          <a class="inline-flex min-h-11 items-center gap-2 rounded border border-line bg-panel px-4 text-sm no-underline hover:border-primary hover:text-primary" href="/cv"><Download size={16} aria-hidden="true" /> Download CV</a>
+          <a class="inline-flex min-h-11 items-center gap-2 rounded px-4 text-sm no-underline hover:text-primary" href={`mailto:${site.email}`}><Mail size={16} aria-hidden="true" /> Email me</a>
         </div>
+        <dl class="mt-12 grid gap-x-10 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+          {metrics.slice(0, 4).map(([value, label]) => <div>
+            <dt class="font-mono text-sm font-semibold text-ink">{value}</dt>
+            <dd class="text-sm text-muted">{label}</dd>
+          </div>)}
+        </dl>
       </div>
     </section>
 
     <section id="work" class="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-20">
       <div class="max-w-2xl">
-        <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">01 / Selected work</p>
+        <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">01 / Selected work</p>
         <h2 class="mt-4 text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Three releases, written up as engineering decisions.</h2>
         <p class="mt-4 text-muted">Case studies use public product facts. Internal architecture, endpoints, and data are left out on purpose.</p>
       </div>
-      <div class="mt-12 grid gap-px border border-line bg-line md:grid-cols-3">
-        {projects.map((project) => <article class="project-card flex min-h-80 flex-col bg-paper p-6 transition-[transform] duration-200 ease-out motion-reduce:transition-none">
-          <p class="font-mono text-xs text-moss">{project.data.released}</p>
-          <h3 class="mt-5 text-2xl font-semibold tracking-[-.035em]"><a class="no-underline project-link" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>{project.data.title}</a></h3>
-          <p class="mt-2 text-sm text-muted">{project.data.company}</p>
-          <p class="mt-5 text-sm text-body">{project.data.summary}</p>
+      <div class="mt-12 grid gap-6 lg:grid-cols-3">
+        {projects.map((project) => <article class="project-card flex flex-col overflow-hidden rounded-lg border border-line bg-panel transition-[transform,box-shadow] duration-200 ease-out motion-reduce:transition-none">
           <img
-            class="mt-6 aspect-[16/10] w-full border border-line object-cover object-top"
+            class="aspect-[16/10] w-full border-b border-line object-cover object-top"
             src={project.data.image}
             alt={project.data.imageAlt}
             width="1200"
@@ -87,22 +62,28 @@ const log = [
             loading="lazy"
             decoding="async"
           />
-          <div class="mt-auto pt-8"><a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-moss project-cta" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>Open case study <ArrowUpRight size={15} /></a></div>
+          <div class="flex grow flex-col p-6">
+            <p class="font-mono text-xs text-primary">{project.data.released}</p>
+            <h3 class="mt-3 text-2xl font-semibold tracking-[-.035em]"><a class="no-underline project-link" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>{project.data.title}</a></h3>
+            <p class="mt-2 text-sm text-muted">{project.data.company}</p>
+            <p class="mt-4 text-sm text-body">{project.data.summary}</p>
+            <div class="mt-auto pt-6"><a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-primary project-cta" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>Open case study <ArrowUpRight size={15} aria-hidden="true" /></a></div>
+          </div>
         </article>)}
       </div>
     </section>
 
     <section id="toolkit" class="border-y border-line bg-panel scroll-mt-20">
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-20">
-        <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">02 / Toolkit</p>
+        <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">02 / Skills</p>
         <h2 class="mt-4 max-w-2xl text-3xl font-semibold tracking-[-.04em] sm:text-4xl">What I use, and how often.</h2>
-        <div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {toolkit.map((group) => <div class="border-t border-line pt-5">
-            <h3 class="font-mono text-xs uppercase tracking-[.16em] text-muted">{group.group}</h3>
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {skills.map((group) => <div class="rounded-lg border border-line bg-paper p-5">
+            <h3 class="font-mono text-xs uppercase tracking-[.16em] text-primary">{group.group}</h3>
             <ul class="mt-4 space-y-3">
               {group.items.map(([name, level]) => <li class="flex flex-wrap items-baseline justify-between gap-2">
-                <span class="text-lg">{name}</span>
-                <span class="font-mono text-xs text-moss">{level}</span>
+                <span class="text-base font-medium">{name}</span>
+                <span class="font-mono text-xs text-muted">{level}</span>
               </li>)}
             </ul>
           </div>)}
@@ -111,13 +92,24 @@ const log = [
     </section>
 
     <section id="log" class="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-20">
-      <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">03 / Experience</p>
-      <h2 class="mt-4 max-w-2xl text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Work log.</h2>
-      <ol class="mt-10 max-w-3xl border-l border-line">
-        {log.map((entry, index) => <li class={`relative pl-8 ${index === log.length - 1 ? '' : 'pb-10'} before:absolute before:-left-[5px] before:top-2 before:size-[9px] before:rounded-full ${index === 0 ? 'before:bg-moss' : 'before:bg-line'}`}>
-          <p class="font-mono text-xs text-muted">{entry.when}</p>
-          <h3 class="mt-2 text-2xl font-semibold">{entry.role}</h3>
-          <p class="mt-2 text-body">{entry.detail}</p>
+      <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">03 / Experience</p>
+      <h2 class="mt-4 max-w-2xl text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Challenge, solution, impact.</h2>
+      <ol class="mt-10 space-y-6">
+        {experience.map((entry) => <li class="rounded-lg border border-line bg-panel p-6 lg:p-8">
+          <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h3 class="text-2xl font-semibold tracking-[-.03em]">{entry.role}</h3>
+            <p class="font-mono text-xs text-muted">{entry.when}</p>
+          </div>
+          <p class="mt-1 text-sm text-muted">{entry.org}</p>
+          <dl class="mt-6 grid gap-5 lg:grid-cols-3">
+            {[['Challenge', entry.challenge], ['Solution', entry.solution], ['Impact', entry.impact]].map(([term, text]) => <div class="border-t border-line pt-4">
+              <dt class="font-mono text-xs uppercase tracking-[.16em] text-primary">{term}</dt>
+              <dd class="mt-2 text-sm text-body">{text}</dd>
+            </div>)}
+          </dl>
+          {entry.tech.length > 0 && <ul class="mt-6 flex flex-wrap gap-2">
+            {entry.tech.map((t) => <li class="rounded-full border border-line px-3 py-1 font-mono text-xs text-muted">{t}</li>)}
+          </ul>}
         </li>)}
       </ol>
     </section>
@@ -125,24 +117,34 @@ const log = [
     <section id="about" class="border-y border-line bg-panel scroll-mt-20">
       <div class="mx-auto grid max-w-6xl gap-12 px-5 py-16 lg:grid-cols-2 lg:px-8 lg:py-20">
         <div>
-          <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">04 / About</p>
+          <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">04 / About</p>
           <h2 class="mt-5 text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Physics first, backend after.</h2>
           <div class="mt-6 max-w-xl space-y-4 text-body">
-            <p>I started in a physics programme at Universitas Lampung, where the work was mostly measurement, modelling, and defending your conclusions with data. That habit carried over: I care more about what the numbers in production say than about how elegant a design looks on a diagram.</p>
-            <p>I moved into backend engineering and now lead backend delivery, with team size varying by project rather than fixed. Most of my decisions are about trade-offs under constraints — payment correctness over convenience, clear failure behaviour over optimistic happy paths, and an API that the next engineer can read without asking me.</p>
+            <p>I started in a physics programme at Universitas Lampung, where the work was mostly measurement, modelling, and defending your conclusions with data. I joined SMBC Indonesia as an IT trainee in October 2021, moved into backend engineering a year later, and now lead backend delivery for the payment and merchant-acquiring platform behind Jenius.</p>
+            <p>Team size flexes with the project rather than being fixed, so most of what I actually do is judgement: which state gets stored, which failure is allowed to be visible, which interface other teams will have to live with. I would rather make a boundary explicit than let it be discovered in production.</p>
             <p>Two things I keep returning to: systems fail in the states nobody drew, and a release is not done until someone on-call can debug it.</p>
           </div>
         </div>
         <div class="space-y-10">
+          <div>
+            <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">Engineering principles</p>
+            <dl class="mt-5 space-y-4">
+              {principles.map(([title, text]) => <div class="border-l border-primary pl-4">
+                <dt class="font-medium">{title}</dt>
+                <dd class="mt-1 text-sm text-muted">{text}</dd>
+              </div>)}
+            </dl>
+          </div>
           <div id="education">
-            <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">Education</p>
-            <h2 class="mt-5 text-2xl font-semibold">B.Sc. Physics</h2>
-            <p class="mt-2 text-muted">Universitas Lampung · 2015–2021</p>
-            <p class="mt-1 font-mono text-sm">GPA 3.61/4.00</p>
-            <p class="mt-5 border-l border-moss pl-4 text-body">Physics background: measurement, modelling, and stating uncertainty honestly.</p>
+            {education.map((e) => <div>
+              <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">Education</p>
+              <h2 class="mt-5 text-2xl font-semibold">{e.title}</h2>
+              <p class="mt-2 text-muted">{e.org} · {e.when}</p>
+              <p class="mt-1 font-mono text-sm">{e.detail}</p>
+            </div>)}
           </div>
           <div>
-            <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">Writing</p>
+            <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">Writing</p>
             <h2 class="mt-5 text-2xl font-semibold">Nothing published yet.</h2>
             <p class="mt-3 max-w-md text-muted">I write notes on payment backends, release review, and backend team practice. When the first one is worth reading, it goes here — not before.</p>
           </div>
@@ -151,60 +153,58 @@ const log = [
     </section>
 
     <section id="contact" class="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-20">
-      <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">05 / Contact</p>
+      <p class="font-mono text-xs uppercase tracking-[.18em] text-primary">05 / Contact</p>
       <h2 class="mt-5 max-w-2xl text-4xl font-semibold tracking-[-.045em] sm:text-5xl">Open to mentoring and technical collaboration.</h2>
-      <p class="mt-4 flex items-center gap-2 text-body"><MapPin size={18} aria-hidden="true" /> Jakarta, Indonesia</p>
+      <p class="mt-4 flex items-center gap-2 text-body"><MapPin size={18} aria-hidden="true" /> {site.location}</p>
       <div class="mt-9 flex flex-wrap gap-x-7 gap-y-3">
         <button
           type="button"
           data-copy-email
-          class="inline-flex min-h-11 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 font-sans text-ink no-underline hover:text-moss"
-          aria-label="Copy email address nevalenaginda10@gmail.com to clipboard"
+          class="inline-flex min-h-11 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 font-sans text-ink no-underline hover:text-primary"
+          aria-label={`Copy email address ${site.email} to clipboard`}
         >
           <Mail size={18} aria-hidden="true" /><span data-copy-label>Copy email</span>
         </button>
-        <a class="inline-flex min-h-11 items-center gap-2" href="https://linkedin.com/in/nevalen-aginda-prasetyo-57ba3a120" rel="me"><Linkedin size={18} /> LinkedIn</a>
-        <a class="inline-flex min-h-11 items-center gap-2" href="https://github.com/nevalenaginda" rel="me"><Github size={18} /> GitHub</a>
+        <a class="inline-flex min-h-11 items-center gap-2" href={site.linkedin} rel="me"><Linkedin size={18} aria-hidden="true" /> LinkedIn</a>
+        <a class="inline-flex min-h-11 items-center gap-2" href={site.github} rel="me"><Github size={18} aria-hidden="true" /> GitHub</a>
       </div>
     </section>
   </main>
   <Footer />
 </BaseLayout>
 <style>
-  .project-card:nth-child(1) { --hover-lift: -2px; }
-  .project-card:nth-child(3) { --hover-lift: -2px; }
-  .project-card:hover { transform: translateY(var(--hover-lift, -2px)); }
+  .project-card { --hover-lift: -4px; }
+  .project-card:hover { transform: translateY(var(--hover-lift)); box-shadow: 0 18px 40px -24px color-mix(in oklab, var(--color-primary) 55%, transparent); }
   .project-link {
-    background-image: linear-gradient(var(--color-moss), var(--color-moss));
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
     background-position: 0 100%;
     background-repeat: no-repeat;
     background-size: 0 2px;
     transition: background-size 200ms ease-out;
   }
   .project-card:nth-child(1):hover .project-link { background-size: 100% 2px; }
-  .project-card:nth-child(2):hover { transform: translateX(4px) translateY(var(--hover-lift, -2px)); }
-  .project-card:nth-child(2):hover .project-link { text-decoration: underline; text-decoration-color: var(--color-moss); text-underline-offset: 5px; }
+  .project-card:nth-child(2):hover .project-link { text-decoration: underline; text-decoration-color: var(--color-secondary); text-underline-offset: 5px; }
   .project-cta { transition: transform 200ms ease-out; }
   .project-card:nth-child(3):hover .project-cta { transform: translateX(3px); }
   @media (prefers-reduced-motion: reduce) {
     .project-card, .project-link, .project-cta { transition: none; }
-    .project-card:hover, .project-card:nth-child(2):hover { transform: none; }
+    .project-card:hover { transform: none; }
     .project-card:nth-child(3):hover .project-cta { transform: none; }
   }
 </style>
 <script>
   const btn = document.querySelector<HTMLElement>('[data-copy-email]');
   const label = btn?.querySelector<HTMLElement>('[data-copy-label]');
+  const email = 'nevalenaginda10@gmail.com';
   if (btn && label) {
     btn.addEventListener('click', async () => {
       try {
-        await navigator.clipboard.writeText('nevalenaginda10@gmail.com');
+        await navigator.clipboard.writeText(email);
         label.textContent = 'Copied ✓';
-        setTimeout(() => { label.textContent = 'Copy email'; }, 2000);
       } catch {
         label.textContent = 'Copy failed';
-        setTimeout(() => { label.textContent = 'Copy email'; }, 2000);
       }
+      setTimeout(() => { label.textContent = 'Copy email'; }, 2000);
     });
   }
 </script>

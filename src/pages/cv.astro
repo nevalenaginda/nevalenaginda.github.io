@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import { ArrowLeft, Printer } from 'lucide-astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, summary, skills, experience, education } from '../data/site';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const contact = [site.email, site.location, site.linkedin.replace('https://', ''), site.github.replace('https://', '')];
+---
+<BaseLayout
+  title={`CV — ${site.name}, ${site.role}`}
+  description={`Curriculum vitae of ${site.name}, ${site.role} in Jakarta. Printable A4, ATS-friendly layout.`}
+>
+  <div class="no-print mx-auto flex max-w-[21cm] flex-wrap items-center justify-between gap-3 px-5 py-5">
+    <a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-primary" href="/"><ArrowLeft size={15} aria-hidden="true" /> Back to portfolio</a>
+    <button
+      type="button"
+      data-print-cv
+      class="gradient-cta inline-flex min-h-11 cursor-pointer items-center gap-2 rounded border-0 px-5 text-sm font-medium"
+    >
+      <Printer size={16} aria-hidden="true" /> Download / Print PDF
+    </button>
+  </div>
+
+  <main id="main" class="pb-16 lg:pb-24">
+    <article class="cv-sheet rounded border border-line shadow-sm">
+      <header>
+        <h1>{site.name}</h1>
+        <p class="mt-1 font-semibold">{site.role} — Payment Infrastructure &amp; Merchant Acquiring</p>
+        <ul class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+          {contact.map((item) => <li>{item}</li>)}
+        </ul>
+      </header>
+
+      <section>
+        <h2>Summary</h2>
+        <p>{summary}</p>
+      </section>
+
+      <section>
+        <h2>Experience</h2>
+        {experience.map((entry) => <div class="mb-2 last:mb-0">
+          <div class="row">
+            <h3>{entry.role}</h3>
+            <span>{entry.when}</span>
+          </div>
+          <p class="font-semibold">{entry.org}</p>
+          <ul>
+            <li><strong>Challenge.</strong> {entry.challenge}</li>
+            <li><strong>Solution.</strong> {entry.solution}</li>
+            <li><strong>Impact.</strong> {entry.impact}</li>
+          </ul>
+          {entry.tech.length > 0 && <p>Technologies: {entry.tech.join(', ')}</p>}
+        </div>)}
+      </section>
+
+      <section>
+        <h2>Skills</h2>
+        {skills.map((group) => <p><span class="font-semibold">{group.group}: </span>{group.items.map(([name, level]) => `${name} (${level})`).join(', ')}</p>)}
+      </section>
+
+      <section>
+        <h2>Projects</h2>
+        {projects.map((project) => <div class="mb-2 last:mb-0">
+          <div class="row">
+            <h3>{project.data.title}</h3>
+            <span>{project.data.released}</span>
+          </div>
+          <p class="font-semibold">{project.data.company} — {project.data.role}</p>
+          <p>{project.data.summary}</p>
+        </div>)}
+      </section>
+
+      <section>
+        <h2>Education</h2>
+        {education.map((e) => <div>
+          <div class="row">
+            <h3>{e.title}</h3>
+            <span>{e.when}</span>
+          </div>
+          <p>{e.org} — {e.detail}</p>
+        </div>)}
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+<script>
+  document.querySelector('[data-print-cv]')?.addEventListener('click', () => window.print());
+</script>

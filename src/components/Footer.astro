@@ -1,6 +1,9 @@
-<footer class="border-t border-line">
+---
+import { site } from '../data/site';
+---
+<footer class="no-print border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-8 font-mono text-xs text-muted sm:flex-row sm:justify-between lg:px-8">
-    <p>© {new Date().getFullYear()} Nevalen Aginda Prasetyo</p>
+    <p>© {new Date().getFullYear()} {site.name}</p>
     <p>Astro · hand-written CSS. No trackers, no cookie banner.</p>
   </div>
 </footer>
