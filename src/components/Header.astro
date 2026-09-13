@@ -4,6 +4,7 @@ const nav = [
 ];
 ---
 <header class="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur-sm">
+  <div data-reading-progress class="pointer-events-none absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-moss/80 [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
   <nav class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 lg:px-8" aria-label="Primary navigation">
     <a class="font-mono text-sm font-semibold tracking-tight no-underline" href="/">NAP<span class="text-moss">/</span>index</a>
     <div class="hidden items-center gap-5 text-sm md:flex">
@@ -14,3 +15,26 @@ const nav = [
     </button>
   </nav>
 </header>
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    [data-reading-progress] { display: none; }
+  }
+</style>
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-reading-progress]');
+  if (bar) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reduced.matches) {
+      bar.remove();
+    } else {
+      const update = () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const ratio = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+        bar.style.transform = `scaleX(${ratio})`;
+      };
+      window.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+      update();
+    }
+  }
+</script>

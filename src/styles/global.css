@@ -21,3 +21,4 @@ a:hover { color: var(--color-moss); }
 .flow-line { background: linear-gradient(90deg, transparent, #b8c694 15%, #b8c694 85%, transparent); height: 1px; }
 :focus-visible { outline: 2px solid var(--color-moss); outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { :root { scroll-behavior: auto; } *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+@media (max-width: 640px) { body { line-height: 1.68; } }

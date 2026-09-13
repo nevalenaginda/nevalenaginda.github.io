@@ -8,12 +8,15 @@ import Footer from '../components/Footer.astro';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 ---
-<BaseLayout>
+<BaseLayout
+  title="Nevalen Aginda Prasetyo — Software Engineer Technical Lead"
+  description="Backend systems for payments, merchant operations, and secure identity journeys. Selected work and work log, Jakarta, Indonesia."
+>
   <Header />
   <CommandPalette />
   <main id="main">
     <section class="grid-paper relative overflow-hidden border-b border-line">
-      <div class="mx-auto max-w-6xl px-5 py-24 lg:px-8 lg:py-36">
+      <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-36">
         <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">Software Engineer Technical Lead · Jakarta, Indonesia</p>
         <h1 class="mt-6 max-w-4xl text-5xl font-semibold tracking-[-.06em] text-balance sm:text-7xl">Nevalen Aginda Prasetyo</h1>
         <p class="mt-7 max-w-2xl text-lg text-[#c2c1b9] sm:text-xl">Backend systems for payments, merchant operations, and secure identity journeys.</p>
@@ -32,12 +35,12 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
         <p class="mt-4 text-muted">Case studies cover public product facts and engineering considerations only. No internal system detail.</p>
       </div>
       <div class="mt-12 grid gap-px border border-line bg-line md:grid-cols-3">
-        {projects.map((project) => <article class="flex min-h-80 flex-col bg-paper p-6">
+        {projects.map((project) => <article class="project-card flex min-h-80 flex-col bg-paper p-6 transition-[transform] duration-200 ease-out motion-reduce:transition-none">
           <p class="font-mono text-xs text-moss">{project.data.released}</p>
-          <h3 class="mt-5 text-2xl font-semibold tracking-[-.035em]"><a class="no-underline" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>{project.data.title}</a></h3>
+          <h3 class="mt-5 text-2xl font-semibold tracking-[-.035em]"><a class="no-underline project-link" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>{project.data.title}</a></h3>
           <p class="mt-2 text-sm text-muted">{project.data.company}</p>
           <p class="mt-5 text-sm text-[#c2c1b9]">{project.data.summary}</p>
-          <div class="mt-auto pt-8"><a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-moss" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>Open case study <ArrowUpRight size={15} /></a></div>
+          <div class="mt-auto pt-8"><a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-moss project-cta" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>Open case study <ArrowUpRight size={15} /></a></div>
         </article>)}
       </div>
     </section>
@@ -69,7 +72,14 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
       <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">06 / Contact</p>
       <h2 class="mt-5 max-w-2xl text-4xl font-semibold tracking-[-.045em] sm:text-5xl">Open to a useful technical conversation.</h2>
       <div class="mt-10 flex flex-wrap gap-x-7 gap-y-3">
-        <a class="inline-flex min-h-11 items-center gap-2" href="mailto:nevalenaginda10@gmail.com"><Mail size={18} /> Email</a>
+        <button
+          type="button"
+          data-copy-email
+          class="inline-flex min-h-11 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 font-sans text-ink no-underline hover:text-moss"
+          aria-label="Copy email address nevalenaginda10@gmail.com to clipboard"
+        >
+          <Mail size={18} aria-hidden="true" /><span data-copy-label>Copy email</span>
+        </button>
         <a class="inline-flex min-h-11 items-center gap-2" href="https://linkedin.com/in/nevalen-aginda-prasetyo-57ba3a120" rel="me"><Linkedin size={18} /> LinkedIn</a>
         <a class="inline-flex min-h-11 items-center gap-2" href="https://github.com/nevalenaginda" rel="me"><Github size={18} /> GitHub</a>
       </div>
@@ -77,3 +87,41 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
   </main>
   <Footer />
 </BaseLayout>
+<style>
+  .project-card:nth-child(1) { --hover-lift: -2px; }
+  .project-card:nth-child(3) { --hover-lift: -2px; }
+  .project-card:hover { transform: translateY(var(--hover-lift, -2px)); }
+  .project-link {
+    background-image: linear-gradient(var(--color-moss), var(--color-moss));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 2px;
+    transition: background-size 200ms ease-out;
+  }
+  .project-card:nth-child(1):hover .project-link { background-size: 100% 2px; }
+  .project-card:nth-child(2):hover { transform: translateX(4px) translateY(var(--hover-lift, -2px)); }
+  .project-card:nth-child(2):hover .project-link { text-decoration: underline; text-decoration-color: var(--color-moss); text-underline-offset: 5px; }
+  .project-cta { transition: transform 200ms ease-out; }
+  .project-card:nth-child(3):hover .project-cta { transform: translateX(3px); }
+  @media (prefers-reduced-motion: reduce) {
+    .project-card, .project-link, .project-cta { transition: none; }
+    .project-card:hover, .project-card:nth-child(2):hover { transform: none; }
+    .project-card:nth-child(3):hover .project-cta { transform: none; }
+  }
+</style>
+<script>
+  const btn = document.querySelector<HTMLElement>('[data-copy-email]');
+  const label = btn?.querySelector<HTMLElement>('[data-copy-label]');
+  if (btn && label) {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText('nevalenaginda10@gmail.com');
+        label.textContent = 'Copied ✓';
+        setTimeout(() => { label.textContent = 'Copy email'; }, 2000);
+      } catch {
+        label.textContent = 'Copy failed';
+        setTimeout(() => { label.textContent = 'Copy email'; }, 2000);
+      }
+    });
+  }
+</script>

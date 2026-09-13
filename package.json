@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && node scripts/verify.mjs",
+    "build": "node scripts/gen-og.mjs && astro check && astro build && node scripts/verify.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "verify": "node scripts/verify.mjs"
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "sharp": "^0.33.5",
     "typescript": "^5.6.3"
   }
 }

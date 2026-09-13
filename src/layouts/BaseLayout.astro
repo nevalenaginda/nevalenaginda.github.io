@@ -4,16 +4,54 @@ import '@fontsource/geist-sans/600.css';
 import '@fontsource/geist-mono/400.css';
 import '../styles/global.css';
 
-interface Props { title?: string; description?: string }
-const { title = 'Nevalen Aginda Prasetyo — Software Engineer Technical Lead', description = 'Backend systems for payments, merchant operations, and secure identity journeys.' } = Astro.props;
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+}
+const {
+  title = 'Nevalen Aginda Prasetyo — Software Engineer Technical Lead',
+  description = 'Backend systems for payments, merchant operations, and secure identity journeys.',
+  canonicalUrl = new URL(Astro.url.pathname, Astro.site).href,
+  ogImage = new URL('/og.png', Astro.site).href,
+} = Astro.props;
+const siteName = 'Nevalen Aginda Prasetyo';
+const handle = '@nevalenaginda10';
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: siteName,
+  jobTitle: 'Software Engineer Technical Lead',
+  url: new URL('/', Astro.site).href,
+  email: 'mailto:nevalenaginda10@gmail.com',
+  address: { '@type': 'PostalAddress', addressLocality: 'Jakarta', addressCountry: 'ID' },
+  sameAs: ['https://linkedin.com/in/nevalen-aginda-prasetyo-57ba3a120', 'https://github.com/nevalenaginda'],
+  knowsAbout: ['Node.js', 'Apache Kafka', 'MongoDB', 'Distributed systems', 'Backend leadership'],
+});
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:site" content={handle} />
+    <meta name="twitter:creator" content={handle} />
+    <script type="application/ld+json" set:html={jsonLd} />
   </head>
   <body>
     <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-moss focus:px-4 focus:py-3 focus:text-paper" href="#main">Skip to content</a>
