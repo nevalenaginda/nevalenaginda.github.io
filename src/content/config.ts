@@ -8,6 +8,8 @@ const projects = defineCollection({
     role: z.string(),
     released: z.string(),
     summary: z.string(),
+    image: z.string(),
+    imageAlt: z.string(),
     reference: z.string().url(),
     referenceLabel: z.string(),
     order: z.number(),
@@ -18,5 +20,4 @@ const writing = defineCollection({
   type: 'content',
   schema: z.object({ title: z.string(), published: z.date() }),
 });
-
 export const collections = { projects, writing };

@@ -4,6 +4,8 @@ company: Jenius / PT Bank SMBC Indonesia
 role: Backend Developer
 released: "2023"
 summary: Face-based verification that shortens new-account activation and lets a user move their account to a new phone without calling support.
+image: /work/face-recognition.webp
+imageAlt: Jenius article page about face recognition for registration and device unlink
 reference: https://www.jenius.com/article/detail/pengenalan-wajah-untuk-registrasi-dan-unlink-device
 referenceLabel: Public product reference
 order: 3

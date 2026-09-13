@@ -27,8 +27,15 @@ const toolkit = [
   },
 ];
 
+const metrics = [
+  ['~500k', 'active users on the consumer app whose payment and merchant backend I lead'],
+  ['~2,000', 'active merchant businesses on the QRIS merchant product'],
+  ['< 500 ms', 'p99 latency across the backend services I own'],
+  ['< 2.5%', 'unexpected error rate'],
+];
+
 const log = [
-  { when: 'Since 2024', role: 'Software Engineer Technical Lead', detail: 'Leading six backend engineers. Set delivery direction and review practices for backend work.' },
+  { when: 'Since 2024', role: 'Tech Lead', detail: 'Leading six backend engineers. Scope covers the payment and merchant backend behind an app with roughly 500,000 active users, at p99 latency under 500 ms and an unexpected error rate under 2.5%.' },
   { when: '2025 – 2026', role: 'Backend tech lead — two product releases', detail: 'Merchant operations (2025) and scheduled bill payments (2026), from design review through release.' },
   { when: '2023', role: 'Backend Developer', detail: 'Secure identity verification and device recovery flows, including multi-step verification paths.' },
 ];
@@ -46,7 +53,13 @@ const log = [
         <h1 class="mt-6 max-w-4xl text-5xl font-semibold tracking-[-.06em] text-balance sm:text-7xl">Nevalen Aginda Prasetyo</h1>
         <p class="mt-7 max-w-2xl text-lg text-body sm:text-xl">I lead backend work on payment infrastructure and merchant acquiring: scheduled payments, QRIS merchant operations, and account-verification flows.</p>
         <div class="mt-10 flow-line max-w-2xl"></div>
-        <div class="mt-7 flex flex-wrap gap-3">
+        <dl class="mt-7 grid max-w-3xl gap-x-10 gap-y-6 sm:grid-cols-3">
+          {metrics.map(([value, label]) => <div>
+            <dt class="font-mono text-2xl font-semibold text-moss">{value}</dt>
+            <dd class="mt-1 text-sm text-muted">{label}</dd>
+          </div>)}
+        </dl>
+        <div class="mt-9 flex flex-wrap gap-3">
           <a class="inline-flex min-h-11 items-center gap-2 border border-moss px-4 text-sm no-underline hover:bg-moss hover:text-paper" href="#work">Read selected work <ArrowUpRight size={16} /></a>
           <a class="inline-flex min-h-11 items-center gap-2 border border-line px-4 text-sm no-underline hover:border-moss hover:text-moss" href="mailto:nevalenaginda10@gmail.com"><Mail size={16} /> Email me</a>
         </div>
@@ -65,6 +78,15 @@ const log = [
           <h3 class="mt-5 text-2xl font-semibold tracking-[-.035em]"><a class="no-underline project-link" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>{project.data.title}</a></h3>
           <p class="mt-2 text-sm text-muted">{project.data.company}</p>
           <p class="mt-5 text-sm text-body">{project.data.summary}</p>
+          <img
+            class="mt-6 aspect-[16/10] w-full border border-line object-cover object-top"
+            src={project.data.image}
+            alt={project.data.imageAlt}
+            width="1200"
+            height="750"
+            loading="lazy"
+            decoding="async"
+          />
           <div class="mt-auto pt-8"><a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-moss project-cta" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>Open case study <ArrowUpRight size={15} /></a></div>
         </article>)}
       </div>

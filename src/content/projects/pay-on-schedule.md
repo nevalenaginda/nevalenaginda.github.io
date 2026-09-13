@@ -4,6 +4,8 @@ company: Jenius / PT Bank SMBC Indonesia
 role: Backend Tech Lead
 released: August 2026
 summary: Recurring bill and virtual-account payments with a choice between automatic payment and a timely manual reminder.
+image: /work/pay-on-schedule.webp
+imageAlt: Jenius product page for Pay on Schedule, showing the automatic payment and reminder options
 reference: https://www.jenius.com/article/detail/pay-on-schedule
 referenceLabel: Public product reference
 order: 1
@@ -26,7 +28,7 @@ The public product gives users two explicit paths when scheduling a bill: automa
 
 ## Role
 
-Backend Tech Lead for delivery and release coordination. I owned backend scope, review, and release readiness rather than every line of code.
+Backend Tech Lead for delivery and release coordination. I owned backend scope, review, and release readiness on a backend currently serving roughly 500,000 active users at p99 latency under 500 ms and an unexpected error rate under 2.5%.
 
 ## Public outcome
 

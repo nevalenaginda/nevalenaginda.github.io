@@ -4,7 +4,7 @@ import sharp from 'sharp';
 
 const W = 1200, H = 630;
 const name = 'Nevalen Aginda Prasetyo';
-const role = 'Tech Lead &amp; Backend Engineer';
+const role = 'Tech Lead';
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" fill="#faf8f3"/>

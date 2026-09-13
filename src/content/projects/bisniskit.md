@@ -4,6 +4,8 @@ company: Jenius / PT Bank SMBC Indonesia
 role: Backend Tech Lead
 released: "2025"
 summary: Merchant-side tooling for QRIS acceptance, disbursement, and outlet or cashier access — built for use at a counter, not at a desk.
+image: /work/bisniskit.webp
+imageAlt: Jenius Bisniskit landing page for the merchant QRIS payment app
 reference: https://www.jenius.com/bisniskit
 referenceLabel: Public product reference
 order: 2
@@ -26,7 +28,7 @@ Bisniskit is the merchant-facing app for that loop. Publicly documented capabili
 
 ## Role
 
-Backend Tech Lead for delivery and release coordination across the merchant backend scope.
+Backend Tech Lead for delivery and release coordination across the merchant backend scope, currently serving roughly 2,000 active merchant businesses on the QRIS product.
 
 ## Public outcome
 
