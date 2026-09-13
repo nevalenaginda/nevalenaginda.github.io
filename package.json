@@ -1,0 +1,25 @@
+{
+  "name": "nevalenaginda.github.io",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build && node scripts/verify.mjs",
+    "preview": "astro preview",
+    "check": "astro check",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "@fontsource/geist-mono": "^5.2.6",
+    "@fontsource/geist-sans": "^5.2.6",
+    "@tailwindcss/vite": "^4.1.13",
+    "astro": "^4.16.18",
+    "lucide-astro": "^0.468.0",
+    "tailwindcss": "^4.1.13"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,16 @@
+---
+const nav = [
+  ['Work', '/#work'], ['Toolkit', '/#toolkit'], ['Log', '/#log'], ['About', '/#about'], ['Contact', '/#contact'],
+];
+---
+<header class="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur-sm">
+  <nav class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 lg:px-8" aria-label="Primary navigation">
+    <a class="font-mono text-sm font-semibold tracking-tight no-underline" href="/">NAP<span class="text-moss">/</span>index</a>
+    <div class="hidden items-center gap-5 text-sm md:flex">
+      {nav.map(([label, href]) => <a href={href}>{label}</a>)}
+    </div>
+    <button class="min-h-11 rounded border border-line px-3 font-mono text-xs hover:border-moss hover:text-moss" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
+      <span class="hidden sm:inline">Navigate </span><kbd class="font-sans">⌘K</kbd>
+    </button>
+  </nav>
+</header>

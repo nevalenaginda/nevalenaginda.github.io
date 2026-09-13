@@ -1,0 +1,79 @@
+---
+import { getCollection } from 'astro:content';
+import { ArrowUpRight, Github, Linkedin, Mail } from 'lucide-astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+import Footer from '../components/Footer.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout>
+  <Header />
+  <CommandPalette />
+  <main id="main">
+    <section class="grid-paper relative overflow-hidden border-b border-line">
+      <div class="mx-auto max-w-6xl px-5 py-24 lg:px-8 lg:py-36">
+        <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">Software Engineer Technical Lead · Jakarta, Indonesia</p>
+        <h1 class="mt-6 max-w-4xl text-5xl font-semibold tracking-[-.06em] text-balance sm:text-7xl">Nevalen Aginda Prasetyo</h1>
+        <p class="mt-7 max-w-2xl text-lg text-[#c2c1b9] sm:text-xl">Backend systems for payments, merchant operations, and secure identity journeys.</p>
+        <div class="mt-12 flow-line max-w-2xl"></div>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a class="inline-flex min-h-11 items-center gap-2 border border-moss px-4 text-sm no-underline hover:bg-moss hover:text-paper" href="#work">Read selected work <ArrowUpRight size={16} /></a>
+          <a class="inline-flex min-h-11 items-center gap-2 border border-line px-4 text-sm no-underline" href="mailto:nevalenaginda10@gmail.com"><Mail size={16} /> Write email</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="work" class="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 lg:px-8">
+      <div class="max-w-2xl">
+        <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">01 / Selected work</p>
+        <h2 class="mt-4 text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Public product stories. Backend delivery lens.</h2>
+        <p class="mt-4 text-muted">Case studies cover public product facts and engineering considerations only. No internal system detail.</p>
+      </div>
+      <div class="mt-12 grid gap-px border border-line bg-line md:grid-cols-3">
+        {projects.map((project) => <article class="flex min-h-80 flex-col bg-paper p-6">
+          <p class="font-mono text-xs text-moss">{project.data.released}</p>
+          <h3 class="mt-5 text-2xl font-semibold tracking-[-.035em]"><a class="no-underline" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>{project.data.title}</a></h3>
+          <p class="mt-2 text-sm text-muted">{project.data.company}</p>
+          <p class="mt-5 text-sm text-[#c2c1b9]">{project.data.summary}</p>
+          <div class="mt-auto pt-8"><a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-moss" href={`/projects/${project.id.replace(/\.md$/, '')}/`}>Open case study <ArrowUpRight size={15} /></a></div>
+        </article>)}
+      </div>
+    </section>
+
+    <section id="toolkit" class="border-y border-line bg-panel scroll-mt-20">
+      <div class="mx-auto max-w-6xl px-5 py-20 lg:px-8">
+        <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">02 / Engineering toolkit</p>
+        <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {['Node.js', 'Apache Kafka', 'MongoDB', 'Distributed systems', 'Performance testing', 'Backend leadership', 'AI exploration'].map((item, index) => <div class="border-l border-line pl-4"><span class="font-mono text-xs text-muted">0{index + 1}</span><p class="mt-2 text-lg">{item}</p></div>)}
+        </div>
+      </div>
+    </section>
+
+    <section id="log" class="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 lg:px-8">
+      <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">03 / Work log</p>
+      <ol class="mt-10 max-w-3xl border-l border-line">
+        <li class="relative pb-10 pl-8 before:absolute before:-left-[5px] before:top-2 before:size-[9px] before:rounded-full before:bg-moss"><p class="font-mono text-xs text-muted">SINCE 2024</p><h2 class="mt-2 text-2xl font-semibold">Software Engineer Technical Lead</h2><p class="mt-2 text-[#c2c1b9]">Leading six backend engineers.</p></li>
+        <li class="relative pb-10 pl-8 before:absolute before:-left-[5px] before:top-2 before:size-[9px] before:rounded-full before:bg-line"><p class="font-mono text-xs text-muted">2025–2026</p><h2 class="mt-2 text-2xl font-semibold">Backend tech lead product releases</h2><p class="mt-2 text-[#c2c1b9]">Merchant and scheduled-payment product releases.</p></li>
+        <li class="relative pl-8 before:absolute before:-left-[5px] before:top-2 before:size-[9px] before:rounded-full before:bg-line"><p class="font-mono text-xs text-muted">2023</p><h2 class="mt-2 text-2xl font-semibold">Backend Developer</h2><p class="mt-2 text-[#c2c1b9]">Secure identity verification and device recovery flows.</p></li>
+      </ol>
+    </section>
+
+    <section id="about" class="border-y border-line bg-panel scroll-mt-20"><div class="mx-auto grid max-w-6xl gap-12 px-5 py-20 lg:grid-cols-2 lg:px-8">
+      <div id="education"><p class="font-mono text-xs uppercase tracking-[.18em] text-moss">04 / Education</p><h2 class="mt-5 text-2xl font-semibold">B.Sc. Physics</h2><p class="mt-2 text-muted">Universitas Lampung · 2015–2021</p><p class="mt-1 font-mono text-sm">GPA 3.61/4.00</p><p class="mt-6 border-l border-moss pl-4 text-[#c2c1b9]">BRI Data Hackathon 2021</p></div>
+      <div><p class="font-mono text-xs uppercase tracking-[.18em] text-moss">05 / Writing</p><h2 class="mt-5 text-2xl font-semibold">Writing in progress.</h2><p class="mt-3 max-w-md text-muted">Short notes on backend delivery, system reliability, and engineering leadership will appear here.</p></div>
+    </div></section>
+
+    <section id="contact" class="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 lg:px-8">
+      <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">06 / Contact</p>
+      <h2 class="mt-5 max-w-2xl text-4xl font-semibold tracking-[-.045em] sm:text-5xl">Open to a useful technical conversation.</h2>
+      <div class="mt-10 flex flex-wrap gap-x-7 gap-y-3">
+        <a class="inline-flex min-h-11 items-center gap-2" href="mailto:nevalenaginda10@gmail.com"><Mail size={18} /> Email</a>
+        <a class="inline-flex min-h-11 items-center gap-2" href="https://linkedin.com/in/nevalen-aginda-prasetyo-57ba3a120" rel="me"><Linkedin size={18} /> LinkedIn</a>
+        <a class="inline-flex min-h-11 items-center gap-2" href="https://github.com/nevalenaginda" rel="me"><Github size={18} /> GitHub</a>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>

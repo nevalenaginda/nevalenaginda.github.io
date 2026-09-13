@@ -1,0 +1,30 @@
+---
+const links = [
+  ['Home', '/'], ['Selected work', '/#work'], ['Engineering toolkit', '/#toolkit'], ['Work log', '/#log'], ['Education', '/#education'], ['Contact', '/#contact'],
+  ['Pay on Schedule', '/projects/pay-on-schedule/'], ['Jenius Bisniskit', '/projects/bisniskit/'], ['Face Recognition', '/projects/face-recognition/'],
+];
+---
+<dialog id="command-palette" class="w-[min(92vw,38rem)] border border-line bg-panel p-0 text-ink shadow-2xl backdrop:bg-black/65" aria-labelledby="palette-title">
+  <div class="border-b border-line p-5">
+    <p id="palette-title" class="font-mono text-xs uppercase tracking-[.16em] text-muted">Navigate</p>
+    <label class="mt-3 block"><span class="sr-only">Filter destinations</span><input data-palette-input class="min-h-11 w-full border-b border-line bg-transparent font-mono text-sm outline-none placeholder:text-muted" placeholder="Type to filter…" /></label>
+  </div>
+  <ul class="max-h-[55vh] overflow-auto p-2" data-palette-list>
+    {links.map(([label, href]) => <li><a class="block min-h-11 rounded px-3 py-2 text-sm no-underline hover:bg-[#242820]" href={href}>{label}</a></li>)}
+  </ul>
+</dialog>
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('#command-palette');
+  const input = document.querySelector<HTMLInputElement>('[data-palette-input]');
+  const open = () => { dialog?.showModal(); input?.focus(); };
+  document.querySelector('[data-palette-open]')?.addEventListener('click', open);
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); open(); }
+    if (event.key === 'Escape' && dialog?.open) dialog.close();
+  });
+  input?.addEventListener('input', () => {
+    const value = input.value.toLowerCase();
+    document.querySelectorAll('[data-palette-list] li').forEach((item) => { (item as HTMLElement).hidden = !item.textContent?.toLowerCase().includes(value); });
+  });
+  dialog?.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+</script>

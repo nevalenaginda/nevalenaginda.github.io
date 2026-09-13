@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import { ArrowLeft, ArrowUpRight } from 'lucide-astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import CommandPalette from '../../components/CommandPalette.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({ params: { slug: project.id.replace(/\.md$/, '') }, props: { project } }));
+}
+const { project } = Astro.props;
+const { Content } = await project.render();
+---
+<BaseLayout title={`${project.data.title} — Nevalen Aginda Prasetyo`} description={project.data.summary}>
+  <Header />
+  <CommandPalette />
+  <main id="main" class="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
+    <a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-moss" href="/#work"><ArrowLeft size={15} /> Selected work</a>
+    <article class="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_15rem]">
+      <div>
+        <p class="font-mono text-xs uppercase tracking-[.18em] text-moss">Case study / {project.data.released}</p>
+        <h1 class="mt-5 max-w-3xl text-4xl font-semibold tracking-[-.055em] sm:text-6xl">{project.data.title}</h1>
+        <p class="mt-5 max-w-2xl text-lg text-muted">{project.data.summary}</p>
+        <div class="case-study mt-14 max-w-2xl space-y-6 text-[#c2c1b9]"><Content /></div>
+      </div>
+      <aside class="h-fit border-y border-line py-5 text-sm lg:sticky lg:top-24">
+        <dl class="space-y-5"><div><dt class="font-mono text-xs uppercase tracking-wide text-muted">Company</dt><dd class="mt-1">{project.data.company}</dd></div><div><dt class="font-mono text-xs uppercase tracking-wide text-muted">Role</dt><dd class="mt-1">{project.data.role}</dd></div><div><dt class="font-mono text-xs uppercase tracking-wide text-muted">Released</dt><dd class="mt-1">{project.data.released}</dd></div></dl>
+        <a class="mt-7 inline-flex min-h-11 items-center gap-2 text-moss" href={project.data.reference}>Public reference <ArrowUpRight size={16} /></a>
+      </aside>
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>
+  .case-study :global(h2) { margin-top: 3rem; color: var(--color-ink); font-size: 1.5rem; font-weight: 600; letter-spacing: -.03em; }
+  .case-study :global(p), .case-study :global(ul) { margin-top: 1rem; }
+  .case-study :global(ul) { list-style: square; padding-left: 1.25rem; }
+  .case-study :global(li) { margin-top: .5rem; }
+  .case-study :global(a) { color: var(--color-moss); }
+</style>
