@@ -1,92 +1,178 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
-  --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fredoka", "Plus Jakarta Sans", ui-rounded, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --color-primary: #2563eb;
-  --color-secondary: #06b6d4;
-  --color-accent: #7c3aed;
+  /* Candy accents: backgrounds, blobs, icons and large shapes only. */
+  --color-grape: #8b5cf6;
+  --color-bubblegum: #ff6fae;
+  --color-mint: #34d3a0;
+  --color-sunny: #ffc83d;
+  --color-sky: #4fb3ff;
 
-  --color-ink: #0f172a;
-  --color-body: #334155;
-  --color-muted: #64748b;
-  --color-paper: #f8fafc;
+  /* Text-safe accents: every one clears 4.5:1 on paper, panel and the tints below. */
+  --color-primary: #6d28d9;
+  --color-grape-ink: #6d28d9;
+  --color-pink-ink: #be185d;
+  --color-mint-ink: #047857;
+  --color-sun-ink: #92400e;
+  --color-sky-ink: #0369a1;
+
+  /* Pastel tints for cards and chips. */
+  --color-grape-soft: #f3edff;
+  --color-pink-soft: #ffeaf3;
+  --color-mint-soft: #e3faf1;
+  --color-sun-soft: #fff4d6;
+  --color-sky-soft: #e4f3ff;
+
+  --color-ink: #1f1a3d;
+  --color-body: #3d3760;
+  --color-muted: #5f5885;
+  --color-paper: #fff8f0;
   --color-panel: #ffffff;
-  --color-line: #e2e8f0;
+  --color-line: #f1e4d8;
 
-  /* legacy alias: existing components reference --color-moss for the accent */
+  /* legacy aliases used by the /cv toolbar */
+  --color-secondary: var(--color-bubblegum);
+  --color-accent: var(--color-grape);
   --color-moss: var(--color-primary);
+
+  --radius-blob: 2rem;
 }
 
-.dark {
-  --color-ink: #f1f5f9;
-  --color-body: #cbd5e1;
-  --color-muted: #94a3b8;
-  --color-paper: #0b1220;
-  --color-panel: #111a2e;
-  --color-line: #23324d;
-}
+/* Cross-document view transitions: home ⇄ case study morph with no router JS. */
+@view-transition { navigation: auto; }
 
-/* Base rules live in @layer base so Tailwind utilities (text-primary, text-muted)
-   still win — unlayered rules would silently override every utility. */
+/* Base rules live in @layer base so Tailwind utilities still win. */
 @layer base {
-  :root { color-scheme: light; scroll-behavior: smooth; }
-  .dark { color-scheme: dark; }
+  :root { color-scheme: light; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); line-height: 1.6; }
-  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .font-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -.01em; line-height: 1.15; }
+  a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 4px; }
   a:hover { color: var(--color-primary); }
-  ::selection { background: var(--color-primary); color: #fff; }
-  :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+  ::selection { background: var(--color-sunny); color: var(--color-ink); }
+  :focus-visible { outline: 3px solid var(--color-grape); outline-offset: 3px; border-radius: .5rem; }
 }
 
-/* Hero backdrop: soft grid + gradient wash + slow glow. CSS only, no JS. */
-.grid-paper {
-  background-image:
-    linear-gradient(color-mix(in oklab, var(--color-line) 70%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--color-line) 70%, transparent) 1px, transparent 1px);
-  background-size: 34px 34px;
-}
-.hero-wash {
-  background-image:
-    radial-gradient(60rem 24rem at 12% -10%, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent 70%),
-    radial-gradient(50rem 22rem at 88% 0%, color-mix(in oklab, var(--color-accent) 12%, transparent), transparent 70%),
-    radial-gradient(40rem 20rem at 60% 110%, color-mix(in oklab, var(--color-secondary) 12%, transparent), transparent 70%);
-}
-.glow-orb {
+/* Hero backdrop: pastel blobs. Parallax is added by motion.ts; CSS drift is the no-JS default. */
+.blob {
   position: absolute;
-  border-radius: 9999px;
-  filter: blur(70px);
-  opacity: .5;
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  opacity: .6;
   pointer-events: none;
-  animation: drift 18s ease-in-out infinite;
+  will-change: transform;
+  /* transform only: border-radius or filter animation would repaint every frame */
+  animation: wobble 16s ease-in-out infinite;
 }
-.glow-orb--one { width: 22rem; height: 22rem; top: -6rem; left: -4rem; background: color-mix(in oklab, var(--color-primary) 55%, transparent); }
-.glow-orb--two { width: 18rem; height: 18rem; bottom: -7rem; right: 4rem; background: color-mix(in oklab, var(--color-accent) 45%, transparent); animation-delay: -6s; }
-.glow-orb--three { width: 16rem; height: 16rem; top: 30%; right: 35%; background: color-mix(in oklab, var(--color-secondary) 45%, transparent); animation-delay: -11s; }
-@keyframes drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(2rem, -1.5rem, 0) scale(1.08); }
+.blob--grape { background: var(--color-grape-soft); }
+.blob--pink { background: var(--color-pink-soft); animation-delay: -5s; }
+.blob--mint { background: var(--color-mint-soft); animation-delay: -9s; }
+.blob--sun { background: var(--color-sun-soft); animation-delay: -12s; }
+@keyframes wobble {
+  0%, 100% { transform: translate3d(0, var(--py), 0) rotate(0) scale(1); }
+  50% { transform: translate3d(1.25rem, calc(var(--py) - 1rem), 0) rotate(14deg) scale(1.06); }
 }
 
-/* Text gradient skips the cyan stop: #06b6d4 fails WCAG contrast on paper
-   (~2.4:1). Backgrounds and rails can still use the full three-stop ramp. */
+@property --py { syntax: '<length>'; inherits: false; initial-value: 0px; }
+
+/* Byte's canvas wrapper: in the hero slot on small screens, fixed companion on wide ones. */
+.robot-fly { position: absolute; inset: 0; z-index: 20; cursor: pointer; opacity: 0; transition: opacity 500ms ease; -webkit-tap-highlight-color: transparent; }
+.robot-fly--fixed { position: fixed; inset: auto; will-change: transform; }
+.robot-fly--ready { opacity: 1; }
+
+/* Dotted confetti background for alternating sections. */
+.dots {
+  background-image: radial-gradient(color-mix(in oklab, var(--color-grape) 18%, transparent) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
 .gradient-text {
-  background: linear-gradient(100deg, var(--color-primary), var(--color-accent));
+  background: linear-gradient(100deg, var(--color-grape-ink), var(--color-pink-ink));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-.gradient-cta {
-  background: linear-gradient(100deg, var(--color-primary), var(--color-secondary) 50%, var(--color-accent));
-  color: #fff;
-  box-shadow: 0 10px 30px -12px color-mix(in oklab, var(--color-primary) 70%, transparent);
+.gradient-rail { height: 4px; background: linear-gradient(90deg, var(--color-grape), var(--color-bubblegum) 35%, var(--color-sunny) 65%, var(--color-mint)); }
+
+/* Soft, squishy surfaces. */
+.pillow-card {
+  border-radius: var(--radius-blob);
+  background: var(--color-panel);
+  border: 2px solid var(--color-line);
+  box-shadow: 0 6px 0 0 var(--color-line), 0 18px 40px -24px color-mix(in oklab, var(--color-grape) 45%, transparent);
+  transition: transform 260ms cubic-bezier(.34, 1.56, .64, 1), box-shadow 260ms ease;
 }
-.gradient-cta:hover { color: #fff; filter: saturate(1.15) brightness(1.06); }
-.gradient-rail { height: 3px; background: linear-gradient(90deg, var(--color-primary), var(--color-secondary) 50%, var(--color-accent)); }
+.pillow-card:hover {
+  transform: translateY(-6px) rotate(-.4deg);
+  box-shadow: 0 10px 0 0 var(--color-line), 0 26px 50px -24px color-mix(in oklab, var(--color-grape) 55%, transparent);
+}
+
+.btn {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: .5rem;
+  border-radius: 9999px;
+  padding: 0 1.4rem;
+  font-weight: 700;
+  font-size: .95rem;
+  text-decoration: none;
+  border: 2px solid var(--color-ink);
+  transition: transform 200ms cubic-bezier(.34, 1.56, .64, 1), box-shadow 200ms ease;
+  box-shadow: 0 4px 0 0 var(--color-ink);
+  cursor: pointer;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 0 var(--color-ink); color: inherit; }
+.btn:active { transform: translateY(3px) scale(.97); box-shadow: 0 1px 0 0 var(--color-ink); }
+.btn--primary { background: #7c3aed; color: #fff; }
+.btn--primary:hover { color: #fff; }
+.btn--sunny { background: var(--color-sunny); color: var(--color-ink); }
+.btn--ghost { background: var(--color-panel); color: var(--color-ink); }
+/* Kept for the /cv toolbar button. */
+.gradient-cta { background: #7c3aed; color: #fff; border-radius: 9999px; }
+.gradient-cta:hover { color: #fff; filter: brightness(1.08); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: .25rem .8rem;
+  font-size: .8rem;
+  font-weight: 600;
+  transition: transform 220ms cubic-bezier(.34, 1.56, .64, 1);
+}
+.chip:hover { transform: translateY(-3px) rotate(-3deg); }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  border-radius: 9999px;
+  padding: .3rem .9rem;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-weight: 600;
+}
+
+/* Above-the-fold entrance: transform only (no opacity) so LCP is not delayed. */
+.intro { animation: intro 800ms cubic-bezier(.34, 1.56, .64, 1) var(--d, 0ms) backwards; }
+@keyframes intro { from { transform: translateY(22px) scale(.98); } }
+
+/* Hidden until motion.ts reveals it; without JS (no .js class) everything shows. */
+.js [data-reveal] { opacity: 0; }
 
 /* ATS-friendly A4 CV: /cv is the only consumer. */
 .cv-sheet {
@@ -97,7 +183,12 @@
   margin: 0 auto;
   background: #fff;
   color: #0f172a;
+  /* The CV keeps its original Geist typography so the A4 page break does not move. */
+  font-family: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
+.cv-sheet h1, .cv-sheet h2, .cv-sheet h3 { font-family: inherit; font-weight: inherit; line-height: inherit; letter-spacing: normal; }
 .cv-sheet h1 { font-size: 1.5rem; margin: 0; letter-spacing: -.02em; }
 .cv-sheet h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .15em; margin: .5rem 0 .25rem; padding-bottom: .14rem; border-bottom: 1px solid #cbd5e1; }
 .cv-sheet h3 { font-size: .9rem; margin: 0; }
@@ -110,8 +201,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root { scroll-behavior: auto; }
-  .glow-orb { animation: none; }
+  @view-transition { navigation: none; }
+  .blob, .intro { animation: none; }
+  .js [data-reveal] { opacity: 1; }
+  .pillow-card:hover, .btn:hover, .btn:active, .chip:hover { transform: none; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
 

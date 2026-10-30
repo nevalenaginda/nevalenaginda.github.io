@@ -1,54 +1,33 @@
 ---
-import { Download, Moon, Sun } from 'lucide-astro';
+import { Download } from 'lucide-astro';
 
 const nav = [
   ['Work', '/#work'], ['Toolkit', '/#toolkit'], ['Experience', '/#log'], ['About', '/#about'], ['Contact', '/#contact'],
 ];
 ---
-<header class="no-print sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-sm">
-  <div data-reading-progress class="pointer-events-none absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 gradient-rail [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
-  <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3 lg:px-8" aria-label="Primary navigation">
-    <a class="font-mono text-sm font-semibold tracking-tight no-underline" href="/">NAP<span class="gradient-text">/</span>index</a>
-    <div class="hidden items-center gap-5 text-sm lg:flex">
-      {nav.map(([label, href]) => <a href={href}>{label}</a>)}
+<header class="no-print sticky top-0 z-30 px-3 pt-3 sm:px-5">
+  <div data-reading-progress class="pointer-events-none fixed inset-x-0 top-0 z-40 h-1 origin-left scale-x-0 gradient-rail [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
+  <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full border-2 border-line bg-panel/85 py-2 pl-5 pr-2 shadow-[0_10px_30px_-18px_rgba(109,40,217,.45)] backdrop-blur-md" aria-label="Primary navigation">
+    <a class="group inline-flex items-center gap-2 font-display text-lg no-underline" href="/">
+      <span class="grid size-8 place-items-center rounded-full bg-sunny text-sm transition-transform duration-300 group-hover:rotate-12" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="size-5"><rect x="4" y="6" width="16" height="13" rx="5" fill="#1f1a3d"/><circle cx="9.5" cy="12.5" r="1.8" fill="#5ef2d6"/><circle cx="14.5" cy="12.5" r="1.8" fill="#5ef2d6"/><path d="M12 6V3" stroke="#1f1a3d" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="2.6" r="1.6" fill="#ff6fae"/></svg>
+      </span>
+      <span>Nevalen<span class="text-pink-ink">.</span></span>
+    </a>
+    <div class="hidden items-center gap-1 text-sm font-semibold lg:flex">
+      {nav.map(([label, href]) => <a class="rounded-full px-3 py-2 no-underline transition-colors hover:bg-grape-soft" href={href}>{label}</a>)}
     </div>
     <div class="flex items-center gap-2">
-      <a class="inline-flex min-h-11 items-center gap-2 rounded border border-line px-3 font-mono text-xs no-underline hover:border-primary hover:text-primary" href="/cv" aria-label="Open the printable CV, A4 layout">
-        <Download size={15} aria-hidden="true" /><span class="hidden sm:inline">CV</span>
+      <a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-mint-soft px-4 text-sm font-semibold text-mint-ink no-underline transition-transform hover:-translate-y-0.5 hover:text-mint-ink" href="/cv" aria-label="Open the printable CV, A4 layout">
+        <Download size={16} aria-hidden="true" /><span class="hidden sm:inline">CV</span>
       </a>
-      <button
-        type="button"
-        data-theme-toggle
-        class="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded border border-line hover:border-primary hover:text-primary"
-        aria-label="Switch between light and dark theme"
-        aria-pressed="false"
-      >
-        <span data-theme-icon-light class="hidden"><Moon size={16} aria-hidden="true" /></span>
-        <span data-theme-icon-dark><Sun size={16} aria-hidden="true" /></span>
-      </button>
-      <button class="min-h-11 rounded border border-line px-3 font-mono text-xs hover:border-primary hover:text-primary" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
-        <span class="hidden sm:inline">Navigate </span><kbd class="font-sans">⌘K</kbd>
+      <button class="min-h-11 cursor-pointer rounded-full bg-ink px-4 font-mono text-xs text-white transition-transform hover:-translate-y-0.5" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
+        <span class="hidden sm:inline">Menu </span><kbd class="font-sans">⌘K</kbd>
       </button>
     </div>
   </nav>
 </header>
 <script>
-  // Theme: inline script in BaseLayout already applied the stored class before paint.
-  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
-  const sun = document.querySelector<HTMLElement>('[data-theme-icon-dark]');
-  const moon = document.querySelector<HTMLElement>('[data-theme-icon-light]');
-  const label = (dark: boolean) => {
-    if (sun) sun.hidden = dark;
-    if (moon) moon.hidden = !dark;
-    toggle?.setAttribute('aria-pressed', String(dark));
-  };
-  label(document.documentElement.classList.contains('dark'));
-  toggle?.addEventListener('click', () => {
-    const dark = document.documentElement.classList.toggle('dark');
-    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
-    label(dark);
-  });
-
   const bar = document.querySelector<HTMLElement>('[data-reading-progress]');
   if (bar) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
