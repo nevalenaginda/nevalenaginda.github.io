@@ -3,37 +3,42 @@ title: Pay on Schedule
 company: Jenius / PT Bank SMBC Indonesia
 role: Backend Tech Lead
 released: August 2026
-summary: Recurring bill and virtual-account payments with a choice between automatic payment and a timely manual reminder.
+summary: Scheduled bill and virtual-account payments, with a choice between automatic payment and a reminder one day before the due date.
 image: /work/pay-on-schedule.webp
 imageAlt: Jenius product page for Pay on Schedule, showing the automatic payment and reminder options
 reference: https://www.jenius.com/article/detail/pay-on-schedule
 referenceLabel: Public product reference
+stores:
+  - store: Google Play
+    url: https://play.google.com/store/apps/details?id=com.btpn.dc
+  - store: App Store
+    url: https://apps.apple.com/id/app/jenius/id1079340119
 order: 1
 ---
 
 ## Problem
 
-Paying the same bills every month means tracking a separate due date for each one. Public Jenius material frames the cost plainly: miss a date and a late fee follows, and the work of remembering never really stops. Users also do not all want the same thing — some want the money to move on its own, others want to stay in control and just be told in time.
+Paying recurring bills means keeping track of a different due date for each one. As public Jenius material notes, a missed date leads to a late fee. Users also have different preferences: some want payments to run automatically, while others want to stay in control and receive a timely reminder.
 
 ## Approach
 
-The public product gives users two explicit paths when scheduling a bill: automatic payment on a chosen date, or a manual reminder at H-1 so the user pays themselves. Scheduled payments appear grouped by when they are due, so the next obligation is visible instead of buried in a list. Categories span the existing bill and VA surface, from utilities and credit cards to phone, transport, and government services.
+When scheduling a bill, users choose between automatic payment on a selected date or a reminder one day before (H-1) so they can pay manually. Scheduled payments are grouped by due date, so the next payment is easy to see. Supported categories cover the existing bill and virtual-account options, including utilities, credit cards, phone, transport, and government services.
 
-## Trade-offs worth naming
+## Key trade-offs
 
-- **Automatic and manual are different products, not a toggle.** Automatic payment has to be correct without a human watching; manual payment needs to arrive early enough to be useful but not so early that it is forgotten again.
-- **Notifications are a contract.** The reminder only works if it lands before the user's own deadline, which makes timing and delivery reliability part of the feature rather than a nice-to-have.
-- **Payment actions have to be safe to repeat.** Retries happen in real payment systems. A payment instruction that can be applied twice is worse than one that fails loudly.
-- **Scheduling changes state without the user present.** Scheduled, paid, and skipped states all have to be inspectable afterwards, which is an audit question before it is a UI question.
+- **Automatic and manual payments are separate flows.** Automatic payment must be correct without user involvement, while reminders must arrive early enough to be useful.
+- **Reminder timing is part of the feature.** A reminder only helps if it arrives before the due date, so delivery timing and reliability are core requirements.
+- **Payments must be idempotent.** Retries are normal in payment systems, and a payment instruction must never be applied twice.
+- **Scheduled actions must be auditable.** Payments run without the user present, so scheduled, paid, and skipped states must all be traceable afterwards.
 
 ## Role
 
-Backend Tech Lead for delivery and release coordination. I owned backend scope, review, and release readiness on a backend serving roughly 500,000 active users of the Jenius consumer app, at p99 latency under 500 ms and an unexpected error rate under 2.5%.
+Backend Tech Lead responsible for delivery and release coordination. I owned backend scope, review, and release readiness on a backend serving roughly 500,000 active Jenius users at p99 latency under 500 ms and an unexpected error rate under 2.5%.
 
 ## Public outcome
 
-Jenius publicly documents Pay on Schedule as available for scheduled bill and VA payments with automatic payment or an H-1 reminder, and shows upcoming scheduled payments inside a 30-day window.
+Jenius publicly documents Pay on Schedule for bill and virtual-account payments, with automatic payment or an H-1 reminder, and shows upcoming scheduled payments within a 30-day window.
 
 ## Reference
 
-[Read the public Jenius product reference](https://www.jenius.com/article/detail/pay-on-schedule) — the source for every product fact above.
+All product facts above come from the [public Jenius product page](https://www.jenius.com/article/detail/pay-on-schedule). The Jenius app is available on [Google Play](https://play.google.com/store/apps/details?id=com.btpn.dc) and the [App Store](https://apps.apple.com/id/app/jenius/id1079340119).

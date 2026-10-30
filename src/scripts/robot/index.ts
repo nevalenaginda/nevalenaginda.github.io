@@ -10,11 +10,11 @@ gsap.registerPlugin(ScrollTrigger);
 
 const sections: Record<string, { pose: Pose; say: string }> = {
   hero: { pose: 'hello', say: "Hi! I'm Byte 👋" },
-  work: { pose: 'work', say: 'Ooh, shiny releases ✨' },
-  toolkit: { pose: 'type', say: 'Tap tap tap… ⌨️' },
-  log: { pose: 'rocket', say: 'So much shipping 🚀' },
-  about: { pose: 'think', say: 'Physics → code 🧪' },
-  contact: { pose: 'wave', say: 'Say hi to Nevalen! 💌' },
+  work: { pose: 'work', say: 'Recent releases' },
+  toolkit: { pose: 'type', say: 'Daily toolkit' },
+  log: { pose: 'rocket', say: 'Career so far' },
+  about: { pose: 'think', say: 'Physics → backend' },
+  contact: { pose: 'wave', say: 'Let’s talk 👋' },
 };
 
 export function mountRobot(slot: HTMLElement) {
@@ -68,7 +68,7 @@ export function mountRobot(slot: HTMLElement) {
   fly.addEventListener('click', () => {
     brain.celebrate();
     if (bubble) {
-      bubble.textContent = ['Yay! 💜', 'Hehe, that tickles!', 'Beep boop! 🤖', 'High five! ✋'][Math.floor(Math.random() * 4)];
+      bubble.textContent = ['Hello!', 'Beep boop 🤖', 'Nice to meet you', 'High five ✋'][Math.floor(Math.random() * 4)];
       gsap.fromTo(bubble, { scale: 0.6 }, { scale: 1, duration: 0.5, ease: 'back.out(3)' });
     }
   });

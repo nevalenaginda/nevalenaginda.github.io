@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { ArrowLeft, ArrowUpRight, Briefcase, CalendarDays, UserRound } from 'lucide-astro';
+import { Apple, ArrowLeft, ArrowUpRight, Briefcase, CalendarDays, Play, UserRound } from 'lucide-astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import CommandPalette from '../../components/CommandPalette.astro';
@@ -55,6 +55,13 @@ const facts = [
             </div>)}
           </dl>
           <a class="btn btn--primary w-full justify-center" href={project.data.reference}>Public reference <ArrowUpRight size={18} aria-hidden="true" /></a>
+          {project.data.stores.length > 0 && <div class="rounded-3xl bg-panel p-4">
+            <p class="font-mono text-xs font-semibold uppercase tracking-wide text-muted">Get the app</p>
+            <ul class="mt-3 space-y-2">
+              {project.data.stores.map(({ store, url }) => <li><a class="btn btn--ghost w-full justify-center" href={url} rel="noopener">{store === 'App Store' ? <Apple size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />} {store}</a></li>)}
+            </ul>
+            {project.data.stores.every(({ store }) => store === 'Google Play') && <p class="mt-2 text-center text-xs text-muted">Available on Android only.</p>}
+          </div>}
           <div class="hidden rounded-3xl bg-panel p-4 lg:block" aria-hidden="true">
             <RobotPoster class="mx-auto h-40 w-auto" />
           </div>
