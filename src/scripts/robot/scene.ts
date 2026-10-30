@@ -20,12 +20,20 @@ function contactShadowTexture() {
   return new CanvasTexture(c);
 }
 
-export function createStage(canvas: HTMLCanvasElement) {
+export class SoftwareRenderer extends Error {}
+
+export function createStage(canvas: HTMLCanvasElement, { allowSoftware = false } = {}) {
   // Ask for the context ourselves so a missing WebGL fails quietly (Three.js would log errors).
   const context = canvas.getContext('webgl2', { alpha: true, antialias: true, powerPreference: 'high-performance' });
   if (!context) throw new Error('WebGL2 unavailable');
   const coarse = matchMedia('(pointer: coarse)').matches;
-  const maxDpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
+  // A software rasteriser (VMs, blocklisted drivers) cannot run physically based shading smoothly;
+  // the HD poster looks better there, so the caller keeps it instead.
+  const info = context.getExtension('WEBGL_debug_renderer_info');
+  const gpu = info ? String(context.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+  const software = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(gpu);
+  if (software && !allowSoftware) throw new SoftwareRenderer(gpu);
+  const maxDpr = software ? 1 : Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
   let dpr = maxDpr;
 
   const renderer = new WebGLRenderer({ canvas, context, alpha: true, antialias: true });
@@ -34,7 +42,7 @@ export function createStage(canvas: HTMLCanvasElement) {
   // Khronos PBR Neutral keeps the brand colours saturated instead of washing them out.
   renderer.toneMapping = NeutralToneMapping;
   renderer.toneMappingExposure = 1.05;
-  renderer.shadowMap.enabled = !coarse;
+  renderer.shadowMap.enabled = !coarse && !software;
   renderer.shadowMap.type = PCFShadowMap;
 
   const scene = new Scene();

@@ -37,9 +37,10 @@ export function mountRobot(slot: HTMLElement) {
 
   let stage: ReturnType<typeof createStage>;
   try {
-    stage = createStage(canvas);
+    // ?byte=3d forces the 3D robot even on a software renderer (for testing); dev mode always does.
+    stage = createStage(canvas, { allowSoftware: import.meta.env.DEV || new URLSearchParams(location.search).get('byte') === '3d' });
   } catch {
-    fly.remove(); // no WebGL after all: the poster stays
+    fly.remove(); // no WebGL, or only a software renderer: the poster stays
     if (bubbleWrap) slot.append(bubbleWrap);
     return;
   }
@@ -171,15 +172,21 @@ export function mountRobot(slot: HTMLElement) {
 
   // Only render while Byte is visible and the tab is in front.
   let onScreen = true;
-  const sync = () => (onScreen && !document.hidden ? stage.start() : stage.stop());
+  let compiled = false;
+  const sync = () => (compiled && onScreen && !document.hidden ? stage.start() : stage.stop());
   new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; sync(); }).observe(fly);
   document.addEventListener('visibilitychange', sync);
   sync();
 
-  // Crossfade from the poster once the first frame is on screen, then boot up.
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    fly.classList.add('robot-fly--ready');
-    if (poster) poster.style.opacity = '0';
-    brain.boot(() => { booted = true; popBubble(); });
-  }));
+  // Compile the shaders in parallel first, so the page never stalls on them. Then crossfade from
+  // the poster once the first frame is on screen, and boot up.
+  stage.renderer.compileAsync(stage.scene, stage.camera).catch(() => {}).then(() => {
+    compiled = true;
+    sync();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fly.classList.add('robot-fly--ready');
+      if (poster) poster.style.opacity = '0';
+      brain.boot(() => { booted = true; popBubble(); });
+    }));
+  });
 }
