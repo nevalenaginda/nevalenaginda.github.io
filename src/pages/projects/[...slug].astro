@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { ArrowLeft, ArrowUpRight, Briefcase, CalendarDays, UserRound } from 'lucide-astro';
+import { ArrowLeft, ArrowUpRight, Briefcase, CalendarDays, Play, UserRound } from 'lucide-astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import CommandPalette from '../../components/CommandPalette.astro';
@@ -55,6 +55,7 @@ const facts = [
             </div>)}
           </dl>
           <a class="btn btn--primary w-full justify-center" href={project.data.reference}>Public reference <ArrowUpRight size={18} aria-hidden="true" /></a>
+          {project.data.playStore && <a class="btn btn--ghost w-full justify-center" href={project.data.playStore.url} rel="noopener" aria-label={`${project.data.playStore.name} on Google Play`}><Play size={16} aria-hidden="true" /> View on Google Play</a>}
           <div class="hidden rounded-3xl bg-panel p-4 lg:block" aria-hidden="true">
             <RobotPoster class="mx-auto h-40 w-auto" />
           </div>

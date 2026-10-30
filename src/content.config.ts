@@ -14,6 +14,7 @@ const projects = defineCollection({
     imageAlt: z.string(),
     reference: z.url(),
     referenceLabel: z.string(),
+    playStore: z.object({ name: z.string(), url: z.url() }).optional(),
     order: z.number(),
   }),
 });
