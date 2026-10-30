@@ -1,0 +1,46 @@
+---
+// Static drawing of Byte, the same pose as the 3D robot. Shown before WebGL loads,
+// and kept for reduced motion, save-data, no-WebGL, and pages that skip Three.js.
+interface Props { class?: string; }
+const { class: className = '' } = Astro.props;
+---
+<svg class={className} viewBox="0 0 320 360" role="img" aria-label="Byte, a small round purple robot waving hello">
+  <ellipse cx="160" cy="342" rx="78" ry="12" fill="#1f1a3d" opacity=".12"/>
+  <g class="poster-float">
+    <path d="M160 58V28" stroke="#3d3760" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="160" cy="24" r="13" fill="#ff6fae"/>
+    <circle cx="155" cy="19" r="4" fill="#fff" opacity=".7"/>
+    <rect x="62" y="56" width="196" height="150" rx="58" fill="#8b5cf6"/>
+    <rect x="62" y="56" width="196" height="150" rx="58" fill="url(#poster-shine)"/>
+    <rect x="86" y="80" width="148" height="102" rx="40" fill="#1f1a3d"/>
+    <rect x="118" y="108" width="20" height="38" rx="10" fill="#5ef2d6"/>
+    <rect x="182" y="108" width="20" height="38" rx="10" fill="#5ef2d6"/>
+    <ellipse cx="104" cy="158" rx="12" ry="7" fill="#ff6fae" opacity=".8"/>
+    <ellipse cx="216" cy="158" rx="12" ry="7" fill="#ff6fae" opacity=".8"/>
+    <path d="M146 162q14 12 28 0" stroke="#5ef2d6" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <rect x="48" y="112" width="18" height="40" rx="9" fill="#ffc83d"/>
+    <rect x="254" y="112" width="18" height="40" rx="9" fill="#ffc83d"/>
+    <rect x="104" y="214" width="112" height="92" rx="44" fill="#a78bfa"/>
+    <circle cx="160" cy="254" r="17" fill="#ffc83d"/>
+    <path d="M160 245l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#fff"/>
+    <rect x="70" y="226" width="30" height="62" rx="15" fill="#a78bfa" transform="rotate(18 85 230)"/>
+    <circle cx="76" cy="292" r="15" fill="#ffc83d"/>
+    <g class="poster-wave"><rect x="222" y="170" width="30" height="64" rx="15" fill="#a78bfa" transform="rotate(-38 237 230)"/>
+    <circle cx="272" cy="186" r="15" fill="#ffc83d"/></g>
+    <rect x="124" y="298" width="24" height="26" rx="12" fill="#5f5885"/>
+    <rect x="172" y="298" width="24" height="26" rx="12" fill="#5f5885"/>
+  </g>
+  <defs>
+    <linearGradient id="poster-shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".35"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+</svg>
+<style>
+  .poster-float { animation: poster-float 4s ease-in-out infinite; }
+  .poster-wave { transform-box: fill-box; transform-origin: 20% 90%; animation: poster-wave 2.6s ease-in-out infinite; }
+  @keyframes poster-float { 50% { transform: translateY(-10px); } }
+  @keyframes poster-wave { 0%, 55%, 100% { transform: rotate(0); } 70% { transform: rotate(-18deg); } 85% { transform: rotate(8deg); } }
+  @media (prefers-reduced-motion: reduce) { .poster-float, .poster-wave { animation: none; } }
+</style>
