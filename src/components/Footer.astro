@@ -1,9 +1,24 @@
 ---
 import { site } from '../data/site';
 ---
-<footer class="no-print border-t border-line">
-  <div class="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-8 font-mono text-xs text-muted sm:flex-row sm:justify-between lg:px-8">
-    <p>© {new Date().getFullYear()} {site.name}</p>
-    <p>Astro · hand-written CSS. No trackers, no cookie banner.</p>
+<footer class="no-print mt-10 border-t-2 border-line bg-panel">
+  <div class="mx-auto flex max-w-6xl flex-col items-start gap-4 px-5 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between lg:px-8">
+    <div class="flex items-center gap-3">
+      <svg class="footer-bot size-10 shrink-0" viewBox="0 0 48 48" aria-hidden="true">
+        <rect x="9" y="12" width="30" height="24" rx="10" fill="#8b5cf6"/>
+        <rect x="13" y="16" width="22" height="15" rx="7" fill="#1f1a3d"/>
+        <rect x="17" y="21" width="4" height="6" rx="2" fill="#5ef2d6"/>
+        <rect x="27" y="21" width="4" height="6" rx="2" fill="#5ef2d6"/>
+        <path d="M24 12V6" stroke="#1f1a3d" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="24" cy="5" r="3" fill="#ff6fae"/>
+        <rect class="footer-bot__arm" x="38" y="18" width="5" height="11" rx="2.5" fill="#ffc83d"/>
+      </svg>
+      <p>© {new Date().getFullYear()} {site.name}. Built with Astro, Three.js and a lot of 💜.</p>
+    </div>
+    <p class="font-mono text-xs">No trackers, no cookie banner.</p>
   </div>
 </footer>
+<style>
+  .footer-bot__arm { transform-box: fill-box; transform-origin: 50% 90%; animation: wave 2.4s ease-in-out infinite; }
+  @keyframes wave { 0%, 60%, 100% { transform: rotate(0); } 70% { transform: rotate(-35deg); } 80% { transform: rotate(10deg); } 90% { transform: rotate(-25deg); } }
+</style>

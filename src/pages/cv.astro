@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import { ArrowLeft, Printer } from 'lucide-astro';
+import '@fontsource/geist-sans/latin-400.css';
+import '@fontsource/geist-sans/latin-600.css';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site, summary, skills, experience, education } from '../data/site';
 
@@ -8,6 +10,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 const contact = [site.email, site.location, site.linkedin.replace('https://', ''), site.github.replace('https://', '')];
 ---
 <BaseLayout
+  playful={false}
   title={`CV — ${site.name}, ${site.role}`}
   description={`Curriculum vitae of ${site.name}, ${site.role} in Jakarta. Printable A4, ATS-friendly layout.`}
 >

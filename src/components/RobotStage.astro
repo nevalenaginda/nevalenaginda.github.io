@@ -1,0 +1,39 @@
+---
+import RobotPoster from './RobotPoster.astro';
+// Hero slot for Byte. The poster paints immediately; src/scripts/robot/ swaps in the
+// WebGL robot after first paint on capable devices and leaves the poster otherwise.
+---
+<div class="robot-slot relative mx-auto aspect-square w-full max-w-[19rem] sm:max-w-[24rem] lg:max-w-none" data-robot-slot>
+  <div class="absolute inset-[6%] rounded-full bg-[radial-gradient(circle_at_50%_45%,var(--color-sun-soft),var(--color-pink-soft)_55%,transparent_72%)]" aria-hidden="true"></div>
+  <RobotPoster class="robot-poster relative size-full p-[8%] transition-opacity duration-500" />
+  <div class="robot-bubble-wrap pointer-events-none absolute right-[58%] top-[6%] z-10 origin-bottom-right" data-robot-bubble-wrap aria-hidden="true">
+    <p class="whitespace-nowrap rotate-[-6deg] rounded-2xl rounded-br-sm border-2 border-ink bg-panel px-3 py-1.5 font-display text-sm shadow-[0_3px_0_0_var(--color-ink)] sm:text-base" data-robot-bubble>Hi! I'm Byte 👋</p>
+  </div>
+</div>
+<script>
+  const slot = document.querySelector<HTMLElement>('[data-robot-slot]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+  // Cheap feature check only: creating a throwaway context costs as much as the real one.
+  // mountRobot keeps the poster if the real context then fails.
+  const hasWebGL = 'WebGL2RenderingContext' in window;
+  if (slot && !reduce && !saveData && hasWebGL) {
+    // Wait for the first paint and an idle moment so Three.js never competes with LCP.
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      import('../scripts/robot').then(({ mountRobot }) => mountRobot(slot)).catch(() => {});
+    };
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      // Desktop: load once the page is idle.
+      const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 300));
+      if (document.readyState === 'complete') idle(start);
+      else addEventListener('load', () => idle(start), { once: true });
+    } else {
+      // Phones and tablets: the animated poster carries the first view; the 3D robot
+      // loads on the first touch or scroll so slow CPUs never pay for it up front.
+      for (const type of ['pointerdown', 'touchstart', 'scroll', 'keydown']) addEventListener(type, start, { once: true, passive: true });
+    }
+  }
+</script>

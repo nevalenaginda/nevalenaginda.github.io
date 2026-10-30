@@ -10,6 +10,9 @@ const fail = (message) => { console.error(`verify: ${message}`); process.exitCod
 for (const file of walk(source)) {
   const body = readFileSync(file, 'utf8');
   if (/bootstrap|jquery/i.test(body)) fail(`legacy dependency found in ${file}`);
+  if (/\bdark:/.test(body)) fail(`dark-mode class left in ${file} (the site is light-only)`);
+  // Three.js must stay behind the dynamic import in RobotStage so it never blocks first paint.
+  if (/from ['"]three['"]/.test(body) && !file.includes(join('scripts', 'robot'))) fail(`static three import outside src/scripts/robot in ${file}`);
 }
 if (!existsSync(dist)) fail('dist missing; run build first');
 for (const file of walk(dist).filter((path) => path.endsWith('.html'))) {
@@ -22,4 +25,11 @@ for (const file of walk(dist).filter((path) => path.endsWith('.html'))) {
     if (!existsSync(candidate) && !existsSync(join(dist, pathname))) fail(`broken internal link ${target} in ${file}`);
   }
 }
-if (!process.exitCode) console.log('verify: source clean; internal links resolve');
+for (const file of walk(dist).filter((path) => path.endsWith('.html'))) {
+  const body = readFileSync(file, 'utf8');
+  for (const src of body.matchAll(/<script[^>]+src="([^"]+)"/g)) {
+    const js = readFileSync(join(dist, src[1]), 'utf8');
+    if (/WebGLRenderer/.test(js)) fail(`Three.js is loaded eagerly by ${file}`);
+  }
+}
+if (!process.exitCode) console.log('verify: source clean; internal links resolve; Three.js stays lazy');
