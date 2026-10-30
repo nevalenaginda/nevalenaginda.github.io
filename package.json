@@ -11,7 +11,8 @@
     "build": "node scripts/gen-og.mjs && astro check && astro build && node scripts/verify.mjs",
     "preview": "astro preview",
     "check": "astro check",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "poster": "node scripts/render-poster.mjs"
   },
   "dependencies": {
     "@fontsource/fredoka": "5.3.0",

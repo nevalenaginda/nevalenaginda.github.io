@@ -5,7 +5,7 @@ import RobotPoster from './RobotPoster.astro';
 ---
 <div class="robot-slot relative mx-auto aspect-square w-full max-w-[19rem] sm:max-w-[24rem] lg:max-w-none" data-robot-slot>
   <div class="absolute inset-[6%] rounded-full bg-[radial-gradient(circle_at_50%_45%,var(--color-lemon-soft),var(--color-coral-soft)_55%,transparent_72%)]" aria-hidden="true"></div>
-  <RobotPoster class="robot-poster relative size-full p-[8%] transition-opacity duration-500" />
+  <RobotPoster class="robot-poster relative size-full transition-opacity duration-500" priority />
   <div class="robot-bubble-wrap pointer-events-none absolute right-[58%] top-[6%] z-10 origin-bottom-right" data-robot-bubble-wrap aria-hidden="true">
     <p class="whitespace-nowrap rotate-[-6deg] rounded-2xl rounded-br-sm border-2 border-ink bg-panel px-3 py-1.5 font-display text-sm shadow-[0_3px_0_0_var(--color-ink)] sm:text-base" data-robot-bubble>Hi! I'm Byte 👋</p>
   </div>

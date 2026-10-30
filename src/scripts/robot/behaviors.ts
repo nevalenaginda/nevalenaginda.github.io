@@ -245,6 +245,9 @@ export function createBehaviors(bot: Robot, stage: Stage) {
     setTravel(v: number) { travel = Math.max(-2500, Math.min(2500, v)); },
     lookAt(x: number, y: number) { look.x = Math.max(-1, Math.min(1, x)); look.y = Math.max(-1, Math.min(1, y)); },
     /** Jump straight to the settled pose (used for poster renders). */
-    settle(next: Pose) { pose = next; boot = -2; lift.x = 0; eyeOpen.x = 1; booted = true; },
+    settle(next: Pose) {
+      pose = next; boot = -2; lift.x = 0; eyeOpen.x = 1; booted = true;
+      clock = 0; blinkAt = 99; saccadeAt = 99; sx = sy = 0; idle = null; idleAt = 99; hover = false; travel = 0;
+    },
   };
 }

@@ -48,7 +48,32 @@ export function mountRobot(slot: HTMLElement) {
   const brain = createBehaviors(bot, stage);
   stage.setFrame(brain.update);
   // Dev only (stripped from production): lets scripts/render-poster.mjs pose and photograph Byte.
-  if (import.meta.env.DEV) (window as unknown as { __byte: unknown }).__byte = { stage, bot, brain };
+  if (import.meta.env.DEV) {
+    (window as unknown as { __byte: unknown }).__byte = {
+      stage, bot, brain,
+      /** Render one settled frame at full quality and return it as a transparent PNG data URL. */
+      snapshot(size = 1920, pose: Pose = 'hello') {
+        const r = stage.renderer;
+        stage.stop();
+        r.shadowMap.enabled = true;
+        stage.key.castShadow = true;
+        stage.scene.traverse((o) => { const m = (o as { material?: { needsUpdate: boolean } }).material; if (m) m.needsUpdate = true; });
+        brain.settle(pose);
+        brain.lookAt(-0.2, 0.08);
+        for (let i = 0; i < 240; i++) brain.update(1 / 60);
+        const dpr = r.getPixelRatio();
+        const w = r.domElement.clientWidth, h = r.domElement.clientHeight;
+        r.setPixelRatio(1);
+        stage.resize(size, size);
+        r.render(stage.scene, stage.camera);
+        const url = r.domElement.toDataURL('image/png');
+        r.setPixelRatio(dpr);
+        stage.resize(w, h);
+        stage.start();
+        return url;
+      },
+    };
+  }
 
   // The bubble waits for Byte to finish booting, then pops in.
   if (bubble) gsap.set(bubble, { scale: 0.6, opacity: 0 });
