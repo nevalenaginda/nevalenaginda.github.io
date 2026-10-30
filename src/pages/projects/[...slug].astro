@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import { ArrowLeft, ArrowUpRight } from 'lucide-astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
@@ -8,10 +8,10 @@ import Footer from '../../components/Footer.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
-  return projects.map((project) => ({ params: { slug: project.id.replace(/\.md$/, '') }, props: { project } }));
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
 }
 const { project } = Astro.props;
-const { Content } = await project.render();
+const { Content } = await render(project);
 ---
 <BaseLayout title={`${project.data.title} — Nevalen Aginda Prasetyo`} description={project.data.summary}>
   <Header />
