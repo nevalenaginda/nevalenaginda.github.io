@@ -13,11 +13,11 @@ const stats = [metrics[4], metrics[5], ['Team lead', 'scope and release ownershi
 
 // One candy colour per slot; text always uses the *-ink shade for contrast.
 const tones = [
-  { bg: 'bg-grape-soft', ink: 'text-grape-ink', solid: 'bg-grape' },
-  { bg: 'bg-pink-soft', ink: 'text-pink-ink', solid: 'bg-bubblegum' },
   { bg: 'bg-mint-soft', ink: 'text-mint-ink', solid: 'bg-mint' },
-  { bg: 'bg-sun-soft', ink: 'text-sun-ink', solid: 'bg-sunny' },
+  { bg: 'bg-coral-soft', ink: 'text-coral-ink', solid: 'bg-coral' },
   { bg: 'bg-sky-soft', ink: 'text-sky-ink', solid: 'bg-sky' },
+  { bg: 'bg-lemon-soft', ink: 'text-lemon-ink', solid: 'bg-lemon' },
+  { bg: 'bg-lilac-soft', ink: 'text-lilac-ink', solid: 'bg-lilac' },
 ];
 const tone = (i: number) => tones[i % tones.length];
 const steps = [
@@ -33,13 +33,13 @@ const steps = [
   <Header />
   <CommandPalette />
   <main id="main">
-    <section class="relative overflow-hidden" data-section="hero">
-      <div class="blob blob--grape -left-24 -top-20 size-[26rem]" data-parallax="-0.15" aria-hidden="true"></div>
-      <div class="blob blob--pink -right-20 top-10 size-[22rem]" data-parallax="0.2" aria-hidden="true"></div>
-      <div class="blob blob--mint bottom-0 left-1/3 size-[18rem]" data-parallax="-0.1" aria-hidden="true"></div>
+    <section class="relative overflow-hidden" data-section="hero" data-wash="paper">
+      <div class="blob blob--mint -left-24 -top-20 size-[26rem]" data-parallax="-0.15" aria-hidden="true"></div>
+      <div class="blob blob--coral -right-20 top-10 size-[22rem]" data-parallax="0.2" aria-hidden="true"></div>
+      <div class="blob blob--sky bottom-0 left-1/3 size-[18rem]" data-parallax="-0.1" aria-hidden="true"></div>
       <div class="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-10 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:pb-24 lg:pt-16">
         <div class="order-2 lg:order-1">
-          <p class="intro eyebrow bg-sun-soft text-sun-ink" style="--d:0ms">Tech Lead · Payment Infrastructure · Jakarta, Indonesia</p>
+          <p class="intro eyebrow bg-lemon-soft text-lemon-ink" style="--d:0ms">Tech Lead · Payment Infrastructure · Jakarta, Indonesia</p>
           <h1 class="mt-6 max-w-3xl text-5xl text-balance sm:text-7xl" data-split>Nevalen Aginda <span class="gradient-text">Prasetyo</span></h1>
           <p class="intro mt-6 max-w-[38rem] text-lg text-body sm:text-xl" style="--d:260ms">I lead backend delivery for payment infrastructure and merchant acquiring — scheduled payments, QRIS merchant operations, and account verification — on a distributed stack of <span class="font-semibold text-ink">Node.js, Python, Apache Kafka, MongoDB, and Redis</span>.</p>
           <dl class="mt-9 grid max-w-2xl grid-cols-3 gap-3">
@@ -50,7 +50,7 @@ const steps = [
           </dl>
           <div class="intro mt-9 flex flex-wrap gap-3" style="--d:600ms">
             <a class="btn btn--primary" href="#work">Read selected work <ArrowUpRight size={18} aria-hidden="true" /></a>
-            <a class="btn btn--sunny" href="/cv"><Download size={18} aria-hidden="true" /> Download CV</a>
+            <a class="btn btn--lemon" href="/cv"><Download size={18} aria-hidden="true" /> Download CV</a>
             <a class="btn btn--ghost" href={`mailto:${site.email}`}><Mail size={18} aria-hidden="true" /> Email me</a>
           </div>
         </div>
@@ -68,15 +68,16 @@ const steps = [
       </div>
     </section>
 
-    <section id="work" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-16 lg:px-8 lg:py-24" data-section="work">
+    <section id="work" class="scroll-mt-24" data-section="work" data-wash="lemon">
+      <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
       <div class="max-w-2xl">
-        <p class="eyebrow bg-grape-soft text-grape-ink" data-reveal>01 / Selected work</p>
-        <h2 class="mt-5 text-4xl text-balance sm:text-5xl" data-reveal>Three product releases and the engineering decisions behind them.</h2>
+        <p class="eyebrow bg-mint-soft text-mint-ink" data-reveal>01 / Selected work</p>
+        <h2 class="mt-5 text-4xl text-balance sm:text-5xl" data-split="mask">Three product releases and the engineering decisions behind them.</h2>
         <p class="mt-4 text-muted" data-reveal>Each case study is based on publicly available product information. Internal architecture, endpoints, and data are intentionally excluded.</p>
       </div>
       <div class="mt-12 grid gap-7 lg:grid-cols-3">
-        {projects.map((project, i) => <article class="pillow-card group relative flex flex-col overflow-hidden" data-reveal data-tilt>
-          <div class={`relative m-3 overflow-hidden rounded-[1.4rem] ${tone(i).bg}`}>
+        {projects.map((project, i) => <article class="pillow-card group relative flex flex-col overflow-hidden" data-reveal="card" data-tilt>
+          <div class={`relative m-3 overflow-hidden rounded-[1.4rem] ${tone(i).bg}`} data-reveal="image">
             <img
               class="aspect-[16/10] w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
               src={project.data.image}
@@ -90,21 +91,22 @@ const steps = [
           </div>
           <div class="flex grow flex-col px-6 pb-6 pt-2">
             <p class={`chip w-fit ${tone(i).bg} ${tone(i).ink}`}>{project.data.released}</p>
-            <h3 class="mt-4 text-2xl"><a class="no-underline after:absolute after:inset-0 after:content-['']" href={`/projects/${project.id}/`}>{project.data.title}</a></h3>
+            <h3 class="mt-4 text-2xl" style={`view-transition-name: title-${project.id}`}><a class="no-underline after:absolute after:inset-0 after:content-['']" href={`/projects/${project.id}/`}>{project.data.title}</a></h3>
             <p class="mt-1 text-sm font-semibold text-muted">{project.data.company}</p>
             <p class="mt-4 text-[.95rem] text-body">{project.data.summary}</p>
             <p class={`mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold ${tone(i).ink}`}>Open case study <ArrowUpRight class="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" size={16} aria-hidden="true" /></p>
           </div>
         </article>)}
       </div>
+      </div>
     </section>
 
-    <section id="toolkit" class="dots scroll-mt-24 border-y-2 border-line bg-panel" data-section="toolkit">
+    <section id="toolkit" class="dots scroll-mt-24" data-section="toolkit" data-wash="sky">
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-        <p class="eyebrow bg-mint-soft text-mint-ink" data-reveal>02 / Skills</p>
-        <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-reveal>Tools I work with and how often I use them.</h2>
+        <p class="eyebrow bg-sky-soft text-sky-ink" data-reveal>02 / Skills</p>
+        <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-split="mask">Tools I work with and how often I use them.</h2>
         <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {skills.map((group, i) => <div class={`rounded-[2rem] ${tone(i).bg} p-6`} data-reveal>
+          {skills.map((group, i) => <div class={`rounded-[2rem] ${tone(i).bg} p-6`} data-reveal="card">
             <h3 class={`font-display text-xl ${tone(i).ink}`}>{group.group}</h3>
             <ul class="mt-4 space-y-2.5">
               {group.items.map(([name, level]) => <li class="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-panel/80 px-4 py-2.5">
@@ -117,13 +119,14 @@ const steps = [
       </div>
     </section>
 
-    <section id="log" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-16 lg:px-8 lg:py-24" data-section="log">
-      <p class="eyebrow bg-pink-soft text-pink-ink" data-reveal>03 / Experience</p>
-      <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-reveal>Challenge, solution, impact.</h2>
+    <section id="log" class="scroll-mt-24" data-section="log" data-wash="coral">
+      <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
+      <p class="eyebrow bg-coral-soft text-coral-ink" data-reveal>03 / Experience</p>
+      <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-split="mask">Challenge, solution, impact.</h2>
       <div class="relative mt-12">
-        <div class="absolute bottom-6 left-[1.1rem] top-6 w-1 origin-top rounded-full bg-gradient-to-b from-grape via-bubblegum to-mint sm:left-[1.35rem]" data-draw aria-hidden="true"></div>
+        <div class="absolute bottom-6 left-[1.1rem] top-6 w-1 origin-top rounded-full bg-gradient-to-b from-mint via-coral to-sky sm:left-[1.35rem]" data-draw aria-hidden="true"></div>
         <ol class="space-y-8">
-          {experience.map((entry, i) => <li class="relative pl-12 sm:pl-16" data-reveal>
+          {experience.map((entry, i) => <li class="relative pl-12 sm:pl-16" data-reveal="card">
             <span class={`absolute left-0 top-7 grid size-9 place-items-center rounded-full border-4 border-paper ${tone(i).solid} shadow-md sm:size-11`} aria-hidden="true"><span class="size-2.5 rounded-full bg-panel"></span></span>
             <div class="pillow-card p-6 lg:p-8">
               <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
@@ -144,13 +147,14 @@ const steps = [
           </li>)}
         </ol>
       </div>
+      </div>
     </section>
 
-    <section id="about" class="dots scroll-mt-24 border-y-2 border-line bg-panel" data-section="about">
+    <section id="about" class="dots scroll-mt-24" data-section="about" data-wash="lilac">
       <div class="mx-auto grid max-w-6xl gap-12 px-5 py-16 lg:grid-cols-2 lg:px-8 lg:py-24">
         <div>
-          <p class="eyebrow bg-sky-soft text-sky-ink" data-reveal>04 / About</p>
-          <h2 class="mt-5 text-4xl sm:text-5xl" data-reveal>Physics first, backend after.</h2>
+          <p class="eyebrow bg-lilac-soft text-lilac-ink" data-reveal>04 / About</p>
+          <h2 class="mt-5 text-4xl sm:text-5xl" data-split="mask">Physics first, backend after.</h2>
           <div class="mt-6 max-w-xl space-y-4 text-body" data-reveal>
             <p>I studied physics at Universitas Lampung, where most of the work was measurement, modelling, and backing conclusions with data. I joined SMBC Indonesia as an IT trainee in October 2021, moved into backend engineering a year later, and now lead backend delivery for the payment and merchant-acquiring platform behind Jenius.</p>
             <p>Team size changes from project to project, so much of my role is making technical decisions early: what state to store, how failures should surface, and which interfaces other teams will rely on. I prefer to define these boundaries clearly before release rather than discover them in production.</p>
@@ -159,7 +163,7 @@ const steps = [
         </div>
         <div class="space-y-6">
           <div class="rounded-[2rem] bg-paper p-6" data-reveal>
-            <p class="flex items-center gap-2 font-display text-xl text-grape-ink"><Lightbulb size={20} aria-hidden="true" /> Engineering principles</p>
+            <p class="flex items-center gap-2 font-display text-xl text-mint-ink"><Lightbulb size={20} aria-hidden="true" /> Engineering principles</p>
             <dl class="mt-5 space-y-3">
               {principles.map(([title, text], i) => <div class="rounded-2xl bg-panel p-4">
                 <dt class="flex items-center gap-2 font-bold"><span class={`size-2.5 shrink-0 rounded-full ${tone(i).solid}`} aria-hidden="true"></span>{title}</dt>
@@ -168,16 +172,16 @@ const steps = [
             </dl>
           </div>
           <div class="grid gap-6 sm:grid-cols-2">
-            <div id="education" class="scroll-mt-24 rounded-[2rem] bg-mint-soft p-6" data-reveal>
+            <div id="education" class="scroll-mt-24 rounded-[2rem] bg-sky-soft p-6" data-reveal>
               {education.map((e) => <div>
-                <p class="flex items-center gap-2 font-display text-lg text-mint-ink"><GraduationCap size={20} aria-hidden="true" /> Education</p>
+                <p class="flex items-center gap-2 font-display text-lg text-sky-ink"><GraduationCap size={20} aria-hidden="true" /> Education</p>
                 <h2 class="mt-3 text-2xl">{e.title}</h2>
                 <p class="mt-2 text-body">{e.org} · {e.when}</p>
                 <p class="mt-1 font-mono text-sm">{e.detail}</p>
               </div>)}
             </div>
-            <div class="rounded-[2rem] bg-sun-soft p-6" data-reveal>
-              <p class="flex items-center gap-2 font-display text-lg text-sun-ink"><PenLine size={20} aria-hidden="true" /> Writing</p>
+            <div class="rounded-[2rem] bg-lemon-soft p-6" data-reveal>
+              <p class="flex items-center gap-2 font-display text-lg text-lemon-ink"><PenLine size={20} aria-hidden="true" /> Writing</p>
               <h2 class="mt-3 text-2xl">Nothing published yet.</h2>
               <p class="mt-2 text-[.95rem] text-body">I am preparing notes on payment backends, release reviews, and backend team practices. They will be published here.</p>
             </div>
@@ -186,13 +190,14 @@ const steps = [
       </div>
     </section>
 
-    <section id="contact" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-16 lg:px-8 lg:py-24" data-section="contact">
-      <div class="relative overflow-hidden rounded-[2.5rem] border-2 border-ink bg-grape-soft px-6 py-12 shadow-[0_8px_0_0_var(--color-ink)] sm:px-12 sm:py-16" data-reveal>
-        <div class="blob blob--sun -right-16 -top-16 size-64 opacity-90" aria-hidden="true"></div>
-        <div class="blob blob--pink -bottom-20 left-1/3 size-56 opacity-90" aria-hidden="true"></div>
+    <section id="contact" class="scroll-mt-24" data-section="contact" data-wash="mint">
+      <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
+      <div class="relative overflow-hidden rounded-[2.5rem] border-2 border-ink bg-mint-soft px-6 py-12 shadow-[0_8px_0_0_var(--color-ink)] sm:px-12 sm:py-16" data-reveal>
+        <div class="blob blob--lemon -right-16 -top-16 size-64 opacity-90" aria-hidden="true"></div>
+        <div class="blob blob--coral -bottom-20 left-1/3 size-56 opacity-90" aria-hidden="true"></div>
         <div class="relative">
-          <p class="eyebrow bg-panel text-grape-ink">05 / Contact</p>
-          <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-6xl">Open to mentoring and technical collaboration.</h2>
+          <p class="eyebrow bg-panel text-mint-ink">05 / Contact</p>
+          <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-6xl" data-split="mask">Open to mentoring and technical collaboration.</h2>
           <p class="mt-5 flex items-center gap-2 font-semibold text-body"><MapPin size={18} aria-hidden="true" /> {site.location}</p>
           <div class="mt-9 flex flex-wrap gap-3">
             <button
@@ -207,6 +212,7 @@ const steps = [
             <a class="btn btn--ghost" href={site.github} rel="me"><Github size={18} aria-hidden="true" /> GitHub</a>
           </div>
         </div>
+      </div>
       </div>
     </section>
   </main>

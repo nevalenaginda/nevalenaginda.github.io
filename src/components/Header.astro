@@ -5,20 +5,20 @@ const nav = [
   ['Work', '/#work'], ['Toolkit', '/#toolkit'], ['Experience', '/#log'], ['About', '/#about'], ['Contact', '/#contact'],
 ];
 ---
-<header class="no-print sticky top-0 z-30 px-3 pt-3 sm:px-5">
+<header class="no-print sticky top-0 z-30 px-3 pt-3 sm:px-5" data-site-header>
   <div data-reading-progress class="pointer-events-none fixed inset-x-0 top-0 z-40 h-1 origin-left scale-x-0 gradient-rail [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
-  <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full border-2 border-line bg-panel/85 py-2 pl-5 pr-2 shadow-[0_10px_30px_-18px_rgba(109,40,217,.45)] backdrop-blur-md" aria-label="Primary navigation">
+  <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full border-2 border-line bg-panel/85 py-2 pl-5 pr-2 shadow-[0_10px_30px_-18px_rgba(19,41,61,.35)] backdrop-blur-md" aria-label="Primary navigation">
     <a class="group inline-flex items-center gap-2 font-display text-lg no-underline" href="/">
-      <span class="grid size-8 place-items-center rounded-full bg-sunny text-sm transition-transform duration-300 group-hover:rotate-12" aria-hidden="true">
-        <svg viewBox="0 0 24 24" class="size-5"><rect x="4" y="6" width="16" height="13" rx="5" fill="#1f1a3d"/><circle cx="9.5" cy="12.5" r="1.8" fill="#5ef2d6"/><circle cx="14.5" cy="12.5" r="1.8" fill="#5ef2d6"/><path d="M12 6V3" stroke="#1f1a3d" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="2.6" r="1.6" fill="#ff6fae"/></svg>
+      <span class="grid size-8 place-items-center rounded-full bg-lemon text-sm transition-transform duration-300 group-hover:rotate-12" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="size-5"><rect x="4" y="6" width="16" height="13" rx="5" fill="#13293d"/><circle cx="9.5" cy="12.5" r="1.8" fill="#5bc0ff"/><circle cx="14.5" cy="12.5" r="1.8" fill="#5bc0ff"/><path d="M12 6V3" stroke="#13293d" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="2.6" r="1.6" fill="#ff8a7a"/></svg>
       </span>
-      <span>Nevalen<span class="text-pink-ink">.</span></span>
+      <span>Nevalen<span class="text-coral-ink">.</span></span>
     </a>
     <div class="hidden items-center gap-1 text-sm font-semibold lg:flex">
-      {nav.map(([label, href]) => <a class="rounded-full px-3 py-2 no-underline transition-colors hover:bg-grape-soft" href={href}>{label}</a>)}
+      {nav.map(([label, href]) => <a class="rounded-full px-3 py-2 no-underline transition-colors hover:bg-mint-soft" href={href}>{label}</a>)}
     </div>
     <div class="flex items-center gap-2">
-      <a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-mint-soft px-4 text-sm font-semibold text-mint-ink no-underline transition-transform hover:-translate-y-0.5 hover:text-mint-ink" href="/cv" aria-label="Open the printable CV, A4 layout">
+      <a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-sky-soft px-4 text-sm font-semibold text-sky-ink no-underline transition-transform hover:-translate-y-0.5 hover:text-sky-ink" href="/cv" aria-label="Open the printable CV, A4 layout">
         <Download size={16} aria-hidden="true" /><span class="hidden sm:inline">CV</span>
       </a>
       <button class="min-h-11 cursor-pointer rounded-full bg-ink px-4 font-mono text-xs text-white transition-transform hover:-translate-y-0.5" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
