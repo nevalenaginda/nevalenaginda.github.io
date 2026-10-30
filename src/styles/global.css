@@ -49,8 +49,18 @@
   --radius-blob: 2rem;
 }
 
-/* Cross-document view transitions: home ⇄ case study morph with no router JS. */
+/* Cross-document view transitions: home ⇄ case study with no router JS. The project picture and
+   title fly between pages, the header stays put, and the new page wipes in over a mint curtain. */
 @view-transition { navigation: auto; }
+[data-site-header] { view-transition-name: site-header; }
+::view-transition { background: var(--color-mint-soft); }
+::view-transition-group(*) { animation-duration: 760ms; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
+::view-transition-old(root) { animation: vt-out 380ms cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: vt-in 820ms cubic-bezier(.16, 1, .3, 1) both; }
+:root:active-view-transition-type(back)::view-transition-new(root) { animation-name: vt-in-back; }
+@keyframes vt-out { to { opacity: 0; transform: scale(.97); } }
+@keyframes vt-in { from { clip-path: inset(100% 0 0 0 round 2.5rem 2.5rem 0 0); } to { clip-path: inset(0 0 0 0 round 0); } }
+@keyframes vt-in-back { from { clip-path: inset(0 0 100% 0 round 0 0 2.5rem 2.5rem); } to { clip-path: inset(0 0 0 0 round 0); } }
 
 /* Base rules live in @layer base so Tailwind utilities still win. */
 @layer base {
@@ -210,6 +220,7 @@
 
 /* Hidden until motion.ts reveals it; without JS (no .js class) everything shows. */
 .js [data-reveal] { opacity: 0; }
+.js.returning [data-reveal] { opacity: 1; }
 
 /* ATS-friendly A4 CV: /cv is the only consumer. */
 .cv-sheet {

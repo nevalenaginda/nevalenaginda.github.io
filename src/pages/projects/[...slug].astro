@@ -30,7 +30,7 @@ const facts = [
       <article class="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_16rem]">
         <div>
           <p class="intro eyebrow bg-lemon-soft text-lemon-ink">Case study / {project.data.released}</p>
-          <h1 class="intro mt-5 max-w-3xl text-4xl text-balance sm:text-6xl" style="--d:80ms">{project.data.title}</h1>
+          <h1 class="intro mt-5 max-w-3xl text-4xl text-balance sm:text-6xl" style={`--d:80ms; view-transition-name: title-${project.id}`}>{project.data.title}</h1>
           <p class="intro mt-5 max-w-2xl text-lg text-body sm:text-xl" style="--d:160ms">{project.data.summary}</p>
           <div class="mt-10 rounded-[2rem] border-2 border-line bg-panel p-3 shadow-[0_8px_0_0_var(--color-line)]">
             <img

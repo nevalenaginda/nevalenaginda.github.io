@@ -67,7 +67,21 @@ const jsonLd = JSON.stringify({
     {playful && [jakarta400, jakarta600, fredoka600].map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
     {playful && <script is:inline>
       // Runs before paint: [data-reveal] elements start hidden only when JS will reveal them.
-      document.documentElement.classList.add('js');
+      var html = document.documentElement;
+      html.classList.add('js');
+      try {
+        // Coming back with the browser's back button: show everything at once, no second reveal.
+        if (performance.getEntriesByType('navigation')[0].type === 'back_forward') html.classList.add('returning');
+      } catch (e) {}
+      // Page transitions: going back to the home page wipes downward instead of upward.
+      addEventListener('pagereveal', function (e) {
+        var nav = /** @type {any} */ (window).navigation;
+        if (!e.viewTransition || !nav || !nav.activation) return;
+        var from = nav.activation.from && nav.activation.from.url;
+        var back = nav.activation.navigationType === 'traverse'
+          || (from && new URL(from).pathname.indexOf('/projects/') === 0 && location.pathname === '/');
+        if (back) e.viewTransition.types.add('back');
+      });
     </script>}
   </head>
   <body>

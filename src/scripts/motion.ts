@@ -34,27 +34,15 @@ mm.add('(prefers-reduced-motion: no-preference)', () => {
 
   splitWords();
   chapters();
+  // Back from a case study: the page is already known, so skip the entrances.
+  const returning = root.classList.contains('returning');
 
   // Each kind of element arrives in its own way, staggered when several enter together.
-  ScrollTrigger.batch('[data-reveal=""], [data-reveal]:not([data-reveal="card"]):not([data-reveal="image"])', {
-    start: 'top 88%', once: true,
-    onEnter: (els) => gsap.fromTo(els, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.9, ease: EASE, stagger: 0.07, overwrite: true }),
-  });
-  ScrollTrigger.batch('[data-reveal="card"]', {
-    start: 'top 90%', once: true,
-    onEnter: (els) => gsap.fromTo(els, { opacity: 0, y: 48, rotate: 1.2 }, { opacity: 1, y: 0, rotate: 0, duration: 1.05, ease: EASE, stagger: 0.09, overwrite: true }),
-  });
-  gsap.utils.toArray<HTMLElement>('[data-reveal="image"]').forEach((frame) => {
-    const img = frame.querySelector('img');
-    const tl = gsap.timeline({ scrollTrigger: { trigger: frame, start: 'top 90%', once: true } });
-    tl.fromTo(frame, { opacity: 0, clipPath: 'inset(14% 12% 14% 12% round 1.4rem)' }, { opacity: 1, clipPath: 'inset(0% 0% 0% 0% round 1.4rem)', duration: 1.25, ease: EASE });
-    if (img) tl.fromTo(img, { scale: 1.16 }, { scale: 1, duration: 1.4, ease: EASE }, 0);
-  });
-
+  if (!returning) revealAll();
   gsap.utils.toArray<HTMLElement>('[data-split]').forEach((heading) => {
     const words = heading.querySelectorAll('.word');
     if (heading.dataset.split === 'mask') {
-      gsap.fromTo(words, { yPercent: 115 }, { yPercent: 0, duration: 1.05, ease: EASE, stagger: 0.05, scrollTrigger: { trigger: heading, start: 'top 88%', once: true } });
+      if (!returning) gsap.fromTo(words, { yPercent: 115 }, { yPercent: 0, duration: 1.05, ease: EASE, stagger: 0.05, scrollTrigger: { trigger: heading, start: 'top 88%', once: true } });
     } else {
       // The hero name: no opacity and no mask, so it paints on the first frame.
       gsap.from(words, { yPercent: 35, rotate: 4, duration: 1.1, delay: 0.05, ease: EASE, stagger: 0.07 });
@@ -84,6 +72,23 @@ mm.add('(prefers-reduced-motion: no-preference)', () => {
     root.classList.remove('chapters');
   };
 });
+
+function revealAll() {
+  ScrollTrigger.batch('[data-reveal=""], [data-reveal]:not([data-reveal="card"]):not([data-reveal="image"])', {
+    start: 'top 88%', once: true,
+    onEnter: (els) => gsap.fromTo(els, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.9, ease: EASE, stagger: 0.07, overwrite: true }),
+  });
+  ScrollTrigger.batch('[data-reveal="card"]', {
+    start: 'top 90%', once: true,
+    onEnter: (els) => gsap.fromTo(els, { opacity: 0, y: 48, rotate: 1.2 }, { opacity: 1, y: 0, rotate: 0, duration: 1.05, ease: EASE, stagger: 0.09, overwrite: true }),
+  });
+  gsap.utils.toArray<HTMLElement>('[data-reveal="image"]').forEach((frame) => {
+    const img = frame.querySelector('img');
+    const tl = gsap.timeline({ scrollTrigger: { trigger: frame, start: 'top 90%', once: true } });
+    tl.fromTo(frame, { opacity: 0, clipPath: 'inset(14% 12% 14% 12% round 1.4rem)' }, { opacity: 1, clipPath: 'inset(0% 0% 0% 0% round 1.4rem)', duration: 1.25, ease: EASE });
+    if (img) tl.fromTo(img, { scale: 1.16 }, { scale: 1, duration: 1.4, ease: EASE }, 0);
+  });
+}
 
 // One page background that changes colour as each section takes the middle of the screen.
 function chapters() {
