@@ -45,6 +45,8 @@ export function mountRobot(slot: HTMLElement) {
   stage.scene.add(bot.root);
   const brain = createBehaviors(bot);
   stage.setFrame(brain.update);
+  // Dev only (stripped from production): lets scripts/render-poster.mjs pose and photograph Byte.
+  if (import.meta.env.DEV) (window as unknown as { __byte: unknown }).__byte = { stage, bot, brain };
 
   const size = () => {
     const r = slot.getBoundingClientRect();
