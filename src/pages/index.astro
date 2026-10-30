@@ -72,12 +72,12 @@ const steps = [
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
       <div class="max-w-2xl">
         <p class="eyebrow bg-mint-soft text-mint-ink" data-reveal>01 / Selected work</p>
-        <h2 class="mt-5 text-4xl text-balance sm:text-5xl" data-reveal>Three product releases and the engineering decisions behind them.</h2>
+        <h2 class="mt-5 text-4xl text-balance sm:text-5xl" data-split="mask">Three product releases and the engineering decisions behind them.</h2>
         <p class="mt-4 text-muted" data-reveal>Each case study is based on publicly available product information. Internal architecture, endpoints, and data are intentionally excluded.</p>
       </div>
       <div class="mt-12 grid gap-7 lg:grid-cols-3">
-        {projects.map((project, i) => <article class="pillow-card group relative flex flex-col overflow-hidden" data-reveal data-tilt>
-          <div class={`relative m-3 overflow-hidden rounded-[1.4rem] ${tone(i).bg}`}>
+        {projects.map((project, i) => <article class="pillow-card group relative flex flex-col overflow-hidden" data-reveal="card" data-tilt>
+          <div class={`relative m-3 overflow-hidden rounded-[1.4rem] ${tone(i).bg}`} data-reveal="image">
             <img
               class="aspect-[16/10] w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
               src={project.data.image}
@@ -104,9 +104,9 @@ const steps = [
     <section id="toolkit" class="dots scroll-mt-24" data-section="toolkit" data-wash="sky">
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
         <p class="eyebrow bg-sky-soft text-sky-ink" data-reveal>02 / Skills</p>
-        <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-reveal>Tools I work with and how often I use them.</h2>
+        <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-split="mask">Tools I work with and how often I use them.</h2>
         <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {skills.map((group, i) => <div class={`rounded-[2rem] ${tone(i).bg} p-6`} data-reveal>
+          {skills.map((group, i) => <div class={`rounded-[2rem] ${tone(i).bg} p-6`} data-reveal="card">
             <h3 class={`font-display text-xl ${tone(i).ink}`}>{group.group}</h3>
             <ul class="mt-4 space-y-2.5">
               {group.items.map(([name, level]) => <li class="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-panel/80 px-4 py-2.5">
@@ -122,11 +122,11 @@ const steps = [
     <section id="log" class="scroll-mt-24" data-section="log" data-wash="coral">
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
       <p class="eyebrow bg-coral-soft text-coral-ink" data-reveal>03 / Experience</p>
-      <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-reveal>Challenge, solution, impact.</h2>
+      <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-split="mask">Challenge, solution, impact.</h2>
       <div class="relative mt-12">
         <div class="absolute bottom-6 left-[1.1rem] top-6 w-1 origin-top rounded-full bg-gradient-to-b from-mint via-coral to-sky sm:left-[1.35rem]" data-draw aria-hidden="true"></div>
         <ol class="space-y-8">
-          {experience.map((entry, i) => <li class="relative pl-12 sm:pl-16" data-reveal>
+          {experience.map((entry, i) => <li class="relative pl-12 sm:pl-16" data-reveal="card">
             <span class={`absolute left-0 top-7 grid size-9 place-items-center rounded-full border-4 border-paper ${tone(i).solid} shadow-md sm:size-11`} aria-hidden="true"><span class="size-2.5 rounded-full bg-panel"></span></span>
             <div class="pillow-card p-6 lg:p-8">
               <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
@@ -154,7 +154,7 @@ const steps = [
       <div class="mx-auto grid max-w-6xl gap-12 px-5 py-16 lg:grid-cols-2 lg:px-8 lg:py-24">
         <div>
           <p class="eyebrow bg-lilac-soft text-lilac-ink" data-reveal>04 / About</p>
-          <h2 class="mt-5 text-4xl sm:text-5xl" data-reveal>Physics first, backend after.</h2>
+          <h2 class="mt-5 text-4xl sm:text-5xl" data-split="mask">Physics first, backend after.</h2>
           <div class="mt-6 max-w-xl space-y-4 text-body" data-reveal>
             <p>I studied physics at Universitas Lampung, where most of the work was measurement, modelling, and backing conclusions with data. I joined SMBC Indonesia as an IT trainee in October 2021, moved into backend engineering a year later, and now lead backend delivery for the payment and merchant-acquiring platform behind Jenius.</p>
             <p>Team size changes from project to project, so much of my role is making technical decisions early: what state to store, how failures should surface, and which interfaces other teams will rely on. I prefer to define these boundaries clearly before release rather than discover them in production.</p>
@@ -197,7 +197,7 @@ const steps = [
         <div class="blob blob--coral -bottom-20 left-1/3 size-56 opacity-90" aria-hidden="true"></div>
         <div class="relative">
           <p class="eyebrow bg-panel text-mint-ink">05 / Contact</p>
-          <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-6xl">Open to mentoring and technical collaboration.</h2>
+          <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-6xl" data-split="mask">Open to mentoring and technical collaboration.</h2>
           <p class="mt-5 flex items-center gap-2 font-semibold text-body"><MapPin size={18} aria-hidden="true" /> {site.location}</p>
           <div class="mt-9 flex flex-wrap gap-3">
             <button

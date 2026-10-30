@@ -56,9 +56,12 @@
 @layer base {
   :root { color-scheme: light; }
   * { box-sizing: border-box; }
+  :root { --page-bg: var(--color-paper); }
   body {
     margin: 0;
-    background: var(--color-paper);
+    /* motion.ts moves --page-bg through the section washes as you scroll */
+    background-color: var(--page-bg);
+    transition: background-color 700ms ease;
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 1.0625rem;
@@ -106,6 +109,25 @@
 [data-wash="coral"] { background-color: var(--color-wash-coral); }
 [data-wash="lilac"] { background-color: var(--color-wash-lilac); }
 
+/* With motion on, sections drop their own ground so the page colour can glide between them. */
+.chapters [data-wash] { background-color: transparent; }
+
+/* Section headings rise word by word out of a mask (motion.ts, data-split="mask"). */
+.word-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .14em; margin-bottom: -.14em; }
+
+/* Soft highlight that follows the pointer across tilting cards. */
+.glare {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  background: radial-gradient(380px circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / .38), transparent 55%);
+}
+[data-tilt]:hover .glare { opacity: 1; }
+
 /* Dotted confetti background for alternating sections. */
 .dots {
   background-image: radial-gradient(color-mix(in oklab, var(--color-mint) 18%, transparent) 1.5px, transparent 1.5px);
@@ -126,10 +148,10 @@
   background: var(--color-panel);
   border: 2px solid var(--color-line);
   box-shadow: 0 6px 0 0 var(--color-line), 0 18px 40px -24px color-mix(in oklab, var(--color-ink) 30%, transparent);
-  transition: transform 260ms cubic-bezier(.34, 1.56, .64, 1), box-shadow 260ms ease;
+  transition: transform 450ms cubic-bezier(.16, 1, .3, 1), box-shadow 450ms ease;
 }
 .pillow-card:hover {
-  transform: translateY(-6px) rotate(-.4deg);
+  transform: translateY(-6px);
   box-shadow: 0 10px 0 0 var(--color-line), 0 26px 50px -24px color-mix(in oklab, var(--color-ink) 38%, transparent);
 }
 
@@ -144,7 +166,7 @@
   font-size: .95rem;
   text-decoration: none;
   border: 2px solid var(--color-ink);
-  transition: transform 200ms cubic-bezier(.34, 1.56, .64, 1), box-shadow 200ms ease;
+  transition: transform 300ms cubic-bezier(.16, 1, .3, 1), box-shadow 300ms ease, background-color 200ms ease;
   box-shadow: 0 4px 0 0 var(--color-ink);
   cursor: pointer;
 }
@@ -165,9 +187,9 @@
   padding: .25rem .8rem;
   font-size: .8rem;
   font-weight: 600;
-  transition: transform 220ms cubic-bezier(.34, 1.56, .64, 1);
+  transition: transform 300ms cubic-bezier(.16, 1, .3, 1);
 }
-.chip:hover { transform: translateY(-3px) rotate(-3deg); }
+.chip:hover { transform: translateY(-2px); }
 
 .eyebrow {
   display: inline-flex;
@@ -183,7 +205,7 @@
 }
 
 /* Above-the-fold entrance: transform only (no opacity) so LCP is not delayed. */
-.intro { animation: intro 800ms cubic-bezier(.34, 1.56, .64, 1) var(--d, 0ms) backwards; }
+.intro { animation: intro 900ms cubic-bezier(.16, 1, .3, 1) var(--d, 0ms) backwards; }
 @keyframes intro { from { transform: translateY(22px) scale(.98); } }
 
 /* Hidden until motion.ts reveals it; without JS (no .js class) everything shows. */
@@ -218,6 +240,7 @@
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
   .blob, .intro { animation: none; }
+  body { transition: none; }
   .js [data-reveal] { opacity: 1; }
   .pillow-card:hover, .btn:hover, .btn:active, .chip:hover { transform: none; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
