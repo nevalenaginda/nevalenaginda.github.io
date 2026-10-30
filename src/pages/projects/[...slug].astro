@@ -14,22 +14,22 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const facts = [
-  { term: 'Company', value: project.data.company, icon: Briefcase, bg: 'bg-grape-soft', ink: 'text-grape-ink' },
-  { term: 'Role', value: project.data.role, icon: UserRound, bg: 'bg-pink-soft', ink: 'text-pink-ink' },
-  { term: 'Released', value: project.data.released, icon: CalendarDays, bg: 'bg-mint-soft', ink: 'text-mint-ink' },
+  { term: 'Company', value: project.data.company, icon: Briefcase, bg: 'bg-mint-soft', ink: 'text-mint-ink' },
+  { term: 'Role', value: project.data.role, icon: UserRound, bg: 'bg-coral-soft', ink: 'text-coral-ink' },
+  { term: 'Released', value: project.data.released, icon: CalendarDays, bg: 'bg-sky-soft', ink: 'text-sky-ink' },
 ];
 ---
 <BaseLayout title={`${project.data.title} — Nevalen Aginda Prasetyo`} description={project.data.summary}>
   <Header />
   <CommandPalette />
   <main id="main" class="relative overflow-hidden">
-    <div class="blob blob--grape -right-24 -top-10 size-[24rem]" data-parallax="0.15" aria-hidden="true"></div>
-    <div class="blob blob--sun -left-28 top-[28rem] size-[20rem]" data-parallax="-0.1" aria-hidden="true"></div>
+    <div class="blob blob--mint -right-24 -top-10 size-[24rem]" data-parallax="0.15" aria-hidden="true"></div>
+    <div class="blob blob--lemon -left-28 top-[28rem] size-[20rem]" data-parallax="-0.1" aria-hidden="true"></div>
     <div class="relative mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-panel px-4 text-sm font-bold text-grape-ink no-underline shadow-sm transition-transform hover:-translate-x-1" href="/#work"><ArrowLeft size={16} aria-hidden="true" /> Selected work</a>
+      <a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-panel px-4 text-sm font-bold text-mint-ink no-underline shadow-sm transition-transform hover:-translate-x-1" href="/#work"><ArrowLeft size={16} aria-hidden="true" /> Selected work</a>
       <article class="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_16rem]">
         <div>
-          <p class="intro eyebrow bg-sun-soft text-sun-ink">Case study / {project.data.released}</p>
+          <p class="intro eyebrow bg-lemon-soft text-lemon-ink">Case study / {project.data.released}</p>
           <h1 class="intro mt-5 max-w-3xl text-4xl text-balance sm:text-6xl" style="--d:80ms">{project.data.title}</h1>
           <p class="intro mt-5 max-w-2xl text-lg text-body sm:text-xl" style="--d:160ms">{project.data.summary}</p>
           <div class="mt-10 rounded-[2rem] border-2 border-line bg-panel p-3 shadow-[0_8px_0_0_var(--color-line)]">
@@ -86,16 +86,16 @@ const facts = [
     height: .9rem;
     flex-shrink: 0;
     border-radius: 9999px;
-    background: var(--color-bubblegum);
-    box-shadow: 0 0 0 5px var(--color-pink-soft);
+    background: var(--color-coral);
+    box-shadow: 0 0 0 5px var(--color-coral-soft);
   }
-  .case-study :global(h2:nth-of-type(3n+2))::before { background: var(--color-grape); box-shadow: 0 0 0 5px var(--color-grape-soft); }
-  .case-study :global(h2:nth-of-type(3n))::before { background: var(--color-mint); box-shadow: 0 0 0 5px var(--color-mint-soft); }
+  .case-study :global(h2:nth-of-type(3n+2))::before { background: var(--color-mint); box-shadow: 0 0 0 5px var(--color-mint-soft); }
+  .case-study :global(h2:nth-of-type(3n))::before { background: var(--color-sky); box-shadow: 0 0 0 5px var(--color-sky-soft); }
   .case-study :global(h2:first-child) { margin-top: 0; }
   .case-study :global(p), .case-study :global(ul) { margin-top: 1rem; }
   .case-study :global(ul) { list-style: none; padding-left: 0; }
   .case-study :global(li) { position: relative; margin-top: .6rem; padding-left: 1.6rem; }
-  .case-study :global(li)::before { content: '✦'; position: absolute; left: 0; color: var(--color-grape-ink); }
+  .case-study :global(li)::before { content: '✦'; position: absolute; left: 0; color: var(--color-mint-ink); }
   .case-study :global(a) { color: var(--color-primary); font-weight: 600; }
   .case-study :global(strong) { color: var(--color-ink); }
 </style>

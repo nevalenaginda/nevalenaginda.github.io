@@ -5,38 +5,45 @@
   --font-display: "Fredoka", "Plus Jakarta Sans", ui-rounded, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Candy accents: backgrounds, blobs, icons and large shapes only. */
-  --color-grape: #8b5cf6;
-  --color-bubblegum: #ff6fae;
-  --color-mint: #34d3a0;
-  --color-sunny: #ffc83d;
-  --color-sky: #4fb3ff;
+  /* Mint Lemonade. Bright accents: backgrounds, blobs, icons and large shapes only. */
+  --color-mint: #3ddc97;
+  --color-lemon: #ffe45e;
+  --color-sky: #5bc0ff;
+  --color-coral: #ff8a7a;
+  --color-lilac: #b69cff;
 
-  /* Text-safe accents: every one clears 4.5:1 on paper, panel and the tints below. */
-  --color-primary: #6d28d9;
-  --color-grape-ink: #6d28d9;
-  --color-pink-ink: #be185d;
-  --color-mint-ink: #047857;
-  --color-sun-ink: #92400e;
-  --color-sky-ink: #0369a1;
+  /* Text-safe accents: every one clears 4.5:1 on paper, panel, the tints and the washes below. */
+  --color-primary: #08795a;
+  --color-mint-ink: #06704e;
+  --color-lemon-ink: #7a5b00;
+  --color-sky-ink: #0b5e94;
+  --color-coral-ink: #b4382c;
+  --color-lilac-ink: #5b45c2;
 
   /* Pastel tints for cards and chips. */
-  --color-grape-soft: #f3edff;
-  --color-pink-soft: #ffeaf3;
-  --color-mint-soft: #e3faf1;
-  --color-sun-soft: #fff4d6;
-  --color-sky-soft: #e4f3ff;
+  --color-mint-soft: #ddf6ea;
+  --color-lemon-soft: #fff6c7;
+  --color-sky-soft: #e1f1ff;
+  --color-coral-soft: #ffe6e2;
+  --color-lilac-soft: #eee9ff;
 
-  --color-ink: #1f1a3d;
-  --color-body: #3d3760;
-  --color-muted: #5f5885;
-  --color-paper: #fff8f0;
+  /* Section washes: the page background shifts through these as you scroll. */
+  --color-wash-mint: #ecfaf3;
+  --color-wash-lemon: #fffceb;
+  --color-wash-sky: #eef7ff;
+  --color-wash-coral: #fff4f1;
+  --color-wash-lilac: #f5f2ff;
+
+  --color-ink: #13293d;
+  --color-body: #34495e;
+  --color-muted: #556b7e;
+  --color-paper: #f5fbf8;
   --color-panel: #ffffff;
-  --color-line: #f1e4d8;
+  --color-line: #d9eee3;
 
   /* legacy aliases used by the /cv toolbar */
-  --color-secondary: var(--color-bubblegum);
-  --color-accent: var(--color-grape);
+  --color-secondary: var(--color-coral);
+  --color-accent: var(--color-mint);
   --color-moss: var(--color-primary);
 
   --radius-blob: 2rem;
@@ -61,8 +68,8 @@
   h1, h2, h3, .font-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -.01em; line-height: 1.15; }
   a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 4px; }
   a:hover { color: var(--color-primary); }
-  ::selection { background: var(--color-sunny); color: var(--color-ink); }
-  :focus-visible { outline: 3px solid var(--color-grape); outline-offset: 3px; border-radius: .5rem; }
+  ::selection { background: var(--color-lemon); color: var(--color-ink); }
+  :focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; border-radius: .5rem; }
 }
 
 /* Hero backdrop: pastel blobs. Parallax is added by motion.ts; CSS drift is the no-JS default. */
@@ -75,10 +82,10 @@
   /* transform only: border-radius or filter animation would repaint every frame */
   animation: wobble 16s ease-in-out infinite;
 }
-.blob--grape { background: var(--color-grape-soft); }
-.blob--pink { background: var(--color-pink-soft); animation-delay: -5s; }
-.blob--mint { background: var(--color-mint-soft); animation-delay: -9s; }
-.blob--sun { background: var(--color-sun-soft); animation-delay: -12s; }
+.blob--mint { background: var(--color-mint-soft); }
+.blob--coral { background: var(--color-coral-soft); animation-delay: -5s; }
+.blob--sky { background: var(--color-sky-soft); animation-delay: -9s; }
+.blob--lemon { background: var(--color-lemon-soft); animation-delay: -12s; }
 @keyframes wobble {
   0%, 100% { transform: translate3d(0, var(--py), 0) rotate(0) scale(1); }
   50% { transform: translate3d(1.25rem, calc(var(--py) - 1rem), 0) rotate(14deg) scale(1.06); }
@@ -91,31 +98,39 @@
 .robot-fly--fixed { position: fixed; inset: auto; will-change: transform; }
 .robot-fly--ready { opacity: 1; }
 
+/* Section washes. Static here (and without JS); motion.ts turns them into one page
+   background that shifts colour as each section takes the screen. */
+[data-wash="mint"] { background-color: var(--color-wash-mint); }
+[data-wash="lemon"] { background-color: var(--color-wash-lemon); }
+[data-wash="sky"] { background-color: var(--color-wash-sky); }
+[data-wash="coral"] { background-color: var(--color-wash-coral); }
+[data-wash="lilac"] { background-color: var(--color-wash-lilac); }
+
 /* Dotted confetti background for alternating sections. */
 .dots {
-  background-image: radial-gradient(color-mix(in oklab, var(--color-grape) 18%, transparent) 1.5px, transparent 1.5px);
+  background-image: radial-gradient(color-mix(in oklab, var(--color-mint) 18%, transparent) 1.5px, transparent 1.5px);
   background-size: 22px 22px;
 }
 
 .gradient-text {
-  background: linear-gradient(100deg, var(--color-grape-ink), var(--color-pink-ink));
+  background: linear-gradient(100deg, var(--color-mint-ink), var(--color-sky-ink));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-.gradient-rail { height: 4px; background: linear-gradient(90deg, var(--color-grape), var(--color-bubblegum) 35%, var(--color-sunny) 65%, var(--color-mint)); }
+.gradient-rail { height: 4px; background: linear-gradient(90deg, var(--color-mint), var(--color-lemon) 35%, var(--color-sky) 65%, var(--color-coral)); }
 
 /* Soft, squishy surfaces. */
 .pillow-card {
   border-radius: var(--radius-blob);
   background: var(--color-panel);
   border: 2px solid var(--color-line);
-  box-shadow: 0 6px 0 0 var(--color-line), 0 18px 40px -24px color-mix(in oklab, var(--color-grape) 45%, transparent);
+  box-shadow: 0 6px 0 0 var(--color-line), 0 18px 40px -24px color-mix(in oklab, var(--color-ink) 30%, transparent);
   transition: transform 260ms cubic-bezier(.34, 1.56, .64, 1), box-shadow 260ms ease;
 }
 .pillow-card:hover {
   transform: translateY(-6px) rotate(-.4deg);
-  box-shadow: 0 10px 0 0 var(--color-line), 0 26px 50px -24px color-mix(in oklab, var(--color-grape) 55%, transparent);
+  box-shadow: 0 10px 0 0 var(--color-line), 0 26px 50px -24px color-mix(in oklab, var(--color-ink) 38%, transparent);
 }
 
 .btn {
@@ -135,12 +150,12 @@
 }
 .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 0 var(--color-ink); color: inherit; }
 .btn:active { transform: translateY(3px) scale(.97); box-shadow: 0 1px 0 0 var(--color-ink); }
-.btn--primary { background: #7c3aed; color: #fff; }
+.btn--primary { background: var(--color-primary); color: #fff; }
 .btn--primary:hover { color: #fff; }
-.btn--sunny { background: var(--color-sunny); color: var(--color-ink); }
+.btn--lemon { background: var(--color-lemon); color: var(--color-ink); }
 .btn--ghost { background: var(--color-panel); color: var(--color-ink); }
 /* Kept for the /cv toolbar button. */
-.gradient-cta { background: #7c3aed; color: #fff; border-radius: 9999px; }
+.gradient-cta { background: var(--color-primary); color: #fff; border-radius: 9999px; }
 .gradient-cta:hover { color: #fff; filter: brightness(1.08); }
 
 .chip {
