@@ -14,7 +14,8 @@ const projects = defineCollection({
     imageAlt: z.string(),
     reference: z.url(),
     referenceLabel: z.string(),
-    playStore: z.object({ name: z.string(), url: z.url() }).optional(),
+    // App store listings for the app this project ships in.
+    stores: z.array(z.object({ store: z.enum(['Google Play', 'App Store']), url: z.url() })).default([]),
     order: z.number(),
   }),
 });

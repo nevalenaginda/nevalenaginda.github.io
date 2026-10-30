@@ -8,9 +8,11 @@ image: /work/face-recognition.webp
 imageAlt: Jenius article page about face recognition for registration and device unlink
 reference: https://www.jenius.com/article/detail/pengenalan-wajah-untuk-registrasi-dan-unlink-device
 referenceLabel: Public product reference
-playStore:
-  name: Jenius
-  url: https://play.google.com/store/apps/details?id=com.btpn.dc
+stores:
+  - store: Google Play
+    url: https://play.google.com/store/apps/details?id=com.btpn.dc
+  - store: App Store
+    url: https://apps.apple.com/id/app/jenius/id1079340119
 order: 3
 ---
 
@@ -39,4 +41,4 @@ Jenius publicly documents face recognition for faster account activation and sel
 
 ## Reference
 
-All product facts above come from the [public Jenius article](https://www.jenius.com/article/detail/pengenalan-wajah-untuk-registrasi-dan-unlink-device). The Jenius app is available on [Google Play](https://play.google.com/store/apps/details?id=com.btpn.dc).
+All product facts above come from the [public Jenius article](https://www.jenius.com/article/detail/pengenalan-wajah-untuk-registrasi-dan-unlink-device). The Jenius app is available on [Google Play](https://play.google.com/store/apps/details?id=com.btpn.dc) and the [App Store](https://apps.apple.com/id/app/jenius/id1079340119).

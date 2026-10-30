@@ -1,12 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
-import { ArrowUpRight, Download, Play, Github, GraduationCap, Lightbulb, Linkedin, Mail, MapPin, PenLine, Sparkles, Target, Wrench } from 'lucide-astro';
+import { ArrowUpRight, Download, Github, GraduationCap, Lightbulb, Linkedin, Mail, MapPin, PenLine, Sparkles, Target, Wrench } from 'lucide-astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import CommandPalette from '../components/CommandPalette.astro';
 import Footer from '../components/Footer.astro';
 import RobotStage from '../components/RobotStage.astro';
-import { apps, metrics, skills, experience, principles, education, site } from '../data/site';
+import { metrics, skills, experience, principles, education, site } from '../data/site';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 const stats = [metrics[4], metrics[5], ['Team lead', 'scope and release ownership']];
@@ -73,9 +73,6 @@ const steps = [
         <p class="eyebrow bg-grape-soft text-grape-ink" data-reveal>01 / Selected work</p>
         <h2 class="mt-5 text-4xl text-balance sm:text-5xl" data-reveal>Three product releases and the engineering decisions behind them.</h2>
         <p class="mt-4 text-muted" data-reveal>Each case study is based on publicly available product information. Internal architecture, endpoints, and data are intentionally excluded.</p>
-        <ul class="mt-5 flex flex-wrap gap-3" data-reveal>
-          {apps.map((app) => <li><a class="btn btn--ghost" href={app.url} rel="noopener"><Play size={16} aria-hidden="true" /> {app.name} on Google Play</a></li>)}
-        </ul>
       </div>
       <div class="mt-12 grid gap-7 lg:grid-cols-3">
         {projects.map((project, i) => <article class="pillow-card group relative flex flex-col overflow-hidden" data-reveal data-tilt>

@@ -8,9 +8,9 @@ image: /work/bisniskit.webp
 imageAlt: Jenius Bisniskit landing page for the merchant QRIS payment app
 reference: https://www.jenius.com/bisniskit
 referenceLabel: Public product reference
-playStore:
-  name: Jenius Bisniskit
-  url: https://play.google.com/store/apps/details?id=com.btpn.db
+stores:
+  - store: Google Play
+    url: https://play.google.com/store/apps/details?id=com.btpn.db
 order: 2
 ---
 
@@ -39,4 +39,4 @@ Jenius publicly describes Bisniskit as its merchant app for QRIS payments, flexi
 
 ## Reference
 
-All product facts above come from the [public Jenius Bisniskit page](https://www.jenius.com/bisniskit). The app is available on [Google Play](https://play.google.com/store/apps/details?id=com.btpn.db).
+All product facts above come from the [public Jenius Bisniskit page](https://www.jenius.com/bisniskit). The app is available on Android via [Google Play](https://play.google.com/store/apps/details?id=com.btpn.db).

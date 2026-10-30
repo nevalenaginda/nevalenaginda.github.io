@@ -8,9 +8,11 @@ image: /work/pay-on-schedule.webp
 imageAlt: Jenius product page for Pay on Schedule, showing the automatic payment and reminder options
 reference: https://www.jenius.com/article/detail/pay-on-schedule
 referenceLabel: Public product reference
-playStore:
-  name: Jenius
-  url: https://play.google.com/store/apps/details?id=com.btpn.dc
+stores:
+  - store: Google Play
+    url: https://play.google.com/store/apps/details?id=com.btpn.dc
+  - store: App Store
+    url: https://apps.apple.com/id/app/jenius/id1079340119
 order: 1
 ---
 
@@ -39,4 +41,4 @@ Jenius publicly documents Pay on Schedule for bill and virtual-account payments,
 
 ## Reference
 
-All product facts above come from the [public Jenius product page](https://www.jenius.com/article/detail/pay-on-schedule). The Jenius app is available on [Google Play](https://play.google.com/store/apps/details?id=com.btpn.dc).
+All product facts above come from the [public Jenius product page](https://www.jenius.com/article/detail/pay-on-schedule). The Jenius app is available on [Google Play](https://play.google.com/store/apps/details?id=com.btpn.dc) and the [App Store](https://apps.apple.com/id/app/jenius/id1079340119).

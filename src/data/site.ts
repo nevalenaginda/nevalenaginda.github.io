@@ -8,12 +8,6 @@ export const site = {
   github: 'https://github.com/nevalenaginda',
 };
 
-// Public Google Play listings for the apps my backend work ships in.
-export const apps = [
-  { name: 'Jenius', note: 'consumer banking app', url: 'https://play.google.com/store/apps/details?id=com.btpn.dc' },
-  { name: 'Jenius Bisniskit', note: 'merchant QRIS app', url: 'https://play.google.com/store/apps/details?id=com.btpn.db' },
-];
-
 export const summary =
   'Tech Lead for the payment and merchant-acquiring backend behind Jenius, serving roughly 500,000 active users and about 2,000 active QRIS merchants at p99 latency under 500 ms and an unexpected error rate under 2.5%. I lead backend delivery from scope and design review through release, working with Node.js, Python, Apache Kafka, MongoDB, Redis, OpenShift, and Jenkins.';
 
