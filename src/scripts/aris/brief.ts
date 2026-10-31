@@ -1,11 +1,15 @@
 // ARIS-1 on a case study: a reading companion. It docks in the reading guide (or peeks from the
 // corner on phones), sweeps the product screenshot on arrival, locks on to each part as you reach
-// it, scans the trade-off cards, points at the links, and celebrates at the end. What it says also
-// goes to a screen-reader live region; voice and sound follow the header toggles, and each part
-// has a button that reads it aloud.
+// it, scans the trade-off cards, points at the links, and celebrates at the end.
+// Voice, the same model as the home page (audio.ts): with the voice on, ARIS-1 reads the part you
+// stop on, in full; "Listen to this brief" reads from there to the end and scrolls along; each
+// part's speaker reads it on request. If the browser still needs a first click before it may
+// speak, the guide asks for one.
 import { bindAudioToggles, sfx, voice } from './audio';
 import { fine, loadAris, scheduleAris, staticReason } from './boot';
 import { attachNarration, narrate } from './narration';
+import { bindReadButtons } from './read-buttons';
+import { speech, type SpeechOutcome } from './speech';
 import { bindTargets } from './targets';
 import type { Aris } from './types';
 
@@ -14,14 +18,18 @@ const shot = document.querySelector<HTMLElement>('[data-brief-shot]');
 const article = document.querySelector<HTMLElement>('.case-study');
 const fab = document.querySelector<HTMLElement>('[data-guide-fab]');
 const nextCard = document.querySelector<HTMLElement>('[data-next-mission]');
+const sections = [...document.querySelectorAll<HTMLElement>('[data-brief-section]')];
+const total = sections.length;
 const title = document.querySelector('h1')?.textContent?.replace(/\s+/g, ' ').trim() ?? 'this mission';
-const parts = document.querySelectorAll('[data-brief-section]').length;
 const minutes = Number(document.querySelector<HTMLElement>('[data-guide]')?.dataset.intro?.match(/^\d+/)?.[0] ?? 1);
 const wide = matchMedia('(min-width: 1024px)');
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 let aris: Aris | null = null;
 const robot = () => aris;
 const onScreen = (el: Element) => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; };
+const heading = (i: number) => sections[i]?.querySelector<HTMLElement>('h2') ?? null;
+const partTitle = (i: number) => heading(i)?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 
 // ---- the 3D robot, docked in the guide card
 function onReady() {
@@ -48,7 +56,7 @@ if (slot && !staticReason) {
   scheduleAris(() => {
     loadAris(() => ({
       slot,
-      greeting: `Mission brief: ${title}. ${parts} parts, about ${minutes} min.`,
+      greeting: `Mission brief: ${title}. ${total} parts, about ${minutes} min.`,
       events: { onPoke, onReady },
     }), () => {}).then((a) => {
       aris = a;
@@ -69,19 +77,111 @@ if (slot && !staticReason) {
   }, 900);
 }
 
+// ---- reading parts aloud
+let active = -1;        // the part being read on screen
+let finished = false;   // the reader has reached the end
+let playing = false;    // "Listen to this brief" is running
+let followTimer = 0;
+const heard = new Set<number>();
+
+/** Read part i in full, with ARIS-1 turned to it. */
+async function readPart(i: number, source: string): Promise<SpeechOutcome> {
+  const h = heading(i);
+  if (h) aris?.watch(h);
+  aris?.say(`Reading · ${partTitle(i)}`, 2600);
+  narrate(`Reading part ${i + 1} of ${total}: ${partTitle(i)}.`, { speak: false, callout: false });
+  const outcome = await speech.say(`Part ${i + 1} of ${total}. ${sections[i].dataset.readText ?? ''}`, { source });
+  if (outcome === 'done') heard.add(i);
+  aris?.watch(null);
+  return outcome;
+}
+
+const endLine = () => speech.say('Mission brief complete.', { queue: true, source: 'end' });
+
+/** With the voice on, read the part the reader settles on (scrolling past parts says nothing). */
+function follow() {
+  clearTimeout(followTimer);
+  if (!voice.on || playing || active < 0) return;
+  const i = active;
+  followTimer = window.setTimeout(async () => {
+    if (active !== i || playing || !voice.on || speech.source === `part-${i}`) return;
+    const outcome = await readPart(i, `part-${i}`);
+    if (outcome === 'done' && finished && i === total - 1) endLine();
+  }, 1200);
+}
+
+/** "Listen to this brief": from the part on screen to the end, scrolling to each part. */
+async function play() {
+  if (playing) { stopPlay(true); return; }
+  playing = true;
+  clearTimeout(followTimer);
+  syncPlay();
+  // On phones the guide is a sheet over the article: close it so the reader sees what is read.
+  document.querySelector<HTMLDialogElement>('[data-guide-sheet]')?.close();
+  const start = Math.min(Math.max(active, 0), total - 1);
+  for (let i = start; i < total; i++) {
+    const h = heading(i);
+    if (h && (i !== start || !onScreen(h))) {
+      document.dispatchEvent(new CustomEvent('aris:goto', { detail: h.id }));
+      await wait(900);
+    }
+    if (!playing) return;
+    if (await readPart(i, 'play') !== 'done') { stopPlay(false); return; }
+  }
+  if (playing) await speech.say('Mission brief complete.', { source: 'play' });
+  stopPlay(false);
+}
+function stopPlay(silence: boolean) {
+  if (!playing) return;
+  playing = false;
+  if (silence) speech.stop();
+  syncPlay();
+}
+function syncPlay() {
+  document.querySelectorAll<HTMLElement>('[data-guide-play]').forEach((b) => b.setAttribute('aria-pressed', String(playing)));
+  document.querySelectorAll<HTMLElement>('[data-guide-play-label]').forEach((l) => { l.textContent = playing ? 'Stop listening' : 'Listen to this brief'; });
+}
+// The guide exists twice (sidebar and phone sheet), so its buttons are handled by delegation.
+document.addEventListener('click', (e) => {
+  if ((e.target as Element).closest('[data-guide-play]')) { sfx.play('click'); play(); }
+});
+// Scrolling by hand takes over from "Listen to this brief"; the voice, if on, then follows.
+const takeOver = () => { if (playing) stopPlay(true); };
+addEventListener('wheel', takeOver, { passive: true });
+addEventListener('touchmove', takeOver, { passive: true });
+addEventListener('keydown', (e) => { if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) takeOver(); });
+
+// Each part's speaker reads that part on request, voice toggle or not.
+if (article) bindReadButtons(article, (btn) => btn.closest<HTMLElement>('[data-brief-section]')?.dataset.readText ?? '', (btn, done) => {
+  const h = btn.closest('[data-brief-section]')?.querySelector<HTMLElement>('h2');
+  if (h) aris?.watch(h);
+  aris?.say(`Reading · ${h?.textContent?.replace(/\s+/g, ' ').trim() ?? 'this part'}`, 2600);
+  done.then(() => aris?.watch(null));
+});
+
+// The browser wants a first click before it may speak: say so, and start reading once it comes.
+document.addEventListener('speech:blocked', () => {
+  if (!voice.on) return;
+  narrate('Voice is on. Tap or click anywhere to let ARIS-1 read aloud.', { speak: false, callout: 'Tap anywhere to let me read aloud', ms: 5000 });
+});
+document.addEventListener('speech:unblocked', () => {
+  setTimeout(() => { if (voice.on && !playing && !speech.speaking) follow(); }, 250);
+});
+
 // ---- following the reader: one lock-on per part, a celebration at the end
-let finished = false;
 document.addEventListener('brief:section', (e) => {
-  const { index, total, id, title: part, done, first } = (e as CustomEvent<{ index: number; total: number; id: string; title: string; done: boolean; first: boolean }>).detail;
-  if (first) return;
+  const { index, total: count, id, title: part, done, first } = (e as CustomEvent<{ index: number; total: number; id: string; title: string; done: boolean; first: boolean }>).detail;
+  active = index;
   if (done) { finish(); return; }
-  const heading = id ? document.getElementById(id) : null;
-  if (index < 0 || !heading) return;
+  if (first) { follow(); return; }
+  const h = id ? document.getElementById(id) : null;
+  if (index < 0 || !h) return;
   aris?.nod();
-  aris?.ping(heading, 1300);
-  aris?.say(`Now: ${part} · ${index + 1}/${total}`, 2400);
+  aris?.ping(h, 1300);
+  aris?.say(`Now: ${part} · ${index + 1}/${count}`, 2400);
   sfx.play('tick');
-  narrate(`Part ${index + 1} of ${total}: ${part}.`, { callout: false });
+  narrate(`Part ${index + 1} of ${count}: ${part}.`, { speak: false, callout: false });
+  follow();
 });
 
 function finish() {
@@ -90,7 +190,12 @@ function finish() {
   aris?.celebrate();
   aris?.say('Mission brief complete', 2600);
   sfx.play('arrive');
-  narrate('Mission brief complete.', { callout: false });
+  narrate('Mission brief complete.', { speak: false, callout: false });
+  // With the voice on, the last part is read first (follow), then the closing line.
+  if (voice.on && !playing) {
+    if (heard.has(total - 1) && !speech.speaking) endLine();
+    else follow();
+  }
   if (nextCard) setTimeout(() => { if (onScreen(nextCard)) aris?.ping(nextCard, 1600); }, 1500);
 }
 
@@ -115,40 +220,14 @@ addEventListener('pointermove', () => {
   if (glancing) { glancing = false; aris?.watch(null); }
 }, { passive: true });
 setInterval(() => {
-  if (!aris || glancing || performance.now() - lastMove < 7000) return;
-  const heading = document.querySelector<HTMLElement>('[data-brief-section][data-active] h2');
-  if (heading && onScreen(heading)) { glancing = true; aris.watch(heading); }
+  if (!aris || glancing || speech.speaking || performance.now() - lastMove < 7000) return;
+  const h = document.querySelector<HTMLElement>('[data-brief-section][data-active] h2');
+  if (h && onScreen(h)) { glancing = true; aris.watch(h); }
 }, 2000);
 
-// ---- "read this part aloud": an explicit request, so it speaks even with the voice toggle off
-let reading: HTMLButtonElement | null = null;
-const stopReading = () => {
-  reading?.setAttribute('aria-pressed', 'false');
-  reading = null;
-  aris?.talk(false);
-};
-document.querySelectorAll<HTMLButtonElement>('[data-read-part]').forEach((btn) => {
-  if (!voice.available) return;
-  btn.hidden = false;
-  btn.setAttribute('aria-pressed', 'false');
-  btn.addEventListener('click', () => {
-    const section = btn.closest<HTMLElement>('[data-brief-section]');
-    if (!section) return;
-    if (reading === btn) { voice.stop(); stopReading(); return; }
-    stopReading();
-    const text = [...section.querySelectorAll('h2, p, li')].map((el) => el.textContent?.replace(/\s+/g, ' ').trim()).filter(Boolean).join('. ');
-    const heading = section.querySelector<HTMLElement>('h2');
-    reading = btn;
-    btn.setAttribute('aria-pressed', 'true');
-    aris?.talk(true);
-    if (heading) aris?.watch(heading);
-    aris?.say(`Reading: ${heading?.textContent?.replace(/\s+/g, ' ').trim() ?? 'this part'}`, 2600);
-    sfx.play('click');
-    voice.read(text, () => { if (reading === btn) stopReading(); });
-  });
-});
-
 // ---- voice and sound toggles in the header
-bindAudioToggles((kind, on) => {
-  if (kind === 'voice' && on) narrate('Voice assistant online. I will announce each part as you reach it.', { callout: 'Voice assistant online' });
+bindAudioToggles(async (kind, on) => {
+  if (kind !== 'voice' || !on) return;
+  const outcome = await narrate('Voice assistant online. I will read each part as you reach it.', { callout: 'Voice assistant online' });
+  if (outcome === 'done') follow();
 });

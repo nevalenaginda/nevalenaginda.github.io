@@ -1,56 +1,31 @@
-// ARIS-1's voice (Web Speech synthesis) and sound effects (Web Audio oscillators and filtered
-// noise, no audio files). Both start switched off: browsers only allow sound after a click, and a
-// portfolio should not beep at someone in an office. The choice is remembered per browser.
+// ARIS-1's voice toggle and sound effects (Web Audio oscillators and filtered noise, no audio
+// files). Both start switched off: browsers only allow sound after a click, and a portfolio should
+// not beep at someone in an office. The choice is remembered per browser. The speaking itself
+// lives in speech.ts.
+//
+// The voice model, the same on every page:
+// - Voice off: ARIS-1 never speaks by itself. Speaker buttons ([data-read-btn]) still read on
+//   request, because pressing one is an explicit ask.
+// - Voice on: ARIS-1 reads, in full, whatever you engage with: a scanned card, an inspection, a
+//   "scan all" run, a solar destination, the case-study part you stop on. Hover never speaks.
+import { speech } from './speech';
 
 const store = {
   get(key: string) { try { return localStorage.getItem(key); } catch { return null; } },
   set(key: string, value: string) { try { localStorage.setItem(key, value); } catch { /* private mode */ } },
 };
 
-// ---- voice
+// ---- voice toggle
 let voiceOn = store.get('aris:voice') === 'on';
-let chosen: SpeechSynthesisVoice | null = null;
-const speechAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window;
-
-function pickVoice() {
-  if (!speechAvailable) return null;
-  const voices = speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith('en'));
-  const prefer = [/Google UK English Male/i, /Daniel/i, /Microsoft (Guy|Ryan|Andrew)/i, /Google US English/i, /Alex/i, /Samantha/i];
-  for (const re of prefer) { const v = voices.find((x) => re.test(x.name)); if (v) return v; }
-  return voices[0] ?? null;
-}
-if (speechAvailable) speechSynthesis.addEventListener?.('voiceschanged', () => { chosen = pickVoice(); });
-
-function utter(text: string, onEnd?: () => void) {
-  chosen ??= pickVoice();
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  if (chosen) u.voice = chosen;
-  u.lang = chosen?.lang ?? 'en-US';
-  u.rate = 1.02;
-  u.pitch = 0.82;
-  if (onEnd) { u.onend = onEnd; u.onerror = onEnd; }
-  speechSynthesis.speak(u);
-}
 
 export const voice = {
-  available: speechAvailable,
-  get on() { return voiceOn && speechAvailable; },
+  get available() { return speech.available; },
+  get on() { return voiceOn && speech.available; },
   set(on: boolean) {
     voiceOn = on;
     store.set('aris:voice', on ? 'on' : 'off');
-    if (!on) voice.stop();
+    if (!on) speech.stop();
   },
-  /** Automatic narration: only when the voice is switched on. */
-  speak(text: string) {
-    if (voice.on) utter(text);
-  },
-  /** An explicit "read this" request: speaks even with the voice switched off. */
-  read(text: string, onEnd?: () => void) {
-    if (speechAvailable) utter(text, onEnd);
-    else onEnd?.();
-  },
-  stop() { if (speechAvailable) speechSynthesis.cancel(); },
 };
 
 // ---- sound effects

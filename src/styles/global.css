@@ -196,6 +196,11 @@
 .btn[aria-pressed="true"] { border-color: var(--color-teal); color: var(--color-teal); background: var(--color-teal-dim); }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 
+/* Speaker buttons and voice controls only exist where the browser can speak (speech.ts). */
+:root:not([data-speech]) [data-read-btn], :root:not([data-speech]) [data-guide-play] { display: none !important; }
+[data-read-btn][aria-pressed="true"] svg { animation: speaker 1.1s ease-in-out infinite; }
+@keyframes speaker { 50% { transform: scale(1.18); } }
+
 /* Small square icon buttons in the header and HUD. */
 .icon-btn {
   display: inline-flex;

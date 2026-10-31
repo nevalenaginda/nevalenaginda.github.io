@@ -48,7 +48,7 @@ function lockAfter(ms: number, hold: number) {
   }, ms);
 }
 
-/** A full scan: fly over, sweep, read the card aloud. */
+/** A full scan: fly over, sweep, read the card aloud. Settles when the reading ends. */
 export function scanCard(el: HTMLElement, { ms = 2600 } = {}) {
   current = el;
   busyUntil = performance.now() + ms;
@@ -67,12 +67,13 @@ export function scanCard(el: HTMLElement, { ms = 2600 } = {}) {
   }
   setScan('SCANNING', el, ms);
   sfx.play('scan');
-  narrate(el.dataset.scanSay ?? label(el), { callout: `Scanning · ${label(el)}` });
+  const reading = narrate(el.dataset.scanSay ?? label(el), { callout: `Scanning · ${label(el)}` });
   lockAfter(ms, 2400);
   window.setTimeout(() => {
     el.removeAttribute('data-scanning');
     if (!el.matches(':hover, :focus-within')) release(1200);
   }, ms);
+  return reading;
 }
 
 /**

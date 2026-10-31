@@ -1,7 +1,8 @@
 // Case studies are flat Markdown: an h2, then its paragraphs and lists. This Sätteri hast plugin
 // wraps each h2 and what follows it in a <section>, so the page can animate, colour and track the
-// parts as mission log entries. It also gives each part a "read aloud" button and turns the bullets
-// under "Key trade-offs" into cards ARIS-1 can scan. The Markdown files stay plain.
+// parts as mission log entries. It also gives each part a "read aloud" button and the text to read
+// (data-read-text), and turns the bullets under "Key trade-offs" into cards ARIS-1 can scan. The
+// Markdown files stay plain.
 
 // Nebula and accent colour per part; unknown parts take the next colour in turn.
 const tones = { problem: 'rose', approach: 'cyan', 'key trade-offs': 'violet', role: 'teal', 'public outcome': 'amber', reference: 'teal' };
@@ -23,8 +24,8 @@ const svg = (paths) => `<svg xmlns="http://www.w3.org/2000/svg" width="17" heigh
 const speaker = svg(['M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z', 'M16 9a5 5 0 0 1 0 6', 'M19.364 18.364a9 9 0 0 0 0-12.728']);
 const scanLine = svg(['M3 7V5a2 2 0 0 1 2-2h2', 'M17 3h2a2 2 0 0 1 2 2v2', 'M21 17v2a2 2 0 0 1-2 2h-2', 'M7 21H5a2 2 0 0 1-2-2v-2', 'M7 12h10']);
 
-// Hidden until a script finds speech synthesis in the browser.
-const readButton = (title) => ({ type: 'raw', value: `<button type="button" class="read-part" data-read-part hidden aria-label="Read &quot;${escape(title)}&quot; aloud" title="Read this part aloud">${speaker}</button>` });
+// Shown only where the browser can speak (:root[data-speech] in global.css).
+const readButton = (title) => ({ type: 'raw', value: `<button type="button" class="read-part" data-read-btn aria-label="Read &quot;${escape(title)}&quot; aloud" title="Read this part aloud">${speaker}</button>` });
 const scanButton = (label) => ({ type: 'raw', value: `<button type="button" class="tradeoff-scan" data-scan-btn aria-label="Scan: ${escape(label)}" title="Scan this trade-off">${scanLine}</button>` });
 
 function decorateTradeoffs(list) {
@@ -68,6 +69,20 @@ export const briefSections = {
         else if (['p', 'ul', 'ol', 'blockquote'].includes(node.tagName)) node.properties.dataReveal = '';
       }
       section.children.push(node);
+    }
+    // What the voice reads for each part: the heading, then every paragraph and bullet as sentences.
+    for (const part of children) {
+      if (part.tagName !== 'section') continue;
+      const sentences = [];
+      for (const node of part.children) {
+        if (node.type !== 'element') continue;
+        const items = ['ul', 'ol'].includes(node.tagName) ? node.children.filter((c) => c.type === 'element' && c.tagName === 'li') : [node];
+        for (const item of items) {
+          const line = textOf(item).replace(/\s+/g, ' ').trim();
+          if (line) sentences.push(/[.!?]$/.test(line) ? line : `${line}.`);
+        }
+      }
+      part.properties.dataReadText = sentences.join(' ');
     }
     ctx.replaceNode(root, { type: 'root', children });
   },

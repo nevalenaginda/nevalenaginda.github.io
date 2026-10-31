@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import {
   ArrowUpRight, Atom, AudioLines, Copy, Download, Eye, Flame, Github, Grab, GraduationCap, Lightbulb, Linkedin, MapPin,
-  Orbit, PenLine, Radar, Radio, ScanLine, ScanSearch, Send, Sparkles, Target, Wrench,
+  Orbit, PenLine, Radar, Radio, ScanLine, ScanSearch, Send, Sparkles, Target, Volume2, Wrench,
 } from 'lucide-astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
@@ -107,7 +107,7 @@ const platforms = (stores: { store: string }[]) => stores.map(({ store }) => (st
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
         <p class="eyebrow" data-reveal>02 / System architecture</p>
         <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-5xl" data-split="mask">The modules I run on.</h2>
-        <p class="mt-4 max-w-2xl text-body" data-reveal>Four modules built from eleven skills, each with how often I use it. Hover a module and ARIS-1 flies over to scan it; click it to hear the readout.</p>
+        <p class="mt-4 max-w-2xl text-body" data-reveal>Four modules built from eleven skills, each with how often I use it. Hover a module and ARIS-1 flies over to scan it; press its speaker to hear it read.</p>
         <ul class="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs text-muted" aria-label="Usage levels" data-reveal>
           {Object.entries(levels).map(([name, cls]) => <li class="flex items-center gap-2"><span class={cls} aria-hidden="true"></span>{name}</li>)}
         </ul>
@@ -134,7 +134,10 @@ const platforms = (stores: { store: string }[]) => stores.map(({ store }) => (st
                 <span class="flex items-center gap-2 font-mono text-xs text-muted"><span class={levels[level]} aria-hidden="true"></span>{level}</span>
               </li>)}
             </ul>
-            <button class="btn btn--ghost mt-5 w-full" type="button" data-scan-btn><ScanLine size={16} aria-hidden="true" /> Scan module</button>
+            <div class="mt-5 flex gap-2">
+              <button class="btn btn--ghost grow" type="button" data-scan-btn><ScanLine size={16} aria-hidden="true" /> Scan module</button>
+              <button class="icon-btn !h-[2.875rem] !w-[2.875rem]" type="button" data-read-btn aria-label={`Read ${m.name} aloud`} title="Read aloud"><Volume2 size={18} aria-hidden="true" /></button>
+            </div>
           </article>)}
         </div>
       </div>
@@ -179,7 +182,10 @@ const platforms = (stores: { store: string }[]) => stores.map(({ store }) => (st
               </ul>
               <div class="mt-auto flex items-center justify-between gap-3 pt-5">
                 <span class="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[.14em] text-teal">Open mission brief <ArrowUpRight class="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" size={15} aria-hidden="true" /></span>
-                <button class="icon-btn relative z-[3]" type="button" data-scan-btn aria-label={`Scan ${project.data.title}`} title="Scan this mission"><ScanLine size={18} aria-hidden="true" /></button>
+                <span class="relative z-[3] flex gap-2">
+                  <button class="icon-btn" type="button" data-read-btn aria-label={`Read ${project.data.title} aloud`} title="Read aloud"><Volume2 size={18} aria-hidden="true" /></button>
+                  <button class="icon-btn" type="button" data-scan-btn aria-label={`Scan ${project.data.title}`} title="Scan this mission"><ScanLine size={18} aria-hidden="true" /></button>
+                </span>
               </div>
             </div>
           </article>)}
@@ -205,7 +211,10 @@ const platforms = (stores: { store: string }[]) => stores.map(({ store }) => (st
               >
                 <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
                   <h3 class="text-2xl sm:text-3xl">{entry.role}</h3>
-                  <p class="chip text-amber">{entry.when}</p>
+                  <div class="flex items-center gap-2">
+                    <p class="chip text-amber">{entry.when}</p>
+                    <button class="icon-btn" type="button" data-read-btn aria-label={`Read ${entry.role} aloud`} title="Read aloud"><Volume2 size={18} aria-hidden="true" /></button>
+                  </div>
                 </div>
                 <p class="mt-1 font-medium text-muted">{entry.org}</p>
                 <dl class="mt-5 grid gap-3 lg:grid-cols-3">

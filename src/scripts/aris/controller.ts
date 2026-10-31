@@ -6,6 +6,7 @@ import { parts, waypoints, type Part, type Waypoint } from '../../data/site';
 import { bindAudioToggles, sfx, voice } from './audio';
 import { fine, loadAris, scheduleAris, staticReason, type StaticReason } from './boot';
 import { attachNarration, narrate } from './narration';
+import { bindReadButtons } from './read-buttons';
 import { bindTargets, isCurrent, newSequence, scanCard, scanProgress, scanState } from './targets';
 import type { Aris, Telemetry } from './types';
 
@@ -81,18 +82,25 @@ render();
 // ---- scan targets: ARIS-1 flies next to the card it scans
 bindTargets(document, () => aris, { hover: 'fly', fine });
 
+// ---- speaker buttons: read one card on request, with ARIS-1 turned toward it
+bindReadButtons(document, (btn) => btn.closest<HTMLElement>('[data-scan]')?.dataset.scanSay ?? '', (btn, done) => {
+  const card = btn.closest<HTMLElement>('[data-scan]');
+  if (!card) return;
+  aris?.watch(card);
+  done.then(() => aris?.watch(null));
+});
+
 // ---- quick actions
 async function scanAll() {
   const run = newSequence();
   const cards = [...document.querySelectorAll<HTMLElement>('#specs [data-scan]')];
-  narrate(`Scanning all ${cards.length} system modules.`, { callout: 'Scanning all modules' });
+  const intro = narrate(`Scanning all ${cards.length} system modules.`, { callout: 'Scanning all modules' });
   emit('aris:goto', 'specs');
-  await wait(1100);
+  await Promise.all([wait(1100), intro]);
   for (const card of cards) {
     if (!isCurrent(run)) return;
-    scanCard(card, { ms: 2400 });
-    // With the voice on, wait for each module to be read out.
-    await wait(voice.on ? 5600 : 2900);
+    // Each module gets at least its scan, and with the voice on, its whole reading.
+    await Promise.all([wait(2900), scanCard(card, { ms: 2400 })]);
   }
   if (isCurrent(run)) narrate('Scan complete. Four modules, all nominal.', { callout: 'Scan complete · all nominal' });
 }
@@ -165,7 +173,7 @@ function onDepart(id: Waypoint) {
   sfx.play('thrust');
   destButtons.forEach((b) => b.toggleAttribute('aria-current', b.dataset.waypoint === id));
 }
-function onArrive(id: Waypoint) {
+function onArrive(id: Waypoint, queue = false) {
   const w = byId[id];
   scanState.target = w.name.toUpperCase();
   if (brief.title) brief.title.textContent = `${w.name} · ${w.title}`;
@@ -174,13 +182,17 @@ function onArrive(id: Waypoint) {
   if (brief.status) brief.status.textContent = `In orbit · ${w.name}`;
   destButtons.forEach((b) => b.toggleAttribute('aria-current', b.dataset.waypoint === id));
   sfx.play('arrive');
-  narrate(`${w.name}. ${w.title}. ${w.brief}`, { callout: false });
+  const reading = narrate(`${w.name}. ${w.title}. ${w.brief}`, { callout: false, queue });
   if (tour) {
     clearTimeout(tourTimer);
-    tourTimer = window.setTimeout(() => {
-      if (!tour || mode !== 'solar') return;
-      go(order[(order.indexOf(id) + 1) % order.length], true);
-    }, voice.on ? 9000 : 6500);
+    // The tour moves on once the brief has been read (or after a pause, with the voice off).
+    reading.then(() => {
+      if (!tour || mode !== 'solar' || aris?.destination !== id) return;
+      tourTimer = window.setTimeout(() => {
+        if (!tour || mode !== 'solar') return;
+        go(order[(order.indexOf(id) + 1) % order.length], true);
+      }, voice.on ? 2500 : 6500);
+    });
   }
 }
 
@@ -209,7 +221,7 @@ async function enterSolar() {
   switching = false;
   setTour(true);
   narrate('Solar flight mode engaged. Touring the system; pick any destination to take the controls.', { callout: false });
-  onArrive(a.destination);
+  onArrive(a.destination, true);
 }
 
 async function exitSolar(section?: string) {
