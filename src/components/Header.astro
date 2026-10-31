@@ -1,28 +1,51 @@
 ---
-import { Download } from 'lucide-astro';
+import { AudioLines, Download, Radio, Volume2 } from 'lucide-astro';
 
+interface Props {
+  /** Show the voice and sound toggles (the home page, where ARIS-1 talks). */
+  audio?: boolean;
+}
+const { audio = false } = Astro.props;
 const nav = [
-  ['Work', '/#work'], ['Toolkit', '/#toolkit'], ['Experience', '/#log'], ['About', '/#about'], ['Contact', '/#contact'],
+  ['Viewport', '/#viewport'], ['Specs', '/#specs'], ['Missions', '/#missions'], ['Log', '/#log'], ['Contact', '/#contact'],
 ];
 ---
-<header class="no-print sticky top-0 z-30 px-3 pt-3 sm:px-5" data-site-header>
-  <div data-reading-progress class="pointer-events-none fixed inset-x-0 top-0 z-40 h-1 origin-left scale-x-0 gradient-rail [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
-  <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full border-2 border-line bg-panel/85 py-2 pl-5 pr-2 shadow-[0_10px_30px_-18px_rgba(19,41,61,.35)] backdrop-blur-md" aria-label="Primary navigation">
-    <a class="group inline-flex items-center gap-2 font-display text-lg no-underline" href="/">
-      <span class="grid size-8 place-items-center rounded-full bg-lemon text-sm transition-transform duration-300 group-hover:rotate-12" aria-hidden="true">
-        <svg viewBox="0 0 24 24" class="size-5"><rect x="4" y="6" width="16" height="13" rx="5" fill="#13293d"/><circle cx="9.5" cy="12.5" r="1.8" fill="#5bc0ff"/><circle cx="14.5" cy="12.5" r="1.8" fill="#5bc0ff"/><path d="M12 6V3" stroke="#13293d" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="2.6" r="1.6" fill="#ff8a7a"/></svg>
+<header class="no-print solar-hide sticky top-0 z-30 px-3 pt-3 sm:px-5" data-site-header>
+  <div data-reading-progress class="pointer-events-none fixed inset-x-0 top-0 z-40 origin-left scale-x-0 gradient-rail [@media(prefers-reduced-motion:reduce)]:hidden" role="presentation" aria-hidden="true"></div>
+  <nav class="panel mx-auto flex max-w-6xl items-center justify-between gap-2 !rounded-2xl py-2 pl-3 pr-2 sm:pl-4" aria-label="Primary navigation">
+    <a class="group inline-flex items-center gap-2.5 no-underline" href="/">
+      <svg viewBox="0 0 32 32" class="size-8 shrink-0 transition-transform duration-300 group-hover:-rotate-6" aria-hidden="true">
+        <circle cx="16" cy="15" r="12" fill="#0b1326" stroke="#6cc9ff" stroke-opacity=".7" stroke-width="1.5" />
+        <rect x="9.5" y="11" width="13" height="6.5" rx="3.2" fill="#04070d" stroke="#3ff3dc" stroke-opacity=".5" />
+        <circle cx="13.2" cy="14.2" r="1.5" fill="#3ff3dc" />
+        <circle cx="18.8" cy="14.2" r="1.5" fill="#3ff3dc" />
+        <path d="M7 25.5c2.4-1.6 5.4-2.5 9-2.5s6.6.9 9 2.5" fill="none" stroke="#97a4b8" stroke-width="2" stroke-linecap="round" />
+        <circle cx="25.5" cy="5" r="1.6" fill="#ff5f7e" />
+        <path d="M24.6 6.6 22.5 10" stroke="#97a4b8" stroke-width="1.2" />
+      </svg>
+      <span class="leading-none">
+        <span class="block font-display text-[.95rem] tracking-[.14em] text-ink">NEVALEN</span>
+        <span class="hidden font-mono text-[.62rem] uppercase tracking-[.22em] text-muted sm:block">Sys.core · online</span>
       </span>
-      <span>Nevalen<span class="text-coral-ink">.</span></span>
     </a>
-    <div class="hidden items-center gap-1 text-sm font-semibold lg:flex">
-      {nav.map(([label, href]) => <a class="rounded-full px-3 py-2 no-underline transition-colors hover:bg-mint-soft" href={href}>{label}</a>)}
+    <div class="hidden items-center gap-1 xl:flex">
+      {nav.map(([label, href]) => <a class="rounded-lg px-3 py-2 font-mono text-xs uppercase tracking-[.14em] text-body no-underline transition-colors hover:bg-hull-2 hover:text-teal" href={href}>{label}</a>)}
     </div>
-    <div class="flex items-center gap-2">
-      <a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-sky-soft px-4 text-sm font-semibold text-sky-ink no-underline transition-transform hover:-translate-y-0.5 hover:text-sky-ink" href="/cv" aria-label="Open the printable CV, A4 layout">
-        <Download size={16} aria-hidden="true" /><span class="hidden sm:inline">CV</span>
+    <div class="flex items-center gap-1.5">
+      {audio && <>
+        <button class="icon-btn" type="button" data-audio-toggle="voice" aria-pressed="false" aria-label="Voice assistant" title="Voice assistant: reads scans aloud">
+          <AudioLines size={18} aria-hidden="true" />
+        </button>
+        <button class="icon-btn" type="button" data-audio-toggle="sfx" aria-pressed="false" aria-label="Sound effects" title="Sound effects">
+          <Volume2 size={18} aria-hidden="true" />
+        </button>
+      </>}
+      <a class="icon-btn no-underline sm:!w-auto sm:gap-2 sm:px-3" href="/cv" aria-label="Open the printable CV, A4 layout">
+        <Download size={16} aria-hidden="true" /><span class="hidden font-mono text-xs uppercase tracking-[.12em] sm:inline">CV</span>
       </a>
-      <button class="min-h-11 cursor-pointer rounded-full bg-ink px-4 font-mono text-xs text-white transition-transform hover:-translate-y-0.5" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
-        <span class="hidden sm:inline">Menu </span><kbd class="font-sans">⌘K</kbd>
+      <a class="btn btn--primary hidden !min-h-11 lg:inline-flex" href="/#contact"><Radio size={16} aria-hidden="true" /> Comms link</a>
+      <button class="icon-btn !w-auto px-3 font-mono text-xs text-ink" type="button" data-palette-open aria-haspopup="dialog" aria-controls="command-palette">
+        <span class="hidden sm:inline">Menu&nbsp;</span><kbd class="font-sans">⌘K</kbd>
       </button>
     </div>
   </nav>

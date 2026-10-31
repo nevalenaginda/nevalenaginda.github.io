@@ -1,236 +1,307 @@
 ---
 import { getCollection } from 'astro:content';
-import { ArrowUpRight, Download, Github, GraduationCap, Lightbulb, Linkedin, Mail, MapPin, PenLine, Sparkles, Target, Wrench } from 'lucide-astro';
+import {
+  ArrowUpRight, Atom, AudioLines, Copy, Download, Eye, Flame, Github, Grab, GraduationCap, Lightbulb, Linkedin, MapPin,
+  Orbit, PenLine, Radar, Radio, ScanLine, ScanSearch, Send, Sparkles, Target, Wrench,
+} from 'lucide-astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import CommandPalette from '../components/CommandPalette.astro';
 import Footer from '../components/Footer.astro';
-import RobotStage from '../components/RobotStage.astro';
-import { metrics, skills, experience, principles, education, site } from '../data/site';
+import ArisSlot from '../components/ArisSlot.astro';
+import SolarDeck from '../components/SolarDeck.astro';
+import { metrics, modules, parts, experience, principles, education, site, type Part } from '../data/site';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const stats = [metrics[4], metrics[5], ['Team lead', 'scope and release ownership']];
-
-// One candy colour per slot; text always uses the *-ink shade for contrast.
-const tones = [
-  { bg: 'bg-mint-soft', ink: 'text-mint-ink', solid: 'bg-mint' },
-  { bg: 'bg-coral-soft', ink: 'text-coral-ink', solid: 'bg-coral' },
-  { bg: 'bg-sky-soft', ink: 'text-sky-ink', solid: 'bg-sky' },
-  { bg: 'bg-lemon-soft', ink: 'text-lemon-ink', solid: 'bg-lemon' },
-  { bg: 'bg-lilac-soft', ink: 'text-lilac-ink', solid: 'bg-lilac' },
-];
-const tone = (i: number) => tones[i % tones.length];
+const levels: Record<string, string> = { 'Daily use': 'led', 'Working knowledge': 'led led--cyan', 'Practice area': 'led led--violet', Learning: 'led led--amber' };
+const inspectIcons: Record<Part, typeof Eye> = { visor: Eye, reactor: Atom, manipulator: Grab, thruster: Flame };
 const steps = [
-  { term: 'Challenge', icon: Target, t: tones[1] },
-  { term: 'Solution', icon: Wrench, t: tones[4] },
-  { term: 'Impact', icon: Sparkles, t: tones[2] },
+  { term: 'Challenge', icon: Target, ink: 'text-rose' },
+  { term: 'Solution', icon: Wrench, ink: 'text-violet' },
+  { term: 'Impact', icon: Sparkles, ink: 'text-teal' },
 ] as const;
+const platforms = (stores: { store: string }[]) => stores.map(({ store }) => (store === 'App Store' ? 'iOS' : 'Android'));
 ---
 <BaseLayout
   title="Nevalen Aginda Prasetyo — Tech Lead"
-  description="Tech lead in Jakarta working on payment infrastructure, merchant acquiring, and distributed backend systems. Selected work, engineering principles, and a printable CV."
+  description="Tech lead in Jakarta working on payment infrastructure, merchant acquiring, and distributed backend systems, guided through the site by ARIS-1, an interactive 3D astronaut robot."
 >
-  <Header />
+  <Header audio />
   <CommandPalette />
-  <main id="main">
-    <section class="relative overflow-hidden" data-section="hero" data-wash="paper">
-      <div class="blob blob--mint -left-24 -top-20 size-[26rem]" data-parallax="-0.15" aria-hidden="true"></div>
-      <div class="blob blob--coral -right-20 top-10 size-[22rem]" data-parallax="0.2" aria-hidden="true"></div>
-      <div class="blob blob--sky bottom-0 left-1/3 size-[18rem]" data-parallax="-0.1" aria-hidden="true"></div>
-      <div class="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-10 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:pb-24 lg:pt-16">
+  <main id="main" class="solar-hide">
+    <section id="viewport" class="relative scroll-mt-24" data-section="viewport" data-wash="teal">
+      <div class="mx-auto grid max-w-6xl items-center gap-6 px-5 pb-8 pt-8 lg:grid-cols-[1.15fr_.85fr] lg:gap-10 lg:px-8 lg:pt-12">
         <div class="order-2 lg:order-1">
-          <p class="intro eyebrow bg-lemon-soft text-lemon-ink" style="--d:0ms">Tech Lead · Payment Infrastructure · Jakarta, Indonesia</p>
-          <h1 class="mt-6 max-w-3xl text-5xl text-balance sm:text-7xl" data-split>Nevalen Aginda <span class="gradient-text">Prasetyo</span></h1>
-          <p class="intro mt-6 max-w-[38rem] text-lg text-body sm:text-xl" style="--d:260ms">I lead backend delivery for payment infrastructure and merchant acquiring — scheduled payments, QRIS merchant operations, and account verification — on a distributed stack of <span class="font-semibold text-ink">Node.js, Python, Apache Kafka, MongoDB, and Redis</span>.</p>
-          <dl class="mt-9 grid max-w-2xl grid-cols-3 gap-3">
-            {stats.map(([value, label], i) => <div class={`intro rounded-3xl ${tone(i).bg} px-4 py-4`} style={`--d:${360 + i * 80}ms`}>
-              <dt class={`font-display text-2xl sm:text-3xl ${tone(i).ink}`} data-count>{value}</dt>
-              <dd class="mt-1 text-xs leading-snug text-body sm:text-sm">{label}</dd>
+          <p class="intro eyebrow" style="--d:0ms">Online · Jakarta, Indonesia</p>
+          <h1 class="mt-5 text-[2.15rem] leading-[1.08] text-balance sm:text-6xl xl:text-[4.1rem]" data-split>Nevalen Aginda <span class="gradient-text">Prasetyo</span></h1>
+          <p class="intro mt-4 font-mono text-sm uppercase tracking-[.16em] text-cyan" style="--d:180ms">Tech Lead · Payment infrastructure &amp; merchant acquiring</p>
+          <p class="intro mt-5 max-w-[38rem] text-lg text-body" style="--d:260ms">I lead backend delivery for the payment and merchant-acquiring platform behind Jenius: scheduled payments, QRIS merchant operations, and account verification, on a distributed stack of <span class="font-semibold text-ink">Node.js, Python, Apache Kafka, MongoDB, and Redis</span>.</p>
+          <dl class="intro mt-8 grid max-w-2xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4" style="--d:360ms">
+            {metrics.slice(0, 4).map(([value, label]) => <div class="bg-hull/90 px-4 py-3">
+              <dt class="font-display text-lg text-ink sm:text-xl">{value}</dt>
+              <dd class="mt-1 text-xs leading-snug text-muted">{label}</dd>
             </div>)}
           </dl>
-          <div class="intro mt-9 flex flex-wrap gap-3" style="--d:600ms">
-            <a class="btn btn--primary" href="#work">Read selected work <ArrowUpRight size={18} aria-hidden="true" /></a>
-            <a class="btn btn--lemon" href="/cv"><Download size={18} aria-hidden="true" /> Download CV</a>
-            <a class="btn btn--ghost" href={`mailto:${site.email}`}><Mail size={18} aria-hidden="true" /> Email me</a>
+          <div class="intro mt-8 flex flex-wrap gap-3" style="--d:520ms">
+            <a class="btn btn--primary" href="#missions">Deployed missions <ArrowUpRight size={16} aria-hidden="true" /></a>
+            <a class="btn btn--ghost" href="/cv"><Download size={16} aria-hidden="true" /> Download CV</a>
+            <a class="btn btn--ghost" href="#contact"><Radio size={16} aria-hidden="true" /> Open comms</a>
           </div>
         </div>
         <div class="order-1 lg:order-2">
-          <RobotStage />
+          <ArisSlot />
         </div>
       </div>
-      <div class="relative mx-auto max-w-6xl px-5 pb-14 lg:px-8">
-        <dl class="grid gap-3 rounded-[2rem] border-2 border-line bg-panel/80 p-4 backdrop-blur sm:grid-cols-2 lg:grid-cols-4" data-reveal>
-          {metrics.slice(0, 4).map(([value, label], i) => <div class="rounded-2xl px-3 py-2">
-            <dt class="flex items-center gap-3 font-mono text-sm font-semibold text-ink"><span class={`size-3 shrink-0 rounded-full ${tone(i).solid}`} aria-hidden="true"></span>{value}</dt>
-            <dd class="pl-6 text-sm leading-snug text-muted">{label}</dd>
-          </div>)}
-        </dl>
+
+      <div class="mx-auto max-w-6xl px-5 pb-16 lg:px-8 lg:pb-20">
+        <div class="panel brackets scanlines intro overflow-hidden" style="--d:640ms" data-hud>
+          <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+            <p class="hud-label flex items-center gap-2"><span class="led"></span> ARIS-1 · Heads-up display</p>
+            <p class="hud-label">MET <span class="text-ink" data-tm="met">00:00</span></p>
+          </div>
+          <div class="grid divide-y divide-line lg:grid-cols-[1.3fr_1fr_1fr] lg:divide-x lg:divide-y-0">
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-3 p-4 sm:grid-cols-3">
+              <div><dt class="hud-label">System</dt><dd class="hud-value" data-tm="sys">STANDBY</dd></div>
+              <div><dt class="hud-label">Mode</dt><dd class="hud-value" data-tm="mode">INSPECT</dd></div>
+              <div><dt class="hud-label">Frame rate</dt><dd class="hud-value"><span data-tm="fps">—</span> <span class="text-xs text-muted">fps</span></dd></div>
+              <div><dt class="hud-label">Pos X</dt><dd class="hud-value" data-tm="x">+0000</dd></div>
+              <div><dt class="hud-label">Pos Y</dt><dd class="hud-value" data-tm="y">+0000</dd></div>
+              <div><dt class="hud-label">Thruster</dt><dd class="hud-value" data-tm="thrust">IDLE</dd>
+                <div class="mt-1.5 h-1 overflow-hidden rounded-full bg-line"><div class="h-full origin-left scale-x-0 bg-amber transition-transform duration-150" data-tm-bar="thrust"></div></div>
+              </div>
+              <div class="col-span-2"><dt class="hud-label">Scan</dt><dd class="hud-value" data-tm="scan">STANDBY</dd>
+                <div class="mt-1.5 h-1 overflow-hidden rounded-full bg-line"><div class="h-full origin-left scale-x-0 bg-teal transition-transform duration-150" data-tm-bar="scan"></div></div>
+              </div>
+              <div><dt class="hud-label">Target</dt><dd class="hud-value truncate" data-tm="target">—</dd></div>
+            </dl>
+            <div class="p-4">
+              <p class="hud-label">Flight mode</p>
+              <div class="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="Flight mode">
+                <button class="btn btn--ghost !px-3" type="button" data-mode="inspect" aria-pressed="true"><ScanSearch size={16} aria-hidden="true" /> Inspect</button>
+                <button class="btn btn--ghost !px-3" type="button" data-mode="solar" aria-pressed="false"><Orbit size={16} aria-hidden="true" /> Solar flight</button>
+              </div>
+              <p class="hud-label mt-4">Quick actions</p>
+              <div class="mt-2 grid gap-2">
+                <button class="btn btn--ghost" type="button" data-action="scan-all"><Radar size={16} aria-hidden="true" /> Scan all specs</button>
+                <button class="btn btn--ghost" type="button" data-audio-toggle="voice" aria-pressed="false"><AudioLines size={16} aria-hidden="true" /> Voice assistant · <span data-audio-state>Off</span></button>
+              </div>
+              <p class="mt-3 text-xs text-amber" data-static-note hidden></p>
+            </div>
+            <div class="p-4">
+              <p class="hud-label">Quick inspection</p>
+              <div class="mt-2 grid grid-cols-2 gap-2">
+                {(Object.keys(parts) as Part[]).map((part) => {
+                  const Icon = inspectIcons[part];
+                  return <button class="btn btn--ghost !justify-start !px-3" type="button" data-inspect={part} aria-pressed="false" title={`Inspect the ${parts[part].label.toLowerCase()}: ${parts[part].module}`}><Icon size={16} aria-hidden="true" /> {parts[part].label}</button>;
+                })}
+              </div>
+              <p class="mt-3 text-xs leading-relaxed text-muted">Each part stands for one system module below.<span data-needs-3d> Click ARIS-1 itself to say hello.</span></p>
+            </div>
+          </div>
+          <p class="border-t border-line px-4 py-2.5 font-mono text-xs text-teal" role="status" aria-live="polite" data-aris-readout>ARIS-1 › Systems nominal. Awaiting command.</p>
+        </div>
       </div>
     </section>
 
-    <section id="work" class="scroll-mt-24" data-section="work" data-wash="lemon">
+    <section id="specs" class="scroll-mt-24" data-section="specs" data-wash="cyan">
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <div class="max-w-2xl">
-        <p class="eyebrow bg-mint-soft text-mint-ink" data-reveal>01 / Selected work</p>
-        <h2 class="mt-5 text-4xl text-balance sm:text-5xl" data-split="mask">Three product releases and the engineering decisions behind them.</h2>
-        <p class="mt-4 text-muted" data-reveal>Each case study is based on publicly available product information. Internal architecture, endpoints, and data are intentionally excluded.</p>
-      </div>
-      <div class="mt-12 grid gap-7 lg:grid-cols-3">
-        {projects.map((project, i) => <article class="pillow-card group relative flex flex-col overflow-hidden" data-reveal="card" data-tilt>
-          <div class={`relative m-3 overflow-hidden rounded-[1.4rem] ${tone(i).bg}`} data-reveal="image">
-            <img
-              class="aspect-[16/10] w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
-              src={project.data.image}
-              alt={project.data.imageAlt}
-              width="1200"
-              height="750"
-              loading="lazy"
-              decoding="async"
-              style={`view-transition-name: shot-${project.id}`}
-            />
-          </div>
-          <div class="flex grow flex-col px-6 pb-6 pt-2">
-            <p class={`chip w-fit ${tone(i).bg} ${tone(i).ink}`}>{project.data.released}</p>
-            <h3 class="mt-4 text-2xl" style={`view-transition-name: title-${project.id}`}><a class="no-underline after:absolute after:inset-0 after:content-['']" href={`/projects/${project.id}/`}>{project.data.title}</a></h3>
-            <p class="mt-1 text-sm font-semibold text-muted">{project.data.company}</p>
-            <p class="mt-4 text-[.95rem] text-body">{project.data.summary}</p>
-            <p class={`mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold ${tone(i).ink}`}>Open case study <ArrowUpRight class="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" size={16} aria-hidden="true" /></p>
-          </div>
-        </article>)}
-      </div>
-      </div>
-    </section>
-
-    <section id="toolkit" class="dots scroll-mt-24" data-section="toolkit" data-wash="sky">
-      <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-        <p class="eyebrow bg-sky-soft text-sky-ink" data-reveal>02 / Skills</p>
-        <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-split="mask">Tools I work with and how often I use them.</h2>
-        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {skills.map((group, i) => <div class={`rounded-[2rem] ${tone(i).bg} p-6`} data-reveal="card">
-            <h3 class={`font-display text-xl ${tone(i).ink}`}>{group.group}</h3>
-            <ul class="mt-4 space-y-2.5">
-              {group.items.map(([name, level]) => <li class="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-panel/80 px-4 py-2.5">
-                <span class="font-semibold">{name}</span>
-                <span class="chip bg-paper font-mono text-xs text-muted">{level}</span>
+        <p class="eyebrow" data-reveal>02 / System architecture</p>
+        <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-5xl" data-split="mask">The modules I run on.</h2>
+        <p class="mt-4 max-w-2xl text-body" data-reveal>Four modules built from eleven skills, each with how often I use it. Hover a module and ARIS-1 flies over to scan it; click it to hear the readout.</p>
+        <ul class="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs text-muted" aria-label="Usage levels" data-reveal>
+          {Object.entries(levels).map(([name, cls]) => <li class="flex items-center gap-2"><span class={cls} aria-hidden="true"></span>{name}</li>)}
+        </ul>
+        <div class="mt-10 grid gap-6 sm:grid-cols-2">
+          {modules.map((m) => <article
+            class="panel brackets scan-card cursor-pointer p-6"
+            data-reveal="card"
+            data-tilt
+            data-scan
+            data-scan-click
+            data-scan-label={`${m.code} · ${m.name}`}
+            data-scan-say={m.say}
+            data-scan-part={m.part}
+          >
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <p class="font-mono text-xs tracking-[.22em] text-teal">{m.code}</p>
+              <p class="chip">Part · {parts[m.part].label}</p>
+            </div>
+            <h3 class="mt-4 font-display text-lg tracking-[.08em] sm:text-xl">{m.name}</h3>
+            <p class="mt-1 text-sm text-muted">{m.role}</p>
+            <ul class="mt-5 space-y-2">
+              {m.items.map(([name, level]) => <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-space/70 px-3 py-2">
+                <span class="font-medium text-ink">{name}</span>
+                <span class="flex items-center gap-2 font-mono text-xs text-muted"><span class={levels[level]} aria-hidden="true"></span>{level}</span>
               </li>)}
             </ul>
-          </div>)}
+            <button class="btn btn--ghost mt-5 w-full" type="button" data-scan-btn><ScanLine size={16} aria-hidden="true" /> Scan module</button>
+          </article>)}
         </div>
       </div>
     </section>
 
-    <section id="log" class="scroll-mt-24" data-section="log" data-wash="coral">
+    <section id="missions" class="scroll-mt-24" data-section="missions" data-wash="violet">
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <p class="eyebrow bg-coral-soft text-coral-ink" data-reveal>03 / Experience</p>
-      <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-split="mask">Challenge, solution, impact.</h2>
-      <div class="relative mt-12">
-        <div class="absolute bottom-6 left-[1.1rem] top-6 w-1 origin-top rounded-full bg-gradient-to-b from-mint via-coral to-sky sm:left-[1.35rem]" data-draw aria-hidden="true"></div>
-        <ol class="space-y-8">
-          {experience.map((entry, i) => <li class="relative pl-12 sm:pl-16" data-reveal="card">
-            <span class={`absolute left-0 top-7 grid size-9 place-items-center rounded-full border-4 border-paper ${tone(i).solid} shadow-md sm:size-11`} aria-hidden="true"><span class="size-2.5 rounded-full bg-panel"></span></span>
-            <div class="pillow-card p-6 lg:p-8">
-              <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-                <h3 class="text-2xl sm:text-3xl">{entry.role}</h3>
-                <p class={`chip ${tone(i).bg} font-mono text-xs ${tone(i).ink}`}>{entry.when}</p>
+        <div class="max-w-2xl">
+          <p class="eyebrow" data-reveal>03 / Deployed missions</p>
+          <h2 class="mt-5 text-4xl text-balance sm:text-5xl" data-split="mask">Three releases in production.</h2>
+          <p class="mt-4 text-body" data-reveal>Each case study is based on publicly available product information. Internal architecture, endpoints, and data are intentionally excluded.</p>
+        </div>
+        <div class="mt-12 grid gap-6 lg:grid-cols-3">
+          {projects.map((project, i) => <article
+            class="panel brackets scan-card group relative flex flex-col"
+            data-reveal="card"
+            data-tilt
+            data-scan
+            data-scan-label={`MSN-0${i + 1} · ${project.data.title}`}
+            data-scan-say={`Mission ${i + 1}: ${project.data.title}. Released ${project.data.released}. Role: ${project.data.role}. ${project.data.summary}`}
+          >
+            <div class="relative m-3 overflow-hidden rounded-xl border border-line" data-reveal="image">
+              <img
+                class="aspect-[16/10] w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+                src={project.data.image}
+                alt={project.data.imageAlt}
+                width="1200"
+                height="750"
+                loading="lazy"
+                decoding="async"
+                style={`view-transition-name: shot-${project.id}`}
+              />
+              <span class="chip absolute left-3 top-3 !border-teal/40 bg-void/85 text-teal"><span class="led" aria-hidden="true"></span> Deployed</span>
+            </div>
+            <div class="flex grow flex-col px-5 pb-5 pt-1">
+              <p class="font-mono text-xs tracking-[.2em] text-teal">MSN-0{i + 1} · {project.data.released}</p>
+              <h3 class="mt-2 text-2xl" style={`view-transition-name: title-${project.id}`}><a class="no-underline after:absolute after:inset-0 after:z-[2] after:content-['']" href={`/projects/${project.id}/`}>{project.data.title}</a></h3>
+              <p class="mt-1 text-sm text-muted">{project.data.role} · {project.data.company}</p>
+              <p class="mt-3 text-[.95rem] text-body">{project.data.summary}</p>
+              <ul class="mt-4 flex flex-wrap gap-2" aria-label="Platforms">
+                {platforms(project.data.stores).map((p) => <li class="chip">{p}</li>)}
+              </ul>
+              <div class="mt-auto flex items-center justify-between gap-3 pt-5">
+                <span class="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[.14em] text-teal">Open mission brief <ArrowUpRight class="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" size={15} aria-hidden="true" /></span>
+                <button class="icon-btn relative z-[3]" type="button" data-scan-btn aria-label={`Scan ${project.data.title}`} title="Scan this mission"><ScanLine size={18} aria-hidden="true" /></button>
               </div>
-              <p class="mt-1 font-semibold text-muted">{entry.org}</p>
-              <dl class="mt-6 grid gap-4 lg:grid-cols-3">
-                {steps.map(({ term, icon: Icon, t }) => <div class={`rounded-3xl ${t.bg} p-5`}>
-                  <dt class={`flex items-center gap-2 font-display text-lg ${t.ink}`}><Icon size={18} aria-hidden="true" /> {term}</dt>
-                  <dd class="mt-2 text-[.95rem] text-body">{term === 'Challenge' ? entry.challenge : term === 'Solution' ? entry.solution : entry.impact}</dd>
+            </div>
+          </article>)}
+        </div>
+      </div>
+    </section>
+
+    <section id="log" class="scroll-mt-24" data-section="log" data-wash="amber">
+      <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
+        <p class="eyebrow" data-reveal>04 / Flight log</p>
+        <h2 class="mt-5 max-w-2xl text-4xl sm:text-5xl" data-split="mask">Challenge, solution, impact.</h2>
+        <div class="relative mt-12">
+          <div class="absolute bottom-6 left-[.95rem] top-6 w-px origin-top bg-gradient-to-b from-teal via-violet to-amber sm:left-[1.2rem]" data-draw aria-hidden="true"></div>
+          <ol class="space-y-6">
+            {experience.map((entry, i) => <li class="relative pl-10 sm:pl-14" data-reveal="card">
+              <span class="absolute left-0 top-7 grid size-8 place-items-center rounded-full border border-line-bright bg-hull sm:size-10" aria-hidden="true"><span class={i === 0 ? 'led' : 'led led--off'}></span></span>
+              <article
+                class="panel brackets scan-card cursor-pointer p-5 lg:p-7"
+                data-scan
+                data-scan-click
+                data-scan-label={`LOG-0${experience.length - i} · ${entry.role}`}
+                data-scan-say={`${entry.role}, ${entry.org}, ${entry.when}. ${entry.impact}`}
+              >
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+                  <h3 class="text-2xl sm:text-3xl">{entry.role}</h3>
+                  <p class="chip text-amber">{entry.when}</p>
+                </div>
+                <p class="mt-1 font-medium text-muted">{entry.org}</p>
+                <dl class="mt-5 grid gap-3 lg:grid-cols-3">
+                  {steps.map(({ term, icon: Icon, ink }) => <div class="rounded-xl border border-line bg-space/70 p-4">
+                    <dt class={`flex items-center gap-2 font-mono text-xs uppercase tracking-[.16em] ${ink}`}><Icon size={15} aria-hidden="true" /> {term}</dt>
+                    <dd class="mt-2 text-[.95rem] text-body">{term === 'Challenge' ? entry.challenge : term === 'Solution' ? entry.solution : entry.impact}</dd>
+                  </div>)}
+                </dl>
+                {entry.tech.length > 0 && <ul class="mt-5 flex flex-wrap gap-2" aria-label="Technologies">
+                  {entry.tech.map((t) => <li class="chip">{t}</li>)}
+                </ul>}
+              </article>
+            </li>)}
+          </ol>
+        </div>
+
+        <div class="mt-16 grid gap-6 lg:grid-cols-[1.15fr_1fr]">
+          <div class="panel p-6 lg:p-8" data-reveal>
+            <p class="hud-label">Pilot dossier</p>
+            <h3 class="mt-3 text-3xl">Physics first, backend after.</h3>
+            <div class="mt-5 space-y-4 text-body">
+              <p>I studied physics at Universitas Lampung, where most of the work was measurement, modelling, and backing conclusions with data. I joined SMBC Indonesia as an IT trainee in October 2021, moved into backend engineering a year later, and now lead backend delivery for the payment and merchant-acquiring platform behind Jenius.</p>
+              <p>Team size changes from project to project, so much of my role is making technical decisions early: what state to store, how failures should surface, and which interfaces other teams will rely on. I prefer to define these boundaries clearly before release rather than discover them in production.</p>
+              <p>I pay particular attention to edge cases and to operability: a release is complete only when the on-call team can support it.</p>
+            </div>
+          </div>
+          <div class="grid gap-6">
+            <div class="panel p-6" data-reveal>
+              <p class="flex items-center gap-2 font-mono text-xs uppercase tracking-[.16em] text-teal"><Lightbulb size={16} aria-hidden="true" /> Mission directives</p>
+              <dl class="mt-4 space-y-3">
+                {principles.map(([title, text]) => <div class="rounded-xl border border-line bg-space/70 p-4">
+                  <dt class="flex items-center gap-2 font-semibold text-ink"><span class="led led--off !bg-teal/70" aria-hidden="true"></span>{title}</dt>
+                  <dd class="mt-1 text-[.95rem] text-muted">{text}</dd>
                 </div>)}
               </dl>
-              {entry.tech.length > 0 && <ul class="mt-6 flex flex-wrap gap-2">
-                {entry.tech.map((t, j) => <li class={`chip border-2 border-line bg-panel font-mono text-xs ${tone(j).ink}`}>{t}</li>)}
-              </ul>}
             </div>
-          </li>)}
-        </ol>
-      </div>
-      </div>
-    </section>
-
-    <section id="about" class="dots scroll-mt-24" data-section="about" data-wash="lilac">
-      <div class="mx-auto grid max-w-6xl gap-12 px-5 py-16 lg:grid-cols-2 lg:px-8 lg:py-24">
-        <div>
-          <p class="eyebrow bg-lilac-soft text-lilac-ink" data-reveal>04 / About</p>
-          <h2 class="mt-5 text-4xl sm:text-5xl" data-split="mask">Physics first, backend after.</h2>
-          <div class="mt-6 max-w-xl space-y-4 text-body" data-reveal>
-            <p>I studied physics at Universitas Lampung, where most of the work was measurement, modelling, and backing conclusions with data. I joined SMBC Indonesia as an IT trainee in October 2021, moved into backend engineering a year later, and now lead backend delivery for the payment and merchant-acquiring platform behind Jenius.</p>
-            <p>Team size changes from project to project, so much of my role is making technical decisions early: what state to store, how failures should surface, and which interfaces other teams will rely on. I prefer to define these boundaries clearly before release rather than discover them in production.</p>
-            <p>I pay particular attention to edge cases and to operability: a release is complete only when the on-call team can support it.</p>
-          </div>
-        </div>
-        <div class="space-y-6">
-          <div class="rounded-[2rem] bg-paper p-6" data-reveal>
-            <p class="flex items-center gap-2 font-display text-xl text-mint-ink"><Lightbulb size={20} aria-hidden="true" /> Engineering principles</p>
-            <dl class="mt-5 space-y-3">
-              {principles.map(([title, text], i) => <div class="rounded-2xl bg-panel p-4">
-                <dt class="flex items-center gap-2 font-bold"><span class={`size-2.5 shrink-0 rounded-full ${tone(i).solid}`} aria-hidden="true"></span>{title}</dt>
-                <dd class="mt-1 text-[.95rem] text-muted">{text}</dd>
-              </div>)}
-            </dl>
-          </div>
-          <div class="grid gap-6 sm:grid-cols-2">
-            <div id="education" class="scroll-mt-24 rounded-[2rem] bg-sky-soft p-6" data-reveal>
+            <div id="education" class="panel scroll-mt-24 p-6" data-reveal>
               {education.map((e) => <div>
-                <p class="flex items-center gap-2 font-display text-lg text-sky-ink"><GraduationCap size={20} aria-hidden="true" /> Education</p>
-                <h2 class="mt-3 text-2xl">{e.title}</h2>
-                <p class="mt-2 text-body">{e.org} · {e.when}</p>
-                <p class="mt-1 font-mono text-sm">{e.detail}</p>
+                <p class="flex items-center gap-2 font-mono text-xs uppercase tracking-[.16em] text-cyan"><GraduationCap size={16} aria-hidden="true" /> Education</p>
+                <h3 class="mt-3 text-2xl">{e.title}</h3>
+                <p class="mt-1 text-body">{e.org} · {e.when}</p>
+                <p class="mt-1 font-mono text-sm text-muted">{e.detail}</p>
               </div>)}
-            </div>
-            <div class="rounded-[2rem] bg-lemon-soft p-6" data-reveal>
-              <p class="flex items-center gap-2 font-display text-lg text-lemon-ink"><PenLine size={20} aria-hidden="true" /> Writing</p>
-              <h2 class="mt-3 text-2xl">Nothing published yet.</h2>
-              <p class="mt-2 text-[.95rem] text-body">I am preparing notes on payment backends, release reviews, and backend team practices. They will be published here.</p>
+              <p class="mt-5 flex items-center gap-2 border-t border-line pt-4 font-mono text-xs uppercase tracking-[.16em] text-violet"><PenLine size={15} aria-hidden="true" /> Writing</p>
+              <p class="mt-2 text-[.95rem] text-body">Nothing published yet. I am preparing notes on payment backends, release reviews, and backend team practices.</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="contact" class="scroll-mt-24" data-section="contact" data-wash="mint">
+    <section id="contact" class="scroll-mt-24" data-section="contact" data-wash="rose">
       <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <div class="relative overflow-hidden rounded-[2.5rem] border-2 border-ink bg-mint-soft px-6 py-12 shadow-[0_8px_0_0_var(--color-ink)] sm:px-12 sm:py-16" data-reveal>
-        <div class="blob blob--lemon -right-16 -top-16 size-64 opacity-90" aria-hidden="true"></div>
-        <div class="blob blob--coral -bottom-20 left-1/3 size-56 opacity-90" aria-hidden="true"></div>
-        <div class="relative">
-          <p class="eyebrow bg-panel text-mint-ink">05 / Contact</p>
-          <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-6xl" data-split="mask">Open to mentoring and technical collaboration.</h2>
-          <p class="mt-5 flex items-center gap-2 font-semibold text-body"><MapPin size={18} aria-hidden="true" /> {site.location}</p>
-          <div class="mt-9 flex flex-wrap gap-3">
-            <button
-              type="button"
-              data-copy-email
-              class="btn btn--primary"
-              aria-label={`Copy email address ${site.email} to clipboard`}
-            >
-              <Mail size={18} aria-hidden="true" /><span data-copy-label>Copy email</span>
-            </button>
-            <a class="btn btn--ghost" href={site.linkedin} rel="me"><Linkedin size={18} aria-hidden="true" /> LinkedIn</a>
-            <a class="btn btn--ghost" href={site.github} rel="me"><Github size={18} aria-hidden="true" /> GitHub</a>
+        <p class="eyebrow" data-reveal>05 / Comms terminal</p>
+        <h2 class="mt-5 max-w-2xl text-4xl text-balance sm:text-5xl" data-split="mask">Open to mentoring and technical collaboration.</h2>
+        <div class="mt-12 grid gap-6 lg:grid-cols-[1.45fr_1fr]">
+          <div class="panel brackets overflow-hidden" data-reveal>
+            <div class="flex items-center justify-between gap-3 border-b border-line bg-void/50 px-4 py-2.5">
+              <p class="flex items-center gap-2" aria-hidden="true"><span class="size-2.5 rounded-full bg-rose/80"></span><span class="size-2.5 rounded-full bg-amber/80"></span><span class="size-2.5 rounded-full bg-teal/80"></span></p>
+              <p class="truncate font-mono text-xs text-muted">comms://nevalen@jakarta</p>
+              <p class="hud-label flex items-center gap-2"><span class="led"></span> Open</p>
+            </div>
+            <ol class="terminal-log scanlines" data-terminal-log aria-live="polite" aria-label="Terminal log">
+              <li>&gt; ARIS-1 comms terminal ready</li>
+              <li>&gt; link to Jakarta ground station: up</li>
+              <li data-tone="aris">Fill in the three fields and transmit. Your message goes out through your own mail app; nothing is stored here.</li>
+            </ol>
+            <form class="grid gap-3 p-4 sm:p-5" data-terminal data-email={site.email} novalidate>
+              <label class="terminal-field"><span>sender.name&gt;</span><input name="name" required maxlength="80" autocomplete="name" data-label="your name" placeholder="Ada Lovelace" /></label>
+              <label class="terminal-field"><span>sender.email&gt;</span><input name="email" type="email" required autocomplete="email" data-label="your email" placeholder="ada@example.com" /></label>
+              <label class="terminal-field terminal-field--area"><span>signal.message&gt;</span><textarea name="message" required minlength="10" maxlength="2000" rows="5" data-label="the message" placeholder="Hi Nevalen, I'd like to talk about…"></textarea></label>
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button class="btn btn--primary" type="submit"><Send size={16} aria-hidden="true" /> Transmit signal</button>
+                <button class="btn btn--ghost" type="reset">Clear</button>
+              </div>
+            </form>
           </div>
+          <aside class="panel flex flex-col gap-3 p-6" data-reveal aria-label="Direct channels">
+            <p class="hud-label">Direct channels</p>
+            <p class="break-all font-mono text-sm text-ink">{site.email}</p>
+            <button class="btn btn--ghost w-full" type="button" data-copy-email={site.email} aria-label={`Copy email address ${site.email} to clipboard`}>
+              <Copy size={16} aria-hidden="true" /><span data-copy-label>Copy email</span>
+            </button>
+            <a class="btn btn--ghost w-full" href={site.linkedin} rel="me"><Linkedin size={16} aria-hidden="true" /> LinkedIn</a>
+            <a class="btn btn--ghost w-full" href={site.github} rel="me"><Github size={16} aria-hidden="true" /> GitHub</a>
+            <a class="btn btn--ghost w-full" href="/cv"><Download size={16} aria-hidden="true" /> Printable CV</a>
+            <p class="mt-auto flex items-center gap-2 pt-3 text-sm text-muted"><MapPin size={16} aria-hidden="true" /> {site.location} · UTC+7</p>
+          </aside>
         </div>
-      </div>
       </div>
     </section>
   </main>
+  <SolarDeck />
   <Footer />
 </BaseLayout>
 <script>
-  const btn = document.querySelector<HTMLElement>('[data-copy-email]');
-  const label = btn?.querySelector<HTMLElement>('[data-copy-label]');
-  const email = 'nevalenaginda10@gmail.com';
-  if (btn && label) {
-    btn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(email);
-        label.textContent = 'Copied ✓';
-      } catch {
-        label.textContent = 'Copy failed';
-      }
-      setTimeout(() => { label.textContent = 'Copy email'; }, 2000);
-    });
-  }
+  import '../scripts/aris/controller';
+  import '../scripts/aris/terminal';
 </script>

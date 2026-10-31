@@ -1,0 +1,77 @@
+---
+// Controls for solar flight mode. Hidden until the mode starts; src/scripts/aris/controller.ts
+// shows it, keeps it in step with ARIS-1, and makes the rest of the page inert meanwhile.
+import { LogOut, Route, SkipForward } from 'lucide-astro';
+import { waypoints } from '../data/site';
+---
+<div class="solar-ui" hidden data-solar-ui role="dialog" aria-modal="true" aria-labelledby="solar-title">
+  <div class="fixed inset-x-3 top-3 flex items-start justify-between gap-3 sm:inset-x-5 sm:top-5">
+    <div class="panel brackets px-4 py-3">
+      <p class="hud-label flex items-center gap-2"><span class="led"></span> Flight mode</p>
+      <h2 id="solar-title" class="mt-1 font-display text-base tracking-[.12em] focus:outline-none sm:text-lg" tabindex="-1" data-solar-focus>SOLAR FLIGHT</h2>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn--ghost" type="button" data-tour aria-pressed="true" aria-label="Auto tour"><Route size={16} aria-hidden="true" /> <span class="hidden sm:inline">Auto tour</span></button>
+      <button class="btn btn--primary" type="button" data-mode="inspect"><LogOut size={16} aria-hidden="true" /> Exit <kbd class="hidden font-mono sm:inline">Esc</kbd></button>
+    </div>
+  </div>
+
+  <!-- Phones: destinations stack above the brief at the bottom. Wider: each goes to its own corner. -->
+  <div class="fixed inset-x-3 bottom-[calc(.75rem+env(safe-area-inset-bottom))] flex flex-col gap-2 sm:contents">
+  <nav class="sm:fixed sm:bottom-5 sm:left-5 sm:w-60" aria-label="Destinations">
+    <p class="hud-label mb-2 hidden sm:block">Destinations</p>
+    <ul class="flex gap-2 overflow-x-auto pb-1 sm:flex-col sm:overflow-visible">
+      {waypoints.map((w) => <li class="shrink-0">
+        <button class="dest" type="button" data-waypoint={w.id}>
+          <span class={`dest__dot dest__dot--${w.id}`} aria-hidden="true"></span>
+          <span class="font-mono text-xs uppercase tracking-[.14em] text-ink">{w.name}</span>
+          <span class="hidden text-xs text-muted sm:inline">{w.title}</span>
+        </button>
+      </li>)}
+    </ul>
+  </nav>
+
+  <section class="panel brackets p-4 sm:fixed sm:bottom-5 sm:right-5 sm:w-[23rem] sm:p-5" aria-label="Destination brief">
+    <p class="hud-label flex items-center justify-between gap-3"><span data-brief-status>In orbit · Earth</span><span>Dist <span class="text-ink" data-tm="distance">0.00 AU</span></span></p>
+    <h3 class="mt-2 text-lg sm:text-xl" data-brief-title>Earth · Home base: Jakarta</h3>
+    <p class="mt-1.5 text-sm text-body" data-brief-text aria-live="polite"></p>
+    <dl class="mt-3 grid grid-cols-3 gap-2 font-mono text-[.7rem] uppercase tracking-wider">
+      <div><dt class="text-muted">Pos x</dt><dd class="text-ink" data-tm="x">0.00</dd></div>
+      <div><dt class="text-muted">Pos z</dt><dd class="text-ink" data-tm="y">0.00</dd></div>
+      <div><dt class="text-muted">Thrust</dt><dd class="text-ink" data-tm="thrust">IDLE</dd></div>
+    </dl>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a class="btn btn--primary grow" href="#viewport" data-brief-land>Land · open section</a>
+      <button class="btn btn--ghost" type="button" data-brief-next><SkipForward size={16} aria-hidden="true" /> Next</button>
+    </div>
+  </section>
+  </div>
+
+  <p class="hud-label pointer-events-none fixed bottom-7 left-1/2 hidden -translate-x-1/2 lg:block">Drag to orbit · scroll to zoom · click a planet</p>
+</div>
+<style>
+  .dest {
+    display: flex;
+    width: 100%;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .6rem;
+    border: 1px solid var(--color-line);
+    border-radius: .7rem;
+    background: color-mix(in oklab, var(--color-hull) 80%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    padding: .4rem .8rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 200ms ease, background-color 200ms ease;
+  }
+  .dest:hover { border-color: var(--color-line-bright); }
+  .dest[aria-current] { border-color: var(--color-teal); background: var(--color-teal-dim); }
+  .dest__dot { width: .8rem; height: .8rem; flex-shrink: 0; border-radius: 9999px; }
+  .dest__dot--sun { background: radial-gradient(circle at 35% 35%, #fff1a8, #ff8a1f); box-shadow: 0 0 10px #ffb347; }
+  .dest__dot--earth { background: radial-gradient(circle at 35% 35%, #6cc9ff, #1b4f9c 60%, #2f7d3c); }
+  .dest__dot--mars { background: radial-gradient(circle at 35% 35%, #e08a55, #9c3f22); }
+  .dest__dot--jupiter { background: linear-gradient(#d9c2a0, #a8673f 35%, #f1e4cc 55%, #a8673f 80%); }
+  .dest__dot--saturn { background: radial-gradient(circle at 35% 35%, #f2e3bd, #c9a86e); box-shadow: 0 0 0 2px #0b1326, 0 0 0 3px #d9c08c; }
+</style>

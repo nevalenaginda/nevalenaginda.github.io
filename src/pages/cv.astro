@@ -15,11 +15,11 @@ const contact = [site.email, site.location, site.linkedin.replace('https://', ''
   description={`Curriculum vitae of ${site.name}, ${site.role} in Jakarta. Printable A4, ATS-friendly layout.`}
 >
   <div class="no-print mx-auto flex max-w-[21cm] flex-wrap items-center justify-between gap-3 px-5 py-5">
-    <a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-primary" href="/"><ArrowLeft size={15} aria-hidden="true" /> Back to portfolio</a>
+    <a class="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-wide text-teal" href="/"><ArrowLeft size={15} aria-hidden="true" /> Back to portfolio</a>
     <button
       type="button"
       data-print-cv
-      class="gradient-cta inline-flex min-h-11 cursor-pointer items-center gap-2 rounded border-0 px-5 text-sm font-medium"
+      class="btn btn--primary"
     >
       <Printer size={16} aria-hidden="true" /> Download / Print PDF
     </button>

@@ -1,24 +1,24 @@
 ---
 import { site } from '../data/site';
 ---
-<footer class="no-print mt-10 border-t-2 border-line bg-panel">
+<footer class="no-print solar-hide mt-10 border-t border-line bg-void/60">
   <div class="mx-auto flex max-w-6xl flex-col items-start gap-4 px-5 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between lg:px-8">
     <div class="flex items-center gap-3">
       <svg class="footer-bot size-10 shrink-0" viewBox="0 0 48 48" aria-hidden="true">
-        <rect x="9" y="12" width="30" height="24" rx="10" fill="#3ddc97"/>
-        <rect x="13" y="16" width="22" height="15" rx="7" fill="#13293d"/>
-        <rect x="17" y="21" width="4" height="6" rx="2" fill="#5bc0ff"/>
-        <rect x="27" y="21" width="4" height="6" rx="2" fill="#5bc0ff"/>
-        <path d="M24 12V6" stroke="#13293d" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="24" cy="5" r="3" fill="#ff8a7a"/>
-        <rect class="footer-bot__arm" x="38" y="18" width="5" height="11" rx="2.5" fill="#ffe45e"/>
+        <circle cx="24" cy="21" r="15" fill="#0b1326" stroke="#6cc9ff" stroke-opacity=".6" stroke-width="1.5" />
+        <rect x="14" y="16" width="20" height="9" rx="4.5" fill="#04070d" stroke="#3ff3dc" stroke-opacity=".5" />
+        <circle class="footer-bot__eye" cx="19.5" cy="20.5" r="2" fill="#3ff3dc" />
+        <circle class="footer-bot__eye" cx="28.5" cy="20.5" r="2" fill="#3ff3dc" />
+        <path d="M11 38c3.6-2.4 8-3.6 13-3.6s9.4 1.2 13 3.6" fill="none" stroke="#97a4b8" stroke-width="2.5" stroke-linecap="round" />
+        <circle cx="37" cy="7" r="2" fill="#ff5f7e" />
       </svg>
-      <p>© {new Date().getFullYear()} {site.name}. Built with Astro and Three.js.</p>
+      <p>© {new Date().getFullYear()} {site.name}. Built with Astro and Three.js; ARIS-1 is generated in code, with no model files.</p>
     </div>
     <p class="font-mono text-xs">No trackers, no cookie banner.</p>
   </div>
 </footer>
 <style>
-  .footer-bot__arm { transform-box: fill-box; transform-origin: 50% 90%; animation: wave 2.4s ease-in-out infinite; }
-  @keyframes wave { 0%, 60%, 100% { transform: rotate(0); } 70% { transform: rotate(-35deg); } 80% { transform: rotate(10deg); } 90% { transform: rotate(-25deg); } }
+  .footer-bot__eye { animation: blink 4.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+  @media (prefers-reduced-motion: reduce) { .footer-bot__eye { animation: none; } }
 </style>

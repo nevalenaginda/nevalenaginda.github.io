@@ -10,9 +10,9 @@ const fail = (message) => { console.error(`verify: ${message}`); process.exitCod
 for (const file of walk(source)) {
   const body = readFileSync(file, 'utf8');
   if (/bootstrap|jquery/i.test(body)) fail(`legacy dependency found in ${file}`);
-  if (/\bdark:/.test(body)) fail(`dark-mode class left in ${file} (the site is light-only)`);
-  // Three.js must stay behind the dynamic import in RobotStage so it never blocks first paint.
-  if (/from ['"]three['"]/.test(body) && !file.includes(join('scripts', 'robot'))) fail(`static three import outside src/scripts/robot in ${file}`);
+  if (/\bdark:/.test(body)) fail(`dark-mode class left in ${file} (the site has one theme, deep space)`);
+  // Three.js must stay behind the dynamic import in the ARIS-1 controller so it never blocks first paint.
+  if (/from ['"]three['"]/.test(body) && !file.includes(join('scripts', 'aris', 'webgl'))) fail(`static three import outside src/scripts/aris/webgl in ${file}`);
 }
 if (!existsSync(dist)) fail('dist missing; run build first');
 for (const file of walk(dist).filter((path) => path.endsWith('.html'))) {

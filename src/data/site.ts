@@ -69,3 +69,40 @@ export const principles = [
   ['Operable releases', 'A release is ready when the on-call engineer can diagnose it from logs and traces alone.'],
   ['Decisions backed by data', 'My physics background taught me to settle design questions with production measurements rather than opinion.'],
 ];
+
+// ARIS-1, the astronaut robot on the home page. Its four inspectable parts each stand for one
+// system module below, so inspecting a part and scanning a module card tell the same story.
+export type Part = 'visor' | 'reactor' | 'manipulator' | 'thruster';
+
+const level = (name: string) => skills.flatMap((group) => group.items).find(([n]) => n === name)?.[1] ?? '';
+const mod = (code: string, name: string, role: string, part: Part, items: string[], say: string) =>
+  ({ code, name, role, part, items: items.map((item) => [item, level(item)] as const), say });
+
+// The skills above, regrouped into the module names of the ARIS-1 brief. Levels come from `skills`.
+export const modules = [
+  mod('MOD-01', 'Titanium Armor Frame', 'Core runtime', 'manipulator', ['Node.js', 'Python'],
+    'Titanium Armor Frame. The core runtime: Node.js and Python, both in daily use for payment and merchant backends.'),
+  mod('MOD-02', 'Quantum Neural Core', 'Design and leadership', 'visor', ['Distributed systems design', 'Backend delivery leadership', 'OpenCV', 'AI exploration'],
+    'Quantum Neural Core. Distributed systems design and backend delivery leadership are practice areas. OpenCV is working knowledge, and AI is still being explored.'),
+  mod('MOD-03', 'Fusion Reactor Cell', 'Event streaming and data', 'reactor', ['Apache Kafka', 'MongoDB', 'Redis'],
+    'Fusion Reactor Cell. Apache Kafka and MongoDB in daily use, with Redis as working knowledge.'),
+  mod('MOD-04', 'Sub-Space Telemetry', 'Platform, delivery and performance', 'thruster', ['OpenShift', 'Jenkins', 'Performance testing'],
+    'Sub-Space Telemetry. Performance testing in daily use, with OpenShift and Jenkins as working knowledge.'),
+];
+
+export const parts: Record<Part, { label: string; module: string; say: string }> = {
+  visor: { label: 'Visor', module: 'Quantum Neural Core', say: 'Visor online. Multi-spectral optics link to the Quantum Neural Core: systems design, delivery leadership, and computer vision.' },
+  reactor: { label: 'Reactor', module: 'Fusion Reactor Cell', say: 'Reactor at full output. The Fusion Reactor Cell runs on Apache Kafka, MongoDB, and Redis.' },
+  manipulator: { label: 'Manipulator', module: 'Titanium Armor Frame', say: 'Manipulator arm engaged. The Titanium Armor Frame is built from Node.js and Python.' },
+  thruster: { label: 'Thruster', module: 'Sub-Space Telemetry', say: 'Thrusters firing. Sub-Space Telemetry covers OpenShift, Jenkins, and performance testing.' },
+};
+
+// Solar flight mode: each body is a waypoint for one section of the page.
+export const waypoints = [
+  { id: 'sun', name: 'Sun', section: 'viewport', title: 'Core profile', brief: 'Tech Lead for the payment and merchant-acquiring backend behind Jenius, about five years in.' },
+  { id: 'earth', name: 'Earth', section: 'contact', title: 'Home base: Jakarta', brief: 'Open to mentoring and technical collaboration. Email, LinkedIn, and GitHub are on the comms terminal.' },
+  { id: 'mars', name: 'Mars', section: 'missions', title: 'Deployed missions', brief: 'Three product releases in production: Pay on Schedule, Bisniskit, and face recognition.' },
+  { id: 'jupiter', name: 'Jupiter', section: 'specs', title: 'System architecture', brief: 'Four modules: Node.js and Python, Kafka and MongoDB, OpenShift and Jenkins, and systems design.' },
+  { id: 'saturn', name: 'Saturn', section: 'log', title: 'Flight log', brief: 'From IT trainee in 2021 to Tech Lead in 2024, all on the Jenius platform.' },
+] as const;
+export type Waypoint = (typeof waypoints)[number]['id'];

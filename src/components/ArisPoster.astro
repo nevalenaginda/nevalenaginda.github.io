@@ -1,0 +1,24 @@
+---
+// ARIS-1 as a pre-rendered still of the 3D robot (scripts/render-poster.mjs), so the first paint,
+// reduced motion, save-data, no-WebGL and pages without Three.js all show the same robot.
+interface Props { class?: string; priority?: boolean; sizes?: string; }
+const { class: className = '', priority = false, sizes = '(min-width: 1024px) 460px, 80vw' } = Astro.props;
+---
+<img
+  class={`poster-float ${className}`}
+  src="/aris/poster-800.webp"
+  srcset="/aris/poster-400.webp 400w, /aris/poster-800.webp 800w"
+  sizes={sizes}
+  width="800"
+  height="960"
+  alt="ARIS-1, a white and navy astronaut robot with a glass helmet and glowing teal visor"
+  loading={priority ? 'eager' : 'lazy'}
+  fetchpriority={priority ? 'high' : 'auto'}
+  decoding="async"
+  data-aris-poster
+/>
+<style>
+  .poster-float { animation: poster-float 4.6s ease-in-out infinite; }
+  @keyframes poster-float { 50% { transform: translateY(-1.4%); } }
+  @media (prefers-reduced-motion: reduce) { .poster-float { animation: none; } }
+</style>

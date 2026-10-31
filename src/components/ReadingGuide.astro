@@ -1,6 +1,6 @@
 ---
-// Byte as a reading guide for a case study: where you are, what is left, and a jump to any part.
-// Desktop: a sticky card in the sidebar. Phones and tablets: a floating Byte with a progress ring
+// ARIS-1 as a reading guide for a case study: where you are, what is left, and a jump to any part.
+// Desktop: a sticky card in the sidebar. Phones and tablets: a floating ARIS-1 with a progress ring
 // that opens the same guide in a bottom sheet. Without JS the card is a plain table of contents.
 import { Check, X } from 'lucide-astro';
 
@@ -8,11 +8,11 @@ interface Props { headings: { slug: string; text: string }[]; minutes: number; }
 const { headings, minutes } = Astro.props;
 const intro = `${minutes} min read · ${headings.length} parts`;
 ---
-<nav class="guide hidden rounded-3xl border-2 border-line bg-panel p-4 lg:sticky lg:top-28 lg:block" aria-label="On this page" data-guide data-intro={intro}>
+<nav class="guide panel hidden p-4 lg:sticky lg:top-28 lg:block" aria-label="On this page" data-guide data-intro={intro}>
   <div data-guide-body>
     <div class="flex items-center gap-3">
-      <img class="guide-byte size-16 shrink-0" src="/byte/poster-480.webp" width="480" height="480" alt="" loading="lazy" decoding="async" data-guide-byte />
-      <p class="guide-bubble font-display" data-guide-say>{intro}</p>
+      <img class="guide-aris h-[4.5rem] w-[3.75rem] shrink-0 object-contain" src="/aris/poster-400.webp" width="400" height="480" alt="" loading="lazy" decoding="async" data-guide-aris />
+      <p class="guide-bubble" data-guide-say>{intro}</p>
     </div>
     <ol class="mt-4 space-y-1">
       {headings.map((h) => <li>
@@ -32,7 +32,7 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     <circle class="guide-ring__track" cx="32" cy="32" r="29" />
     <circle class="guide-ring__fill" cx="32" cy="32" r="29" pathLength="100" data-guide-ring />
   </svg>
-  <img src="/byte/poster-480.webp" width="480" height="480" alt="" loading="lazy" decoding="async" />
+  <img src="/aris/poster-400.webp" width="400" height="480" alt="" loading="lazy" decoding="async" />
 </button>
 <dialog id="reading-guide-sheet" class="guide-sheet no-print lg:hidden" aria-label="On this page" data-guide-sheet>
   <button type="button" class="guide-close" aria-label="Close the reading guide" data-guide-close><X size={20} aria-hidden="true" /></button>
@@ -93,15 +93,15 @@ const intro = `${minutes} min read · ${headings.length} parts`;
         const text = done ? 'All done, thanks for reading!' : idx < 0 ? intro : `Now: ${heads[idx].textContent?.trim()} · ${idx + 1} of ${heads.length}`;
         says().forEach((s) => { s.textContent = text; });
         fab.setAttribute('aria-label', `Reading guide: ${done ? 'finished' : idx < 0 ? intro : `${heads[idx].textContent?.trim()}, part ${idx + 1} of ${heads.length}`}`);
-        // Byte nods each time you move on to a new part.
-        if (!first) document.querySelectorAll<HTMLElement>('[data-guide-byte]').forEach((b) => {
+        // ARIS-1 nods each time you move on to a new part.
+        if (!first) document.querySelectorAll<HTMLElement>('[data-guide-aris]').forEach((b) => {
           b.classList.remove('is-nodding');
           void b.offsetWidth;
           b.classList.add('is-nodding');
         });
       }
 
-      // The floating Byte shows while the article is being read, and steps aside for the footer.
+      // The floating ARIS-1 shows while the article is being read, and steps aside for the footer.
       const show = r.top < innerHeight * 0.75 && !footerVisible ? 1 : 0;
       if (show !== shown) {
         shown = show;
@@ -147,16 +147,18 @@ const intro = `${minutes} min read · ${headings.length} parts`;
   .guide-bubble {
     position: relative;
     flex: 1;
-    border-radius: 1rem;
-    border-bottom-left-radius: .25rem;
-    background: var(--color-mint-soft);
-    color: var(--color-mint-ink);
-    padding: .5rem .75rem;
-    font-size: .95rem;
-    line-height: 1.3;
+    border: 1px solid color-mix(in oklab, var(--color-teal) 40%, transparent);
+    border-radius: .7rem;
+    border-bottom-left-radius: .2rem;
+    background: var(--color-teal-dim);
+    color: var(--color-teal);
+    padding: .5rem .7rem;
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    line-height: 1.4;
   }
-  .guide-byte { transform-origin: 50% 85%; }
-  .guide-byte.is-nodding { animation: guide-nod 600ms cubic-bezier(.16, 1, .3, 1); }
+  .guide-aris { transform-origin: 50% 85%; filter: drop-shadow(0 0 10px rgb(63 243 220 / .25)); }
+  .guide-aris.is-nodding { animation: guide-nod 600ms cubic-bezier(.16, 1, .3, 1); }
   @keyframes guide-nod { 30% { transform: rotate(-8deg) translateY(2px); } 60% { transform: rotate(5deg); } }
 
   .guide-link {
@@ -164,16 +166,16 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     min-height: 2.75rem;
     align-items: center;
     gap: .6rem;
-    border-radius: 1rem;
+    border-radius: .7rem;
     padding: .35rem .6rem;
     color: var(--color-body);
-    font-weight: 600;
+    font-weight: 500;
     font-size: .95rem;
     text-decoration: none;
     transition: background-color 200ms ease, color 200ms ease;
   }
-  .guide-link:hover { background: var(--color-paper); color: var(--color-ink); }
-  .guide-link[aria-current] { background: var(--color-mint-soft); color: var(--color-mint-ink); }
+  .guide-link:hover { background: var(--color-hull-2); color: var(--color-ink); }
+  .guide-link[aria-current] { background: var(--color-teal-dim); color: var(--color-teal); }
   .guide-dot {
     display: grid;
     width: 1.25rem;
@@ -181,15 +183,15 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     flex-shrink: 0;
     place-items: center;
     border-radius: 9999px;
-    border: 2px solid var(--color-line);
+    border: 1px solid var(--color-line-bright);
     color: transparent;
     transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
   }
-  .guide-link[aria-current] .guide-dot { border-color: var(--color-mint); background: var(--color-panel); }
-  .guide-link.is-done .guide-dot { border-color: var(--color-mint); background: var(--color-mint); color: var(--color-ink); }
+  .guide-link[aria-current] .guide-dot { border-color: var(--color-teal); box-shadow: 0 0 8px var(--color-teal); }
+  .guide-link.is-done .guide-dot { border-color: var(--color-teal); background: var(--color-teal); color: var(--color-void); }
 
-  .guide-track { margin-top: 1rem; height: .5rem; overflow: hidden; border-radius: 9999px; background: var(--color-mint-soft); }
-  .guide-bar { display: block; height: 100%; border-radius: inherit; background: var(--color-mint); transform: scaleX(0); transform-origin: left; transition: transform 200ms linear; }
+  .guide-track { margin-top: 1rem; height: .35rem; overflow: hidden; border-radius: 9999px; background: var(--color-line); }
+  .guide-bar { display: block; height: 100%; border-radius: inherit; background: var(--color-teal); box-shadow: 0 0 10px var(--color-teal); transform: scaleX(0); transform-origin: left; transition: transform 200ms linear; }
 
   .guide-fab {
     position: fixed;
@@ -197,13 +199,13 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     bottom: 1rem;
     z-index: 25;
     display: grid;
-    width: 3.75rem;
-    height: 3.75rem;
+    width: 4rem;
+    height: 4rem;
     place-items: center;
-    border: 0;
+    border: 1px solid var(--color-line-bright);
     border-radius: 9999px;
-    background: var(--color-panel);
-    box-shadow: 0 10px 30px -12px rgb(19 41 61 / .45);
+    background: var(--color-hull);
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / .8), 0 0 24px -8px rgb(63 243 220 / .4);
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
@@ -212,11 +214,11 @@ const intro = `${minutes} min read · ${headings.length} parts`;
   }
   .guide-fab[data-show] { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
   .guide-fab:active { transform: scale(.94); }
-  .guide-fab img { width: 2.9rem; height: 2.9rem; grid-area: 1 / 1; }
+  .guide-fab img { width: 2.6rem; height: 3.1rem; object-fit: contain; grid-area: 1 / 1; }
   .guide-ring { grid-area: 1 / 1; width: 100%; height: 100%; transform: rotate(-90deg); }
-  .guide-ring circle { fill: none; stroke-width: 4; }
-  .guide-ring__track { stroke: var(--color-mint-soft); }
-  .guide-ring__fill { stroke: var(--color-mint); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 200ms linear; }
+  .guide-ring circle { fill: none; stroke-width: 3; }
+  .guide-ring__track { stroke: var(--color-line); }
+  .guide-ring__fill { stroke: var(--color-teal); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 200ms linear; }
 
   .guide-sheet {
     position: fixed;
@@ -226,15 +228,16 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     max-height: 85vh;
     margin: 0;
     overflow-y: auto;
-    border: 0;
-    border-radius: 2rem 2rem 0 0;
-    background: var(--color-panel);
+    border: 1px solid var(--color-line-bright);
+    border-bottom: 0;
+    border-radius: 1.25rem 1.25rem 0 0;
+    background: var(--color-hull);
     color: var(--color-ink);
     padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
-    box-shadow: 0 -20px 50px -20px rgb(19 41 61 / .4);
+    box-shadow: 0 -20px 50px -20px rgb(0 0 0 / .8);
   }
   .guide-sheet[open] { animation: guide-sheet-up 420ms cubic-bezier(.16, 1, .3, 1); }
-  .guide-sheet::backdrop { background: rgb(19 41 61 / .4); }
+  .guide-sheet::backdrop { background: rgb(3 5 12 / .7); }
   .guide-sheet[open]::backdrop { animation: guide-fade 300ms ease; }
   @keyframes guide-sheet-up { from { transform: translateY(100%); } }
   @keyframes guide-fade { from { opacity: 0; } }
@@ -245,9 +248,9 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     height: 2.75rem;
     place-items: center;
     margin: -.25rem -.25rem .25rem .5rem;
-    border: 0;
-    border-radius: 9999px;
-    background: var(--color-paper);
+    border: 1px solid var(--color-line);
+    border-radius: .7rem;
+    background: var(--color-space);
     color: var(--color-ink);
     cursor: pointer;
   }
@@ -258,7 +261,7 @@ const intro = `${minutes} min read · ${headings.length} parts`;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .guide-byte.is-nodding, .guide-sheet[open], .guide-sheet[open]::backdrop { animation: none; }
+    .guide-aris.is-nodding, .guide-sheet[open], .guide-sheet[open]::backdrop { animation: none; }
     .guide-fab { transition: opacity 150ms ease, visibility 0s linear 150ms; transform: none; }
     .guide-bar, .guide-ring__fill { transition: none; }
   }
