@@ -26,11 +26,31 @@ mm.add('(prefers-reduced-motion: reduce)', () => {
 });
 
 mm.add('(prefers-reduced-motion: no-preference)', () => {
-  const lenis = new Lenis({ lerp: 0.12, anchors: { offset: -88 } });
+  const lenis = new Lenis({ lerp: 0.12 });
   lenis.on('scroll', ScrollTrigger.update);
   const tick = (time: number) => lenis.raf(time * 1000);
   gsap.ticker.add(tick);
   gsap.ticker.lagSmoothing(0);
+
+  // Same-page anchors glide to their target. The position is measured here at click time, with the
+  // target's scroll-margin, rather than by Lenis's own anchor handling, which raced the browser's jump.
+  const onAnchor = (e: MouseEvent) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const link = (e.target as Element).closest<HTMLAnchorElement>('a[href*="#"]');
+    if (!link) return;
+    const url = new URL(link.href, location.href);
+    if (url.pathname !== location.pathname || url.hash.length < 2) return;
+    const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+    if (!target) return;
+    e.preventDefault();
+    const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 96;
+    lenis.scrollTo(target.getBoundingClientRect().top + scrollY - margin, { duration: 1.1, easing: (t) => 1 - (1 - t) ** 4 });
+    history.pushState(null, '', url.hash);
+    // Move focus too, so the next Tab starts from the section the reader jumped to.
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+  };
+  document.addEventListener('click', onAnchor);
 
   splitWords();
   chapters();
@@ -67,6 +87,7 @@ mm.add('(prefers-reduced-motion: no-preference)', () => {
   }
 
   return () => {
+    document.removeEventListener('click', onAnchor);
     gsap.ticker.remove(tick);
     lenis.destroy();
     root.classList.remove('chapters');
