@@ -1,0 +1,40 @@
+---
+import ArisPoster from './ArisPoster.astro';
+// Hero slot for ARIS-1. The poster paints immediately; src/scripts/aris/ swaps in the WebGL robot
+// after first paint on capable devices, then flies it out of this slot as you explore the page.
+---
+<div class="aris-slot relative mx-auto aspect-[5/6] w-full max-w-[17rem] sm:max-w-[22rem] lg:max-w-none" data-aris-slot>
+  <svg class="reticle pointer-events-none absolute inset-0 size-full" viewBox="0 0 500 600" aria-hidden="true">
+    <ellipse class="reticle__pad" cx="250" cy="566" rx="150" ry="16" />
+    <g class="reticle__spin">
+      <circle cx="250" cy="300" r="236" class="reticle__ring reticle__ring--dash" />
+    </g>
+    <circle cx="250" cy="300" r="204" class="reticle__ring" />
+    <path class="reticle__tick" d="M250 52v26M250 522v26M14 300h26M460 300h26" />
+    <path class="reticle__corner" d="M30 40h40M30 40v40M470 40h-40M470 40v40M30 560h40M30 560v-40M470 560h-40M470 560v-40" />
+  </svg>
+  <ArisPoster class="aris-poster relative size-full transition-opacity duration-500" priority />
+  <p class="slot-away hud-label" aria-hidden="true"><span class="led"></span>ARIS-1 deployed</p>
+  <p class="slot-label hud-label absolute left-1/2 top-1 -translate-x-1/2 whitespace-nowrap">CAM-01 · ARIS-1 exo-architect</p>
+</div>
+<style>
+  .reticle__ring { fill: none; stroke: color-mix(in oklab, var(--color-teal) 22%, transparent); stroke-width: 1.5; }
+  .reticle__ring--dash { stroke-dasharray: 4 14; stroke: color-mix(in oklab, var(--color-teal) 40%, transparent); }
+  .reticle__spin { transform-origin: 250px 300px; animation: reticle-spin 60s linear infinite; }
+  .reticle__tick, .reticle__corner { fill: none; stroke: color-mix(in oklab, var(--color-teal) 55%, transparent); stroke-width: 2; }
+  .reticle__pad { fill: color-mix(in oklab, var(--color-teal) 14%, transparent); filter: blur(6px); }
+  @keyframes reticle-spin { to { transform: rotate(360deg); } }
+  .slot-away {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    opacity: 0;
+    transition: opacity 400ms ease;
+    color: var(--color-teal);
+  }
+  [data-away] .slot-away { opacity: 1; transition-delay: 400ms; }
+  @media (prefers-reduced-motion: reduce) { .reticle__spin { animation: none; } }
+</style>

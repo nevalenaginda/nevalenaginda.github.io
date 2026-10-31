@@ -1,11 +1,12 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { Apple, ArrowLeft, ArrowUpRight, Briefcase, CalendarDays, Play, UserRound } from 'lucide-astro';
+import { Apple, ArrowLeft, ArrowUpRight, Play } from 'lucide-astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import CommandPalette from '../../components/CommandPalette.astro';
 import Footer from '../../components/Footer.astro';
 import ReadingGuide from '../../components/ReadingGuide.astro';
+import MissionDebrief from '../../components/MissionDebrief.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -13,91 +14,207 @@ export async function getStaticPaths() {
 }
 const { project } = Astro.props;
 const { Content, headings } = await render(project);
-// Byte's reading guide: the case study's parts, and a reading time at about 220 words a minute.
+const missions = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const index = missions.findIndex((p) => p.id === project.id);
+const code = `MSN-${String(index + 1).padStart(2, '0')}`;
+const nextIndex = (index + 1) % missions.length;
+const next = missions.length > 1 ? missions[nextIndex] : null;
+const nextCode = `MSN-${String(nextIndex + 1).padStart(2, '0')}`;
+// ARIS-1's reading guide: the case study's parts, and a reading time at about 220 words a minute.
 const parts = headings.filter((h) => h.depth === 2).map(({ slug, text }) => ({ slug, text }));
 const minutes = Math.max(1, Math.ceil((project.body ?? '').split(/\s+/).filter(Boolean).length / 220));
-const facts = [
-  { term: 'Company', value: project.data.company, icon: Briefcase, bg: 'bg-mint-soft', ink: 'text-mint-ink' },
-  { term: 'Role', value: project.data.role, icon: UserRound, bg: 'bg-coral-soft', ink: 'text-coral-ink' },
-  { term: 'Released', value: project.data.released, icon: CalendarDays, bg: 'bg-sky-soft', ink: 'text-sky-ink' },
+const platforms = project.data.stores.map(({ store }) => (store === 'App Store' ? 'iOS' : 'Android'));
+// Two columns on phones, three on wider screens: the long company name takes a full row either way.
+const status = [
+  { term: 'Released', value: project.data.released },
+  { term: 'Platform', value: platforms.length ? platforms.join(' · ') : 'Web' },
+  { term: 'Role', value: project.data.role },
+  { term: 'Company', value: project.data.company, wide: true },
 ];
 ---
 <BaseLayout title={`${project.data.title} — Nevalen Aginda Prasetyo`} description={project.data.summary}>
-  <Header />
+  <Header audio />
   <CommandPalette />
   <main id="main" class="relative overflow-x-clip">
-    <div class="blob blob--mint -right-24 -top-10 size-[24rem]" data-parallax="0.15" aria-hidden="true"></div>
-    <div class="blob blob--lemon -left-28 top-[28rem] size-[20rem]" data-parallax="-0.1" aria-hidden="true"></div>
-    <div class="relative mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-      <a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-panel px-4 text-sm font-bold text-mint-ink no-underline shadow-sm transition-transform hover:-translate-x-1" href="/#work"><ArrowLeft size={16} aria-hidden="true" /> Selected work</a>
-      <article class="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_16rem]">
+    <div class="relative mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-14">
+      <a class="btn btn--ghost !min-h-11" href="/#missions"><ArrowLeft size={16} aria-hidden="true" /> Deployed missions</a>
+      <article class="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem]">
         <div>
-          <p class="intro eyebrow bg-lemon-soft text-lemon-ink">Case study / {project.data.released}</p>
-          <h1 class="intro mt-5 max-w-3xl text-4xl text-balance sm:text-6xl" style={`--d:80ms; view-transition-name: title-${project.id}`}>{project.data.title}</h1>
+          <p class="intro eyebrow">Mission brief · {code}</p>
+          <h1 class="intro mt-5 max-w-3xl text-3xl leading-tight text-balance sm:text-5xl" style={`--d:80ms; view-transition-name: title-${project.id}`}><span class="brief-title">{project.data.title}</span></h1>
           <p class="intro mt-5 max-w-2xl text-lg text-body sm:text-xl" style="--d:160ms">{project.data.summary}</p>
-          <div class="mt-10 rounded-[2rem] border-2 border-line bg-panel p-3 shadow-[0_8px_0_0_var(--color-line)]">
-            <img
-              class="w-full rounded-[1.4rem] object-cover object-top"
-              src={project.data.image}
-              alt={project.data.imageAlt}
-              width="1200"
-              height="750"
-              loading="eager"
-              decoding="async"
-              style={`view-transition-name: shot-${project.id}`}
-            />
-          </div>
-          <p class="mt-3 font-mono text-xs text-muted">Public product page — no internal data or interface.</p>
-          <div class="case-study mt-14 max-w-[65ch] text-body"><Content /></div>
-        </div>
-        <aside class="space-y-3">
-          <dl class="space-y-3">
-            {facts.map(({ term, value, icon: Icon, bg, ink }) => <div class={`rounded-3xl ${bg} p-4`} data-reveal>
-              <dt class={`flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-wide ${ink}`}><Icon size={15} aria-hidden="true" /> {term}</dt>
-              <dd class="mt-1 font-semibold">{value}</dd>
+
+          <dl class="intro panel brackets scanlines mt-8 grid grid-cols-2 gap-x-6 gap-y-4 p-4 sm:grid-cols-3 sm:p-5" style="--d:240ms">
+            <div>
+              <dt class="hud-label">Status</dt>
+              <dd class="hud-value mt-1 flex items-center gap-2"><span class="led" aria-hidden="true"></span><span data-decode>Deployed</span></dd>
+            </div>
+            {status.map(({ term, value, wide }) => <div class={wide ? 'col-span-2' : ''}>
+              <dt class="hud-label">{term}</dt>
+              <dd class="hud-value mt-1" data-decode>{value}</dd>
             </div>)}
           </dl>
-          <a class="btn btn--primary w-full justify-center" href={project.data.reference}>Public reference <ArrowUpRight size={18} aria-hidden="true" /></a>
-          {project.data.stores.length > 0 && <div class="rounded-3xl bg-panel p-4">
-            <p class="font-mono text-xs font-semibold uppercase tracking-wide text-muted">Get the app</p>
-            <ul class="mt-3 space-y-2">
-              {project.data.stores.map(({ store, url }) => <li><a class="btn btn--ghost w-full justify-center" href={url} rel="noopener">{store === 'App Store' ? <Apple size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />} {store}</a></li>)}
-            </ul>
-            {project.data.stores.every(({ store }) => store === 'Google Play') && <p class="mt-2 text-center text-xs text-muted">Available on Android only.</p>}
-          </div>}
+
+          <div class="intro mt-6 flex flex-wrap gap-2" style="--d:320ms">
+            <a class="btn btn--primary" href={project.data.reference} data-aris-point>Public reference <ArrowUpRight size={16} aria-hidden="true" /></a>
+            {project.data.stores.map(({ store, url }) => <a class="btn btn--ghost" href={url} rel="noopener" data-aris-point>{store === 'App Store' ? <Apple size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />} {store}</a>)}
+          </div>
+
+          <figure class="mt-10">
+            <div class="panel brackets p-3" data-brief-shot data-scan-label="Public product page" data-scan-say={`The public product page for ${project.data.title}.`}>
+              <img
+                class="w-full rounded-xl object-cover object-top"
+                src={project.data.image}
+                alt={project.data.imageAlt}
+                width="1200"
+                height="750"
+                loading="eager"
+                decoding="async"
+                style={`view-transition-name: shot-${project.id}`}
+              />
+            </div>
+            <figcaption class="mt-3 font-mono text-xs text-muted">Public product page — no internal data or interface.</figcaption>
+          </figure>
+
+          <div class="case-study relative mt-14 max-w-[68ch] text-body">
+            <div class="brief-rail" data-draw aria-hidden="true"></div>
+            <Content />
+          </div>
+
+          <MissionDebrief next={next} code={code} nextCode={nextCode} parts={parts.length} />
+        </div>
+        <aside>
           <ReadingGuide headings={parts} minutes={minutes} />
         </aside>
       </article>
     </div>
+    <p class="sr-only" role="status" aria-live="polite" data-aris-readout></p>
   </main>
   <Footer />
 </BaseLayout>
+<script>import '../../scripts/aris/brief';</script>
 <style>
-  .case-study :global(h2) {
-    scroll-margin-top: 7rem;
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    margin-top: 3rem;
-    color: var(--color-ink);
-    font-size: 1.75rem;
+  /* The title catches a glint once it lands (after the view transition from the home page). */
+  .brief-title {
+    background: linear-gradient(100deg, var(--color-ink) 42%, #fff 49%, var(--color-cyan) 53%, var(--color-ink) 60%) 0 0 / 260% 100% no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: glint 1.6s 1s cubic-bezier(.3, 0, .2, 1) both;
   }
-  .case-study :global(h2)::before {
+  @keyframes glint { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+  /* Each part of the case study is a mission log entry on a rail (src/lib/brief-sections.mjs). */
+  .case-study { counter-reset: brief; }
+  .brief-rail {
+    position: absolute;
+    left: .6rem;
+    top: .5rem;
+    bottom: 0;
+    width: 1px;
+    transform-origin: top;
+    background: linear-gradient(to bottom, var(--color-teal), var(--color-violet) 55%, var(--color-amber));
+    opacity: .5;
+  }
+  .case-study :global(.brief-section) {
+    --tone: var(--color-teal);
+    counter-increment: brief;
+    position: relative;
+    margin-top: 3.5rem;
+    padding-left: 2.4rem;
+  }
+  .case-study :global(.brief-section:first-of-type) { margin-top: 0; }
+  .case-study :global([data-tone="rose"]) { --tone: var(--color-rose); }
+  .case-study :global([data-tone="cyan"]) { --tone: var(--color-cyan); }
+  .case-study :global([data-tone="violet"]) { --tone: var(--color-violet); }
+  .case-study :global([data-tone="amber"]) { --tone: var(--color-amber); }
+  /* LOG 01, LOG 02… above each heading. */
+  .case-study :global(.brief-section)::before {
+    content: 'LOG ' counter(brief, decimal-leading-zero);
+    display: block;
+    margin-bottom: .4rem;
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .22em;
+    color: var(--tone);
+  }
+  /* The node on the rail: dim ahead, lit while read, filled once passed. */
+  .case-study :global(.brief-section)::after {
     content: '';
-    width: .9rem;
-    height: .9rem;
-    flex-shrink: 0;
+    position: absolute;
+    left: .25rem;
+    top: .15rem;
+    width: .7rem;
+    height: .7rem;
     border-radius: 9999px;
-    background: var(--color-coral);
-    box-shadow: 0 0 0 5px var(--color-coral-soft);
+    border: 1px solid var(--color-line-bright);
+    background: var(--color-space);
+    transition: background-color 400ms ease, border-color 400ms ease, box-shadow 400ms ease, transform 400ms cubic-bezier(.16, 1, .3, 1);
   }
-  .case-study :global(h2:nth-of-type(3n+2))::before { background: var(--color-mint); box-shadow: 0 0 0 5px var(--color-mint-soft); }
-  .case-study :global(h2:nth-of-type(3n))::before { background: var(--color-sky); box-shadow: 0 0 0 5px var(--color-sky-soft); }
-  .case-study :global(h2:first-child) { margin-top: 0; }
+  .case-study :global(.brief-section[data-done])::after { border-color: var(--tone); background: color-mix(in oklab, var(--tone) 55%, var(--color-space)); }
+  .case-study :global(.brief-section[data-active])::after {
+    border-color: var(--tone);
+    background: var(--tone);
+    transform: scale(1.25);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--tone) 22%, transparent), 0 0 16px var(--tone);
+  }
+  .case-study :global(h2) { scroll-margin-top: 7rem; padding-right: 3rem; font-size: 1.65rem; }
   .case-study :global(p), .case-study :global(ul) { margin-top: 1rem; }
   .case-study :global(ul) { list-style: none; padding-left: 0; }
   .case-study :global(li) { position: relative; margin-top: .6rem; padding-left: 1.6rem; }
-  .case-study :global(li)::before { content: '✦'; position: absolute; left: 0; color: var(--color-mint-ink); }
-  .case-study :global(a) { color: var(--color-primary); font-weight: 600; }
+  .case-study :global(li)::before { content: '▸'; position: absolute; left: 0; color: var(--tone, var(--color-teal)); }
+  .case-study :global(a) { color: var(--color-teal); font-weight: 500; }
   .case-study :global(strong) { color: var(--color-ink); }
+
+  /* "Read this part aloud", top right of each part (shown when the browser can speak). */
+  .case-study :global(.read-part) {
+    position: absolute;
+    right: 0;
+    top: 1.35rem;
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border: 1px solid var(--color-line);
+    border-radius: .7rem;
+    background: color-mix(in oklab, var(--color-hull) 70%, transparent);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .case-study :global(.read-part:hover), .case-study :global(.read-part[aria-pressed="true"]) { color: var(--tone); border-color: var(--tone); }
+  .case-study :global(.read-part[hidden]) { display: none; }
+
+  /* Trade-offs are decision cards ARIS-1 can scan. */
+  .case-study :global(.tradeoffs) { display: grid; gap: .75rem; margin-top: 1.25rem; }
+  .case-study :global(.trade-off) {
+    margin: 0;
+    padding: 1rem 3.4rem 1rem 1.1rem;
+    border: 1px solid var(--color-line);
+    border-radius: .9rem;
+    background: color-mix(in oklab, var(--color-hull) 80%, transparent);
+    cursor: pointer;
+  }
+  .case-study :global(.trade-off)::before { content: none; }
+  .case-study :global(.trade-off strong) { display: block; margin-bottom: .2rem; color: var(--color-ink); }
+  .case-study :global(.tradeoff-scan) {
+    position: absolute;
+    right: .7rem;
+    top: .75rem;
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border: 1px solid var(--color-line);
+    border-radius: .6rem;
+    background: var(--color-space);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .case-study :global(.trade-off:hover .tradeoff-scan), .case-study :global(.tradeoff-scan:focus-visible) { color: var(--color-violet); border-color: var(--color-violet); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brief-title { animation: none; }
+  }
 </style>

@@ -1,15 +1,17 @@
 ---
-import '@fontsource/plus-jakarta-sans/latin-400.css';
-import '@fontsource/plus-jakarta-sans/latin-600.css';
-import '@fontsource/plus-jakarta-sans/latin-700.css';
-import '@fontsource/fredoka/latin-600.css';
+import '@fontsource/space-grotesk/latin-400.css';
+import '@fontsource/space-grotesk/latin-500.css';
+import '@fontsource/space-grotesk/latin-600.css';
+import '@fontsource/orbitron/latin-700.css';
 import '@fontsource/geist-mono/latin-400.css';
+import '@fontsource/geist-mono/latin-500.css';
 import '../styles/global.css';
 import { site } from '../data/site';
 import Motion from '../components/Motion.astro';
-import jakarta400 from '@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-400-normal.woff2?url';
-import jakarta600 from '@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-600-normal.woff2?url';
-import fredoka600 from '@fontsource/fredoka/files/fredoka-latin-600-normal.woff2?url';
+import Starfield from '../components/Starfield.astro';
+import grotesk400 from '@fontsource/space-grotesk/files/space-grotesk-latin-400-normal.woff2?url';
+import grotesk600 from '@fontsource/space-grotesk/files/space-grotesk-latin-600-normal.woff2?url';
+import orbitron700 from '@fontsource/orbitron/files/orbitron-latin-700-normal.woff2?url';
 
 interface Props {
   title?: string;
@@ -62,9 +64,9 @@ const jsonLd = JSON.stringify({
     <meta name="twitter:site" content={handle} />
     <meta name="twitter:creator" content={handle} />
     <script type="application/ld+json" set:html={jsonLd} />
-    <meta name="theme-color" content="#f5fbf8" />
+    <meta name="theme-color" content="#060a17" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    {playful && [jakarta400, jakarta600, fredoka600].map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
+    {playful && [grotesk400, grotesk600, orbitron700].map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
     {playful && <script is:inline>
       // Runs before paint: [data-reveal] elements start hidden only when JS will reveal them.
       var html = document.documentElement;
@@ -85,7 +87,8 @@ const jsonLd = JSON.stringify({
     </script>}
   </head>
   <body>
-    <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-primary focus:px-4 focus:py-3 focus:text-white" href="#main">Skip to content</a>
+    <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-teal focus:px-4 focus:py-3 focus:text-void" href="#main">Skip to content</a>
+    {playful && <Starfield />}
     <slot />
     {playful && <Motion />}
   </body>

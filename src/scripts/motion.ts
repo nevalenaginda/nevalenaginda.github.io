@@ -6,10 +6,13 @@
 //   data-split            the hero name: words rise into place (never hidden: it is the LCP)
 //   data-split="mask"     a heading whose words slide up out of a mask
 //   data-count            count the first number in the text up from zero
+//   data-decode           short HUD text resolves out of random glyphs, once, as it comes into view
 //   data-parallax=n       drift at n × scroll speed
 //   data-draw             grow a line from 0 to full height while scrolling past
 //   data-tilt             tilt toward the pointer with a moving highlight (fine pointers only)
-//   data-wash=<colour>    the page background shifts to this section's colour while it is read
+//   data-wash=<colour>    the nebula behind the page shifts to this section's colours while it is read
+// It also answers ARIS-1 (src/scripts/aris/controller.ts): `aris:lock` holds the page still during
+// solar flight, and `aris:goto` glides to a section by id.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
@@ -19,10 +22,21 @@ gsap.registerPlugin(ScrollTrigger);
 const root = document.documentElement;
 const mm = gsap.matchMedia();
 const EASE = 'expo.out';
+// Nebula colours per section (data-wash): the pair behind the page while that section is read.
+const nebulae: Record<string, [string, string]> = {
+  teal: ['#1de9c9', '#7c5cff'],
+  cyan: ['#2f9bff', '#1de9c9'],
+  violet: ['#7c5cff', '#ff4f9a'],
+  amber: ['#ff9f43', '#7c5cff'],
+  rose: ['#ff4f7b', '#2f9bff'],
+};
 
 mm.add('(prefers-reduced-motion: reduce)', () => {
   // CSS already shows [data-reveal]; make sure nothing waits on JS either.
   gsap.set('[data-reveal]', { opacity: 1 });
+  const goto = (e: Event) => document.getElementById((e as CustomEvent<string>).detail)?.scrollIntoView();
+  document.addEventListener('aris:goto', goto);
+  return () => document.removeEventListener('aris:goto', goto);
 });
 
 mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -52,6 +66,16 @@ mm.add('(prefers-reduced-motion: no-preference)', () => {
   };
   document.addEventListener('click', onAnchor);
 
+  const lock = (e: Event) => ((e as CustomEvent<boolean>).detail ? lenis.stop() : lenis.start());
+  const goto = (e: Event) => {
+    const target = document.getElementById((e as CustomEvent<string>).detail);
+    if (!target) return;
+    const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 96;
+    lenis.scrollTo(target.getBoundingClientRect().top + scrollY - margin, { duration: 1.2, easing: (t) => 1 - (1 - t) ** 4 });
+  };
+  document.addEventListener('aris:lock', lock);
+  document.addEventListener('aris:goto', goto);
+
   splitWords();
   chapters();
   // Back from a case study: the page is already known, so skip the entrances.
@@ -70,6 +94,7 @@ mm.add('(prefers-reduced-motion: no-preference)', () => {
   });
 
   gsap.utils.toArray<HTMLElement>('[data-count]').forEach(countUp);
+  if (!returning) gsap.utils.toArray<HTMLElement>('[data-decode]').forEach(decode);
 
   gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((el) => {
     const speed = Number(el.dataset.parallax) || 0.1;
@@ -88,9 +113,10 @@ mm.add('(prefers-reduced-motion: no-preference)', () => {
 
   return () => {
     document.removeEventListener('click', onAnchor);
+    document.removeEventListener('aris:lock', lock);
+    document.removeEventListener('aris:goto', goto);
     gsap.ticker.remove(tick);
     lenis.destroy();
-    root.classList.remove('chapters');
   };
 });
 
@@ -111,17 +137,19 @@ function revealAll() {
   });
 }
 
-// One page background that changes colour as each section takes the middle of the screen.
+// The two nebula glows behind the page take each section's colours as it fills the middle of the
+// screen; the CSS transition on the registered properties blends them.
 function chapters() {
-  const sections = document.querySelectorAll<HTMLElement>('[data-wash]');
-  if (!sections.length) return;
-  root.classList.add('chapters');
-  sections.forEach((section) => {
-    const wash = section.dataset.wash;
-    const colour = wash === 'paper' ? 'var(--color-paper)' : `var(--color-wash-${wash})`;
+  document.querySelectorAll<HTMLElement>('[data-wash]').forEach((section) => {
+    const pair = nebulae[section.dataset.wash ?? ''];
+    if (!pair) return;
     ScrollTrigger.create({
       trigger: section, start: 'top 55%', end: 'bottom 55%',
-      onToggle: (self) => { if (self.isActive) root.style.setProperty('--page-bg', colour); },
+      onToggle: (self) => {
+        if (!self.isActive) return;
+        root.style.setProperty('--nebula-a', pair[0]);
+        root.style.setProperty('--nebula-b', pair[1]);
+      },
     });
   });
 }
@@ -181,6 +209,34 @@ function countUp(el: HTMLElement) {
       el.textContent = before + (grouped ? n.toLocaleString('en-US') : String(n)) + after;
     },
   });
+}
+
+// The real text stays for screen readers; a visual copy runs through random glyphs, settling left
+// to right. Monospace HUD values keep their width while they scramble.
+const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+<>/';
+function decode(el: HTMLElement) {
+  const text = el.textContent?.trim() ?? '';
+  if (!text) return;
+  const real = document.createElement('span');
+  real.className = 'sr-only';
+  real.textContent = text;
+  const shown = document.createElement('span');
+  shown.setAttribute('aria-hidden', 'true');
+  shown.textContent = text;
+  el.replaceChildren(real, shown);
+  const run = () => {
+    const start = performance.now();
+    const duration = 450 + text.length * 22;
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      const settled = Math.floor(p * text.length);
+      shown.textContent = text.slice(0, settled) + [...text.slice(settled)].map((c) => (c === ' ' ? ' ' : glyphs[Math.floor(Math.random() * glyphs.length)])).join('');
+      if (p < 1) requestAnimationFrame(step);
+      else shown.textContent = text;
+    };
+    requestAnimationFrame(step);
+  };
+  ScrollTrigger.create({ trigger: el, start: 'top 92%', once: true, onEnter: run });
 }
 
 // Cards lean toward the pointer and a soft highlight follows it across the surface.
