@@ -4,10 +4,10 @@
 import { PerspectiveCamera, Vector3 } from 'three';
 import type { Part, Waypoint } from '../../../data/site';
 import { waypoints } from '../../../data/site';
-import type { Aris, ArisEvents, Telemetry } from '../types';
+import type { Aris, MountOptions, Telemetry } from '../types';
 import { createBrain, Spring } from './behaviors';
 import { buildRobot } from './robot';
-import { buildSolar, type Solar } from './solar';
+import type { Solar } from './solar';
 import { createStage } from './stage';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -66,7 +66,7 @@ function createBeam() {
   };
 }
 
-export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisEvents): Aris | null {
+export function mountAris({ slot, greeting, telemetry = { sys: 'STANDBY', x: 0, y: 0, thrust: 0, fps: 0, distance: 0 } as Telemetry, events = {}, solar: solarEnabled = false }: MountOptions): Aris | null {
   const poster = slot.querySelector<HTMLElement>('[data-aris-poster]');
   const fly = document.createElement('div');
   fly.className = 'aris-fly';
@@ -100,14 +100,16 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
   hit.setAttribute('aria-hidden', 'true');
   hit.title = 'Say hello to ARIS-1';
   document.body.append(hit);
-  hit.addEventListener('click', () => { brain.spin(); brain.wave(1.6); events.onPoke(); });
+  hit.addEventListener('click', () => { brain.spin(); brain.wave(1.6); events.onPoke?.(); });
 
-  // ---- box layout: the renderer is sized to the hero slot; elsewhere the box is scaled
+  // ---- box layout: the renderer is at least 320 px wide, so a small slot (a sidebar card) stays
+  // sharp when the box grows next to a target; the box is scaled to fit the slot when docked.
   let W = 1, H = 1;
   const measure = () => {
     const r = slot.getBoundingClientRect();
-    W = Math.max(120, r.width);
-    H = Math.max(140, r.height);
+    const aspect = r.width > 0 && r.height > 0 ? r.height / r.width : 1.2;
+    W = Math.max(320, r.width);
+    H = W * aspect;
     fly.style.width = `${W}px`;
     fly.style.height = `${H}px`;
     if (!solar?.group.visible) stage.resize(W, H);
@@ -119,6 +121,8 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
   let target: HTMLElement | null = null;
   let scanEl: HTMLElement | null = null;
   let scanUntil = 0;
+  let watchEl: HTMLElement | null = null;
+  let pointEl: HTMLElement | null = null;
   let shot: Part | 'none' = 'none';
   let calloutUntil = 0;
   const beamLevel = new Spring(0, 90);
@@ -136,10 +140,12 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
     const s = h / H;
     return { x: innerWidth - W * s - 6, y: innerHeight - H * s * (peek && narrow ? 0.52 : 1) - 8, s, slot: false };
   };
+  // The slot holds ARIS-1 while enough of it is on screen: a tall hero slot until it scrolls up past
+  // about a third of the screen, a small sidebar card while at least half of it shows.
   const dock = () => {
     const r = slot.getBoundingClientRect();
-    if (r.bottom > innerHeight * 0.38 && r.top < innerHeight * 0.75) return { x: r.left, y: r.top, s: r.width / W, slot: true };
-    return corner(!calloutUntil && shot === 'none');
+    if (r.width > 0 && r.bottom > Math.min(r.height * 0.55, innerHeight * 0.38) && r.top < innerHeight * 0.75) return { x: r.left, y: r.top, s: r.width / W, slot: true };
+    return corner(!calloutUntil && shot === 'none' && !scanEl);
   };
   // Next to a card, ARIS-1 hovers in the page margin on the card's side and fires across, so it
   // never covers the text. Where the margins are too narrow (tablets, phones) it scans from the corner.
@@ -212,7 +218,7 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
     // Look at the card being scanned, else at the pointer.
     bot.root.updateMatrixWorld(true);
     const head = toScreen(bot.head, headLocal);
-    const focusRect = (scanEl ?? target)?.getBoundingClientRect();
+    const focusRect = (scanEl ?? target ?? pointEl ?? watchEl)?.getBoundingClientRect();
     const fx = focusRect ? focusRect.left + focusRect.width / 2 : pointer.x;
     const fy = focusRect ? focusRect.top + focusRect.height / 2 : pointer.y;
     if (shot === 'none') brain.setLook(Math.atan2(fx - head.x, 650), Math.atan2(-(fy - head.y), 650));
@@ -232,7 +238,7 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
     const level = beamLevel.step(scanEl && arrived && onScreen ? 1 : 0, dt);
     if (scanRect && level > 0.01) beam.draw(toScreen(bot.head, eyeLocal), scanRect, clock, level);
     else beam.hide();
-    brain.setPose(shot !== 'none' ? shot : scanEl && arrived ? 'scan' : 'idle');
+    brain.setPose(shot !== 'none' ? shot : (scanEl && arrived) || pointEl ? 'scan' : 'idle');
     if (away !== !attached) { away = !attached; slot.toggleAttribute('data-away', away); }
 
     // Callout next to the visor, flipped to the left near the right edge.
@@ -268,7 +274,7 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
     brain.update(dt);
     if (s.travelling !== wasTravelling) {
       wasTravelling = s.travelling;
-      if (s.travelling) events.onDepart(s.target);
+      if (s.travelling) events.onDepart?.(s.target);
     }
     destination = s.target;
     const labels = s.labels(innerWidth, innerHeight);
@@ -313,8 +319,17 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
     requestAnimationFrame(() => requestAnimationFrame(() => {
       fly.classList.add('aris-fly--ready');
       if (poster) poster.style.opacity = '0';
-      brain.boot(() => { telemetry.sys = 'ONLINE'; api.greet(); });
+      brain.boot(() => { telemetry.sys = 'ONLINE'; api.greet(); events.onReady?.(); });
     }));
+  });
+
+  // Crossing pages: every ARIS-1 slot is named `aris-1` for view transitions, so the robot glides
+  // from one page's dock into the next. Once the live robot is up, it is what should travel, so the
+  // name moves from the slot (whose poster has faded) to the robot's box as the page leaves.
+  addEventListener('pageswap', (e) => {
+    if (!(e as Event & { viewTransition?: unknown }).viewTransition || solar?.group.visible) return;
+    slot.style.viewTransitionName = 'none';
+    fly.style.viewTransitionName = 'aris-1';
   });
 
   // Dev only (stripped from production): lets scripts/render-poster.mjs pose and photograph ARIS-1.
@@ -351,11 +366,14 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
   }
 
   async function enterSolar() {
+    if (!solarEnabled) return;
     if (!solar) {
+      // Only the home page flies the solar system, so its code loads on first use.
+      const { buildSolar } = await import('./solar');
       solar = await buildSolar();
       stage.scene.add(solar.group);
       solarCam = solar.camera;
-      solar.onArrive = (id) => events.onArrive(id);
+      solar.onArrive = (id) => events.onArrive?.(id);
       solar.onPick = (id) => api.flyTo(id);
       tags = new Map(waypoints.map((w) => {
         const b = document.createElement('button');
@@ -418,7 +436,13 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
   const api: Aris = {
     attend(el) { target = el; if (el) attached = false; },
     scan(el, ms) { target = el; scanEl = el; scanUntil = performance.now() + ms; attached = false; },
+    ping(el, ms) { scanEl = el; scanUntil = performance.now() + ms; },
     stopScan() { scanEl = null; },
+    watch(el) { watchEl = el; },
+    point(el) { pointEl = el; },
+    talk(on) { brain.talk(on); },
+    nod() { brain.nod(); },
+    celebrate() { brain.spin(); brain.wave(2.4); },
     inspect(part) {
       shot = part ?? 'none';
       if (part) { target = null; scanEl = null; }
@@ -430,7 +454,7 @@ export function mountAris(slot: HTMLElement, telemetry: Telemetry, events: ArisE
     },
     greet() {
       brain.wave(2.6);
-      api.say(`ARIS-1 online. ${matchMedia('(hover: hover)').matches ? 'Hover' : 'Tap'} a card and I will scan it.`, 4200);
+      api.say(greeting, 4200);
     },
     enterSolar,
     exitSolar,

@@ -1,69 +1,53 @@
-// The home page's ARIS-1 controller. It owns everything that works without WebGL (HUD telemetry,
-// narration, voice and sound, scan targets, inspection controls, the flight-mode switch) and loads
-// the 3D layer lazily. Without WebGL, reduced motion or save-data, the poster stays and scans
-// still sweep and narrate; only solar flight needs the 3D layer.
+// The home page's ARIS-1 controller: HUD telemetry, inspection controls, "scan all specs", and the
+// flight-mode switch. Scanning, narration, the loading rules and the audio toggles are shared with
+// the case studies (targets.ts, narration.ts, boot.ts, audio.ts). Without WebGL, reduced motion or
+// save-data, the poster stays and scans still sweep and narrate; only solar flight needs the robot.
 import { parts, waypoints, type Part, type Waypoint } from '../../data/site';
-import { sfx, voice } from './audio';
+import { bindAudioToggles, sfx, voice } from './audio';
+import { fine, loadAris, scheduleAris, staticReason, type StaticReason } from './boot';
+import { attachNarration, narrate } from './narration';
+import { bindTargets, isCurrent, newSequence, scanCard, scanProgress, scanState } from './targets';
 import type { Aris, Telemetry } from './types';
 
 const root = document.documentElement;
 const slot = document.querySelector<HTMLElement>('[data-aris-slot]');
 const solarUi = document.querySelector<HTMLElement>('[data-solar-ui]');
 const telemetry: Telemetry = { sys: 'STANDBY', x: 0, y: 0, thrust: 0, fps: 0, distance: 0 };
-const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 const emit = (name: string, detail?: unknown) => document.dispatchEvent(new CustomEvent(name, { detail }));
 
 let aris: Aris | null = null;
-let loading: Promise<Aris | null> | null = null;
 let mode: 'inspect' | 'solar' = 'inspect';
 let switching = false;
 
-// ---- can the 3D layer run here?
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-const can3d = !!slot && !reduce && !saveData && 'WebGL2RenderingContext' in window;
-
-function markStatic(reason: string) {
+// ---- loading the 3D layer (boot.ts decides whether and when)
+const reasons: Record<StaticReason, string> = {
+  'reduced-motion': 'Reduced motion is on, so ARIS-1 holds still and solar flight is off.',
+  'save-data': 'Data saver is on, so ARIS-1 stays a still image.',
+  'no-webgl': 'This browser has no WebGL 2, so ARIS-1 stays a still image.',
+  'no-gpu': '3D needs a hardware-accelerated GPU, so ARIS-1 is shown as a still.',
+  failed: 'ARIS-1 could not start its 3D systems.',
+};
+function markStatic(reason: StaticReason) {
   telemetry.sys = 'STATIC';
-  document.querySelectorAll<HTMLButtonElement>('[data-mode="solar"]').forEach((b) => { b.disabled = true; b.title = reason; });
-  document.querySelectorAll<HTMLElement>('[data-static-note]').forEach((n) => { n.hidden = false; n.textContent = reason; });
+  document.querySelectorAll<HTMLButtonElement>('[data-mode="solar"]').forEach((b) => { b.disabled = true; b.title = reasons[reason]; });
+  document.querySelectorAll<HTMLElement>('[data-static-note]').forEach((n) => { n.hidden = false; n.textContent = reasons[reason]; });
   document.querySelectorAll<HTMLElement>('[data-needs-3d]').forEach((n) => { n.hidden = true; });
 }
 
-function load() {
-  if (!can3d) return Promise.resolve(null);
-  loading ??= import('./webgl').then(({ mountAris }) => {
-    aris = mountAris(slot!, telemetry, { onPoke, onArrive, onDepart });
-    if (!aris) markStatic('3D needs a hardware-accelerated GPU, so ARIS-1 is shown as a still.');
-    return aris;
-  }).catch(() => { markStatic('ARIS-1 could not start its 3D systems.'); return null; });
-  return loading;
+async function load() {
+  if (!slot) return null;
+  aris = await loadAris(() => ({
+    slot, telemetry, solar: true, events: { onPoke, onArrive, onDepart },
+    greeting: `ARIS-1 online. ${fine ? 'Hover' : 'Tap'} a card and I will scan it.`,
+  }), markStatic);
+  attachNarration(aris);
+  return aris;
 }
-
-if (!can3d) {
-  markStatic(reduce ? 'Reduced motion is on, so ARIS-1 holds still and solar flight is off.' : saveData ? 'Data saver is on, so ARIS-1 stays a still image.' : 'This browser has no WebGL 2, so ARIS-1 stays a still image.');
-} else if (fine) {
-  // Desktop: load once the page is idle, so Three.js never competes with first paint.
-  const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 300));
-  if (document.readyState === 'complete') idle(() => load());
-  else addEventListener('load', () => idle(() => load()), { once: true });
-} else {
-  // Phones and tablets: the poster carries the first view; the 3D robot loads on the first touch
-  // or scroll, so slow CPUs never pay for it up front.
-  for (const type of ['pointerdown', 'touchstart', 'scroll', 'keydown']) addEventListener(type, () => load(), { once: true, passive: true });
-}
-
-// ---- narration: one line for screen readers, the callout, and the voice
-const readouts = document.querySelectorAll<HTMLElement>('[data-aris-readout]');
-export function narrate(text: string, { speak = true, callout = text, ms = 3600 }: { speak?: boolean; callout?: string | false; ms?: number } = {}) {
-  readouts.forEach((r) => { r.textContent = text; });
-  if (callout) aris?.say(callout, ms);
-  if (speak) voice.speak(text);
-}
+if (staticReason) markStatic(staticReason);
+else scheduleAris(() => { load(); });
 
 // ---- telemetry HUD, a few times a second
-const scan = { state: 'STANDBY', target: '—', started: 0, ms: 0 };
 const started = performance.now();
 const fields = new Map<string, HTMLElement[]>();
 document.querySelectorAll<HTMLElement>('[data-tm]').forEach((el) => {
@@ -85,118 +69,32 @@ function render() {
   const thrust = Math.round(telemetry.thrust * 100);
   set('thrust', telemetry.sys === 'STATIC' ? 'OFFLINE' : thrust > 55 ? `BURN ${thrust}%` : thrust > 8 ? `CRUISE ${thrust}%` : 'IDLE');
   bars.forEach((b) => { b.style.transform = `scaleX(${b.dataset.tmBar === 'thrust' ? telemetry.thrust : scanProgress(now)})`; });
-  set('scan', scan.state === 'SCANNING' ? `SCANNING ${Math.round(scanProgress(now) * 100)}%` : scan.state);
-  set('target', scan.target);
+  set('scan', scanState.state === 'SCANNING' ? `SCANNING ${Math.round(scanProgress(now) * 100)}%` : scanState.state);
+  set('target', scanState.target);
   set('fps', telemetry.fps ? String(Math.round(telemetry.fps)) : '—');
   set('met', `${String(Math.floor(met / 60)).padStart(2, '0')}:${String(met % 60).padStart(2, '0')}`);
   set('distance', `${(telemetry.distance / 7).toFixed(2)} AU`);
-  set('voice', voice.on ? 'ON' : 'OFF');
-  set('sfx', sfx.on ? 'ON' : 'OFF');
 }
-const scanProgress = (now: number) => (scan.state === 'SCANNING' ? Math.min(1, (now - scan.started) / scan.ms) : scan.state === 'LOCKED' ? 1 : 0);
 setInterval(render, 125);
 render();
 
-// ---- scan targets: hover (with a little intent), focus, or an explicit scan
-let hoverTimer = 0, releaseTimer = 0, lockTimer = 0;
-let current: HTMLElement | null = null;
-let busyUntil = 0; // an explicit scan keeps ARIS-1 on its card until it is done
-let sequence = 0;  // bumps to cancel a running "scan all"
-
-const label = (el: HTMLElement) => el.dataset.scanLabel ?? 'Target';
-
-function attend(el: HTMLElement) {
-  clearTimeout(releaseTimer);
-  if (performance.now() < busyUntil && current !== el) return;
-  current = el;
-  aris?.attend(el);
-}
-function release(delay = 900) {
-  clearTimeout(releaseTimer);
-  releaseTimer = window.setTimeout(() => {
-    if (performance.now() < busyUntil) return release(busyUntil - performance.now() + 200);
-    current = null;
-    aris?.attend(null);
-  }, delay);
-}
-
-/** A full scan: fly over, sweep, read the card aloud. */
-export function scanCard(el: HTMLElement, { ms = 2600 } = {}) {
-  clearTimeout(lockTimer);
-  current = el;
-  busyUntil = performance.now() + ms;
-  document.querySelectorAll('[data-scanning]').forEach((c) => c !== el && c.removeAttribute('data-scanning'));
-  el.setAttribute('data-scanning', '');
-  if (aris) aris.scan(el, ms);
-  else {
-    // Without the robot the card sweeps itself.
-    el.querySelector('.scan-sweep')?.remove();
-    const sweep = document.createElement('span');
-    sweep.className = 'scan-sweep';
-    sweep.setAttribute('aria-hidden', 'true');
-    el.append(sweep);
-    setTimeout(() => sweep.remove(), 2600);
-  }
-  Object.assign(scan, { state: 'SCANNING', target: label(el), started: performance.now(), ms });
-  sfx.play('scan');
-  narrate(el.dataset.scanSay ?? label(el), { callout: `Scanning · ${label(el)}` });
-  lockTimer = window.setTimeout(() => {
-    el.removeAttribute('data-scanning');
-    scan.state = 'LOCKED';
-    lockTimer = window.setTimeout(() => { scan.state = 'STANDBY'; scan.target = '—'; }, 2400);
-    if (!el.matches(':hover, :focus-within')) release(1200);
-  }, ms);
-}
-
-/** A glance on hover: fly over and sweep briefly, no voice. */
-function glance(el: HTMLElement) {
-  if (performance.now() < busyUntil) return;
-  attend(el);
-  aris?.scan(el, 2400);
-  Object.assign(scan, { state: 'SCANNING', target: label(el), started: performance.now(), ms: 2400 });
-  clearTimeout(lockTimer);
-  lockTimer = window.setTimeout(() => { scan.state = 'LOCKED'; lockTimer = window.setTimeout(() => { scan.state = 'STANDBY'; scan.target = '—'; }, 1800); }, 2400);
-  sfx.play('tick');
-}
-
-document.querySelectorAll<HTMLElement>('[data-scan]').forEach((card) => {
-  if (fine) {
-    card.addEventListener('pointerenter', () => {
-      clearTimeout(hoverTimer);
-      hoverTimer = window.setTimeout(() => glance(card), 260);
-    });
-    card.addEventListener('pointerleave', () => { clearTimeout(hoverTimer); release(); });
-  }
-  card.addEventListener('focusin', () => { if (card.matches(':focus-visible, :has(:focus-visible)')) attend(card); });
-  card.addEventListener('focusout', () => release());
-  card.querySelectorAll('[data-scan-btn]').forEach((btn) => btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    sequence++;
-    scanCard(card);
-  }));
-  // Cards without a link of their own scan on a click anywhere.
-  if ('scanClick' in card.dataset) card.addEventListener('click', (e) => {
-    if ((e.target as Element).closest('a, button')) return;
-    sequence++;
-    scanCard(card);
-  });
-});
+// ---- scan targets: ARIS-1 flies next to the card it scans
+bindTargets(document, () => aris, { hover: 'fly', fine });
 
 // ---- quick actions
 async function scanAll() {
-  const run = ++sequence;
+  const run = newSequence();
   const cards = [...document.querySelectorAll<HTMLElement>('#specs [data-scan]')];
   narrate(`Scanning all ${cards.length} system modules.`, { callout: 'Scanning all modules' });
   emit('aris:goto', 'specs');
   await wait(1100);
   for (const card of cards) {
-    if (run !== sequence) return;
+    if (!isCurrent(run)) return;
     scanCard(card, { ms: 2400 });
     // With the voice on, wait for each module to be read out.
     await wait(voice.on ? 5600 : 2900);
   }
-  if (run === sequence) narrate('Scan complete. Four modules, all nominal.', { callout: 'Scan complete · all nominal' });
+  if (isCurrent(run)) narrate('Scan complete. Four modules, all nominal.', { callout: 'Scan complete · all nominal' });
 }
 document.querySelectorAll('[data-action="scan-all"]').forEach((b) => b.addEventListener('click', () => { sfx.play('click'); scanAll(); }));
 
@@ -207,7 +105,7 @@ async function inspect(part: Part | null) {
   clearTimeout(inspectTimer);
   inspectButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.inspect === part)));
   if (!part) { aris?.inspect(null); return; }
-  sequence++;
+  newSequence();
   const a = aris ?? (await load());
   a?.inspect(part);
   sfx.play(part === 'thruster' ? 'thrust' : 'inspect');
@@ -220,26 +118,10 @@ inspectButtons.forEach((b) => b.addEventListener('click', () => {
 }));
 
 // ---- audio toggles (header and HUD)
-const audioButtons = document.querySelectorAll<HTMLButtonElement>('[data-audio-toggle]');
-const syncAudio = () => audioButtons.forEach((b) => {
-  const on = b.dataset.audioToggle === 'voice' ? voice.on : sfx.on;
-  b.setAttribute('aria-pressed', String(on));
-  b.querySelectorAll('[data-audio-state]').forEach((s) => { s.textContent = on ? 'On' : 'Off'; });
+bindAudioToggles((kind, on) => {
+  if (kind === 'voice' && on) narrate('Voice assistant online. Click a module or mission and I will read it to you.', { callout: 'Voice assistant online' });
+  render();
 });
-audioButtons.forEach((b) => {
-  if (b.dataset.audioToggle === 'voice' && !voice.available) { b.disabled = true; b.title = 'This browser has no speech synthesis.'; }
-  b.addEventListener('click', () => {
-    if (b.dataset.audioToggle === 'voice') {
-      voice.set(!voice.on);
-      if (voice.on) narrate('Voice assistant online. Click a module or mission and I will read it to you.', { callout: 'Voice assistant online' });
-    } else {
-      sfx.set(!sfx.on);
-    }
-    syncAudio();
-    render();
-  });
-});
-syncAudio();
 
 // ---- ARIS-1 events from the 3D layer
 function onPoke() {
@@ -278,14 +160,14 @@ function onDepart(id: Waypoint) {
   if (!tourDeparting) setTour(false);
   tourDeparting = false;
   const w = byId[id];
-  scan.target = w.name.toUpperCase();
+  scanState.target = w.name.toUpperCase();
   if (brief.status) brief.status.textContent = `En route · ${w.name}`;
   sfx.play('thrust');
   destButtons.forEach((b) => b.toggleAttribute('aria-current', b.dataset.waypoint === id));
 }
 function onArrive(id: Waypoint) {
   const w = byId[id];
-  scan.target = w.name.toUpperCase();
+  scanState.target = w.name.toUpperCase();
   if (brief.title) brief.title.textContent = `${w.name} · ${w.title}`;
   if (brief.text) brief.text.textContent = w.brief;
   if (brief.land) { brief.land.href = `#${w.section}`; brief.land.dataset.section = w.section; }
@@ -311,7 +193,7 @@ async function enterSolar() {
   if (!a) { switching = false; sfx.play('error'); narrate('Solar flight needs the 3D systems, which are offline here.', { speak: false }); return; }
   mode = 'solar';
   inspect(null);
-  sequence++;
+  newSequence();
   modeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === 'solar')));
   sfx.play('warp');
   emit('aris:warp', 1);
@@ -344,7 +226,7 @@ async function exitSolar(section?: string) {
   modeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === 'inspect')));
   root.classList.remove('solar');
   emit('aris:lock', false);
-  scan.target = '—';
+  scanState.target = '—';
   await wait(300);
   emit('aris:warp', 0);
   switching = false;

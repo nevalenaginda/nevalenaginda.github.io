@@ -4,9 +4,11 @@ Astro portfolio for GitHub Pages. Content lives in `src/content/projects/` as Ma
 
 The home page is guided by ARIS-1, an astronaut robot built in Three.js from primitives (no model files):
 
-- `src/scripts/aris/controller.ts` runs without WebGL: HUD telemetry, scan targets (`data-scan` cards), inspection controls, narration, and the flight-mode switch. It loads the 3D layer lazily.
-- `src/scripts/aris/webgl/` is the 3D layer: the robot, its animation, the laser scanner, and solar flight mode.
-- `src/scripts/aris/audio.ts` holds the voice (Web Speech synthesis) and sound effects (Web Audio, no audio files). Both start switched off.
+- `src/scripts/aris/controller.ts` directs the home page: HUD telemetry, inspection controls, "scan all specs", and the flight-mode switch.
+- `src/scripts/aris/brief.ts` directs the case studies: ARIS-1 docks in the reading guide, sweeps the screenshot, locks on to each part as it is read, scans trade-offs, and reads parts aloud on request.
+- Shared by both: `boot.ts` (when the 3D layer may load), `targets.ts` (`data-scan` elements), `narration.ts`, and `audio.ts` (voice through Web Speech synthesis, sound effects through Web Audio, no audio files; both start switched off).
+- `src/scripts/aris/webgl/` is the 3D layer: the robot, its animation, and the laser scanner. Solar flight mode (`solar.ts`) loads only when the home page enters it.
+- `src/lib/brief-sections.mjs` is a Sätteri hast plugin (`markdown.processor` in `astro.config.mjs`) that turns each case-study part into a mission log section at build time. The Markdown stays plain.
 - The contact terminal (`terminal.ts`) hands the message to the visitor's mail app; the site has no backend.
 
 With reduced motion, data saver, or no WebGL 2, ARIS-1 stays a pre-rendered still and solar flight is off.

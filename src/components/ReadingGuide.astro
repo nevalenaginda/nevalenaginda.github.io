@@ -1,28 +1,36 @@
 ---
 // ARIS-1 as a reading guide for a case study: where you are, what is left, and a jump to any part.
-// Desktop: a sticky card in the sidebar. Phones and tablets: a floating ARIS-1 with a progress ring
+// Desktop: a sticky card in the sidebar, with ARIS-1 docked at the top (src/scripts/aris/brief.ts
+// swaps the poster for the live robot). Phones and tablets: a floating button with a progress ring
 // that opens the same guide in a bottom sheet. Without JS the card is a plain table of contents.
+// The script below also marks the part being read (data-active, data-done on .brief-section) and
+// announces each change as a `brief:section` event, so ARIS-1 can follow along.
 import { Check, X } from 'lucide-astro';
 
 interface Props { headings: { slug: string; text: string }[]; minutes: number; }
 const { headings, minutes } = Astro.props;
 const intro = `${minutes} min read · ${headings.length} parts`;
 ---
-<nav class="guide panel hidden p-4 lg:sticky lg:top-28 lg:block" aria-label="On this page" data-guide data-intro={intro}>
+<nav class="guide panel hidden p-4 lg:sticky lg:top-24 lg:block" aria-label="On this page" data-guide data-intro={intro}>
+  <div class="guide-slot" data-aris-slot data-guide-aris>
+    <svg class="guide-reticle" viewBox="0 0 100 120" aria-hidden="true">
+      <circle cx="50" cy="58" r="44" />
+      <path d="M8 10h12M8 10v12M92 10H80M92 10v12M8 112h12M8 112v-12M92 112H80M92 112v-12" />
+    </svg>
+    <img class="guide-poster" src="/aris/poster-400.webp" width="400" height="480" alt="" decoding="async" data-aris-poster />
+  </div>
   <div data-guide-body>
-    <div class="flex items-center gap-3">
-      <img class="guide-aris h-[4.5rem] w-[3.75rem] shrink-0 object-contain" src="/aris/poster-400.webp" width="400" height="480" alt="" loading="lazy" decoding="async" data-guide-aris />
-      <p class="guide-bubble" data-guide-say>{intro}</p>
-    </div>
-    <ol class="mt-4 space-y-1">
-      {headings.map((h) => <li>
+    <p class="guide-bubble" data-guide-say>{intro}</p>
+    <ol class="mt-3 space-y-0.5">
+      {headings.map((h, i) => <li>
         <a class="guide-link" href={`#${h.slug}`} data-guide-link={h.slug}>
-          <span class="guide-dot" aria-hidden="true"><Check size={12} stroke-width={3} /></span>{h.text}
+          <span class="guide-dot" aria-hidden="true"><Check size={12} stroke-width={3} /></span>
+          <span class="guide-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>{h.text}
         </a>
       </li>)}
     </ol>
-    <div class="guide-track" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-guide-progress>
-      <span class="guide-bar" data-guide-bar></span>
+    <div class="guide-segs" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-guide-progress>
+      {headings.map((h) => <span class="guide-seg" data-guide-seg={h.slug}><span></span></span>)}
     </div>
   </div>
 </nav>
@@ -32,7 +40,8 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     <circle class="guide-ring__track" cx="32" cy="32" r="29" />
     <circle class="guide-ring__fill" cx="32" cy="32" r="29" pathLength="100" data-guide-ring />
   </svg>
-  <img src="/aris/poster-400.webp" width="400" height="480" alt="" loading="lazy" decoding="async" />
+  <img class="guide-fab__aris" src="/aris/poster-400.webp" width="400" height="480" alt="" loading="lazy" decoding="async" />
+  <span class="guide-fab__count" aria-hidden="true" data-guide-count>0/{headings.length}</span>
 </button>
 <dialog id="reading-guide-sheet" class="guide-sheet no-print lg:hidden" aria-label="On this page" data-guide-sheet>
   <button type="button" class="guide-close" aria-label="Close the reading guide" data-guide-close><X size={20} aria-hidden="true" /></button>
@@ -50,9 +59,12 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     if (body) sheet.querySelector('[data-guide-sheet-body]')?.append(body.cloneNode(true));
 
     const heads = [...article.querySelectorAll<HTMLElement>('h2[id]')];
+    const sections = heads.map((h) => h.closest<HTMLElement>('[data-brief-section]'));
+    const slot = guide.querySelector<HTMLElement>('[data-guide-aris]');
     const intro = guide.dataset.intro ?? '';
     const links = () => document.querySelectorAll<HTMLAnchorElement>('[data-guide-link]');
     const says = () => document.querySelectorAll<HTMLElement>('[data-guide-say]');
+    const title = (i: number) => heads[i].textContent?.replace(/\s+/g, ' ').trim() ?? '';
     let current = -2;
     let shown = -1;
     let footerVisible = false;
@@ -77,7 +89,16 @@ const intro = `${minutes} min read · ${headings.length} parts`;
       const done = remaining <= 2 && idx === heads.length - 1;
       const pct = Math.round(p * 100);
 
-      document.querySelectorAll<HTMLElement>('[data-guide-bar]').forEach((bar) => { bar.style.transform = `scaleX(${p})`; });
+      // One segment per part: done parts full, the current part filling as it is read.
+      const within = (i: number) => {
+        const box = sections[i]?.getBoundingClientRect();
+        return box ? Math.min(1, Math.max(0, (line - box.top) / Math.max(1, box.height))) : 0;
+      };
+      document.querySelectorAll<HTMLElement>('[data-guide-seg]').forEach((seg) => {
+        const i = heads.findIndex((h) => h.id === seg.dataset.guideSeg);
+        const fill = done || i < idx ? 1 : i === idx ? within(i) : 0;
+        (seg.firstElementChild as HTMLElement).style.transform = `scaleX(${fill.toFixed(3)})`;
+      });
       document.querySelectorAll<HTMLElement>('[data-guide-progress]').forEach((el) => el.setAttribute('aria-valuenow', String(pct)));
       document.querySelector<SVGCircleElement>('[data-guide-ring]')?.style.setProperty('stroke-dashoffset', String(100 - pct));
 
@@ -90,18 +111,27 @@ const intro = `${minutes} min read · ${headings.length} parts`;
           if (i === idx && !done) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
           a.classList.toggle('is-done', done || i < idx);
         });
-        const text = done ? 'All done, thanks for reading!' : idx < 0 ? intro : `Now: ${heads[idx].textContent?.trim()} · ${idx + 1} of ${heads.length}`;
-        says().forEach((s) => { s.textContent = text; });
-        fab.setAttribute('aria-label', `Reading guide: ${done ? 'finished' : idx < 0 ? intro : `${heads[idx].textContent?.trim()}, part ${idx + 1} of ${heads.length}`}`);
-        // ARIS-1 nods each time you move on to a new part.
-        if (!first) document.querySelectorAll<HTMLElement>('[data-guide-aris]').forEach((b) => {
-          b.classList.remove('is-nodding');
-          void b.offsetWidth;
-          b.classList.add('is-nodding');
+        sections.forEach((s, i) => {
+          s?.toggleAttribute('data-active', i === idx && !done);
+          s?.toggleAttribute('data-done', done || i < idx);
         });
+        const text = done ? 'All done, thanks for reading!' : idx < 0 ? intro : `Now: ${title(idx)} · ${idx + 1} of ${heads.length}`;
+        says().forEach((s) => { s.textContent = text; });
+        const count = fab.querySelector('[data-guide-count]');
+        if (count) count.textContent = done ? '✓' : `${idx + 1}/${heads.length}`;
+        fab.setAttribute('aria-label', `Reading guide: ${done ? 'finished' : idx < 0 ? intro : `${title(idx)}, part ${idx + 1} of ${heads.length}`}`);
+        // The poster nods each time you move on; once the live robot is docked it nods by itself.
+        if (!first && slot && !slot.hasAttribute('data-live')) {
+          slot.classList.remove('is-nodding');
+          void slot.offsetWidth;
+          slot.classList.add('is-nodding');
+        }
+        document.dispatchEvent(new CustomEvent('brief:section', {
+          detail: { index: idx, total: heads.length, id: idx >= 0 ? heads[idx].id : '', title: idx >= 0 ? title(idx) : '', done, first },
+        }));
       }
 
-      // The floating ARIS-1 shows while the article is being read, and steps aside for the footer.
+      // The floating button shows while the article is being read, and steps aside for the footer.
       const show = r.top < innerHeight * 0.75 && !footerVisible ? 1 : 0;
       if (show !== shown) {
         shown = show;
@@ -134,7 +164,10 @@ const intro = `${minutes} min read · ${headings.length} parts`;
     const release = () => { if (forced) { forced = ''; schedule(); } };
     for (const type of ['wheel', 'touchmove', 'pointerdown']) addEventListener(type, release, { passive: true });
     addEventListener('keydown', (e) => { if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) release(); });
-    fab.addEventListener('click', () => sheet.showModal());
+    const open = () => { if (!sheet.open) sheet.showModal(); };
+    fab.addEventListener('click', open);
+    // ARIS-1 itself opens the guide on phones (src/scripts/aris/brief.ts).
+    document.addEventListener('brief:open-guide', open);
     sheet.querySelector('[data-guide-close]')?.addEventListener('click', () => sheet.close());
     // A tap on the dimmed backdrop (the dialog itself, outside its content) closes the sheet.
     sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
@@ -144,54 +177,64 @@ const intro = `${minutes} min read · ${headings.length} parts`;
 </script>
 
 <style>
+  /* ARIS-1's dock: the poster paints first; the live robot is drawn over it, in a fixed box. */
+  .guide-slot { position: relative; margin: -.25rem auto .25rem; width: 100%; max-width: 10.5rem; aspect-ratio: 5 / 6; transform-origin: 50% 85%; }
+  .guide-slot.is-nodding { animation: guide-nod 600ms cubic-bezier(.16, 1, .3, 1); }
+  @keyframes guide-nod { 30% { transform: rotate(-6deg) translateY(2px); } 60% { transform: rotate(4deg); } }
+  .guide-poster { position: relative; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 12px rgb(63 243 220 / .2)); transition: opacity 500ms ease; }
+  .guide-reticle { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke-width: 1.2; }
+  .guide-reticle circle { stroke: color-mix(in oklab, var(--color-teal) 22%, transparent); stroke-dasharray: 3 7; }
+  .guide-reticle path { stroke: color-mix(in oklab, var(--color-teal) 55%, transparent); }
+  @media (max-height: 760px) { .guide-slot { max-width: 7.5rem; } }
+
   .guide-bubble {
     position: relative;
-    flex: 1;
     border: 1px solid color-mix(in oklab, var(--color-teal) 40%, transparent);
     border-radius: .7rem;
-    border-bottom-left-radius: .2rem;
+    border-top-left-radius: .2rem;
     background: var(--color-teal-dim);
     color: var(--color-teal);
     padding: .5rem .7rem;
     font-family: var(--font-mono);
-    font-size: .78rem;
+    font-size: .76rem;
     line-height: 1.4;
   }
-  .guide-aris { transform-origin: 50% 85%; filter: drop-shadow(0 0 10px rgb(63 243 220 / .25)); }
-  .guide-aris.is-nodding { animation: guide-nod 600ms cubic-bezier(.16, 1, .3, 1); }
-  @keyframes guide-nod { 30% { transform: rotate(-8deg) translateY(2px); } 60% { transform: rotate(5deg); } }
 
   .guide-link {
     display: flex;
     min-height: 2.75rem;
     align-items: center;
-    gap: .6rem;
+    gap: .55rem;
     border-radius: .7rem;
-    padding: .35rem .6rem;
+    padding: .3rem .55rem;
     color: var(--color-body);
     font-weight: 500;
-    font-size: .95rem;
+    font-size: .93rem;
     text-decoration: none;
     transition: background-color 200ms ease, color 200ms ease;
   }
   .guide-link:hover { background: var(--color-hull-2); color: var(--color-ink); }
   .guide-link[aria-current] { background: var(--color-teal-dim); color: var(--color-teal); }
+  .guide-num { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .1em; color: var(--color-muted); }
+  .guide-link[aria-current] .guide-num { color: var(--color-teal); }
   .guide-dot {
     display: grid;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.15rem;
+    height: 1.15rem;
     flex-shrink: 0;
     place-items: center;
     border-radius: 9999px;
     border: 1px solid var(--color-line-bright);
     color: transparent;
-    transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+    transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease, box-shadow 250ms ease;
   }
   .guide-link[aria-current] .guide-dot { border-color: var(--color-teal); box-shadow: 0 0 8px var(--color-teal); }
   .guide-link.is-done .guide-dot { border-color: var(--color-teal); background: var(--color-teal); color: var(--color-void); }
 
-  .guide-track { margin-top: 1rem; height: .35rem; overflow: hidden; border-radius: 9999px; background: var(--color-line); }
-  .guide-bar { display: block; height: 100%; border-radius: inherit; background: var(--color-teal); box-shadow: 0 0 10px var(--color-teal); transform: scaleX(0); transform-origin: left; transition: transform 200ms linear; }
+  /* Segmented progress: one cell per part. */
+  .guide-segs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; margin-top: .9rem; }
+  .guide-seg { display: block; height: .3rem; overflow: hidden; border-radius: 2px; background: var(--color-line); }
+  .guide-seg > span { display: block; height: 100%; background: var(--color-teal); box-shadow: 0 0 8px var(--color-teal); transform: scaleX(0); transform-origin: left; transition: transform 200ms linear; }
 
   .guide-fab {
     position: fixed;
@@ -214,7 +257,12 @@ const intro = `${minutes} min read · ${headings.length} parts`;
   }
   .guide-fab[data-show] { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
   .guide-fab:active { transform: scale(.94); }
-  .guide-fab img { width: 2.6rem; height: 3.1rem; object-fit: contain; grid-area: 1 / 1; }
+  .guide-fab__aris { width: 2.6rem; height: 3.1rem; object-fit: contain; grid-area: 1 / 1; }
+  .guide-fab__count { display: none; grid-area: 1 / 1; font-family: var(--font-mono); font-size: .8rem; color: var(--color-teal); }
+  /* With the live robot peeking from the right corner, the button moves left and shows the count. */
+  .guide-fab--live { right: auto; left: 1rem; width: 3.5rem; height: 3.5rem; }
+  .guide-fab--live .guide-fab__aris { display: none; }
+  .guide-fab--live .guide-fab__count { display: block; }
   .guide-ring { grid-area: 1 / 1; width: 100%; height: 100%; transform: rotate(-90deg); }
   .guide-ring circle { fill: none; stroke-width: 3; }
   .guide-ring__track { stroke: var(--color-line); }
@@ -261,8 +309,8 @@ const intro = `${minutes} min read · ${headings.length} parts`;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .guide-aris.is-nodding, .guide-sheet[open], .guide-sheet[open]::backdrop { animation: none; }
+    .guide-slot.is-nodding, .guide-sheet[open], .guide-sheet[open]::backdrop { animation: none; }
     .guide-fab { transition: opacity 150ms ease, visibility 0s linear 150ms; transform: none; }
-    .guide-bar, .guide-ring__fill { transition: none; }
+    .guide-seg > span, .guide-ring__fill { transition: none; }
   }
 </style>

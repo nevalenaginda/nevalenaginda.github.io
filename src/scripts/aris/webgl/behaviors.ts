@@ -49,6 +49,8 @@ export function createBrain(bot: Robot) {
   let spinT = -1;
   let thrust = 0;
   let cruise = -1; // solar flight: 0..1 lean and thrust; the caller steers the heading
+  let nodT = -1;
+  let talking = false;
 
   const sp = {
     sLx: new Spring(0, 60, 0.8), sLz: new Spring(0, 60, 0.8), sRx: new Spring(0, 60, 0.8), sRz: new Spring(0, 60, 0.8),
@@ -138,7 +140,9 @@ export function createBrain(bot: Robot) {
     // ---- head: look where asked, relative to the turned body
     const relYaw = clamp(lookYaw + gx - bot.body.rotation.y, -1.05, 1.05);
     bot.head.rotation.y = sp.headY.step(pose === 'thruster' || spinT >= 0 ? 0 : relYaw, dt);
-    bot.head.rotation.x = sp.headX.step(clamp(-(lookPitch + gy) - bot.lean.rotation.x * 0.6, -0.5, 0.45), dt);
+    let nod = 0;
+    if (nodT >= 0) { nodT += dt; nod = Math.sin(clamp01(nodT / 0.55) * Math.PI) * 0.28; if (nodT > 0.55) nodT = -1; }
+    bot.head.rotation.x = sp.headX.step(clamp(-(lookPitch + gy) - bot.lean.rotation.x * 0.6, -0.5, 0.45) + nod, dt);
     bot.head.rotation.z = sp.headZ.step(tilt + (pose === 'visor' ? Math.sin(t * 1.2) * 0.05 : 0), dt);
 
     // ---- limbs
@@ -165,7 +169,8 @@ export function createBrain(bot: Robot) {
 
     // ---- lights: visor, scan bar, reactor, battery cells
     const eyes = sp.eyes.step(power * lid * (pose === 'scan' || pose === 'visor' ? 1.45 : 1), dt);
-    bot.eyeMat.emissiveIntensity = 1.5 * eyes;
+    // While speaking, the visor flickers like a voice meter.
+    bot.eyeMat.emissiveIntensity = 1.5 * eyes * (talking ? 0.7 + 0.45 * Math.abs(Math.sin(t * 17) * Math.sin(t * 7.3)) : 1);
     bot.eyeGlows.forEach((g) => { (g.material as { opacity: number }).opacity = 0.5 * eyes; g.scale.setScalar(pose === 'scan' ? 0.42 : 0.32); });
     const bar = sp.scan.step(pose === 'visor' || pose === 'scan' ? 1 : 0, dt);
     (bot.scanBar.material as { opacity: number }).opacity = 0.9 * bar * power;
@@ -210,6 +215,8 @@ export function createBrain(bot: Robot) {
     setCruise(level: number) { cruise = level; },
     wave(seconds = 2.4) { waveUntil = clock + seconds; },
     spin() { if (spinT < 0) spinT = 0; },
+    nod() { if (nodT < 0) nodT = 0; },
+    talk(on: boolean) { talking = on; },
     /** Jump straight to a settled idle pose (used for poster renders). */
     settle() {
       boot = -2; sp.lift.x = 0; sp.eyes.x = 1; pose = 'idle'; vx = vy = 0; waveUntil = 0; spinT = -1;

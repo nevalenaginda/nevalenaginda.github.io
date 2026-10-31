@@ -6,6 +6,7 @@
 //   data-split            the hero name: words rise into place (never hidden: it is the LCP)
 //   data-split="mask"     a heading whose words slide up out of a mask
 //   data-count            count the first number in the text up from zero
+//   data-decode           short HUD text resolves out of random glyphs, once, as it comes into view
 //   data-parallax=n       drift at n × scroll speed
 //   data-draw             grow a line from 0 to full height while scrolling past
 //   data-tilt             tilt toward the pointer with a moving highlight (fine pointers only)
@@ -93,6 +94,7 @@ mm.add('(prefers-reduced-motion: no-preference)', () => {
   });
 
   gsap.utils.toArray<HTMLElement>('[data-count]').forEach(countUp);
+  if (!returning) gsap.utils.toArray<HTMLElement>('[data-decode]').forEach(decode);
 
   gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((el) => {
     const speed = Number(el.dataset.parallax) || 0.1;
@@ -207,6 +209,34 @@ function countUp(el: HTMLElement) {
       el.textContent = before + (grouped ? n.toLocaleString('en-US') : String(n)) + after;
     },
   });
+}
+
+// The real text stays for screen readers; a visual copy runs through random glyphs, settling left
+// to right. Monospace HUD values keep their width while they scramble.
+const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+<>/';
+function decode(el: HTMLElement) {
+  const text = el.textContent?.trim() ?? '';
+  if (!text) return;
+  const real = document.createElement('span');
+  real.className = 'sr-only';
+  real.textContent = text;
+  const shown = document.createElement('span');
+  shown.setAttribute('aria-hidden', 'true');
+  shown.textContent = text;
+  el.replaceChildren(real, shown);
+  const run = () => {
+    const start = performance.now();
+    const duration = 450 + text.length * 22;
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      const settled = Math.floor(p * text.length);
+      shown.textContent = text.slice(0, settled) + [...text.slice(settled)].map((c) => (c === ' ' ? ' ' : glyphs[Math.floor(Math.random() * glyphs.length)])).join('');
+      if (p < 1) requestAnimationFrame(step);
+      else shown.textContent = text;
+    };
+    requestAnimationFrame(step);
+  };
+  ScrollTrigger.create({ trigger: el, start: 'top 92%', once: true, onEnter: run });
 }
 
 // Cards lean toward the pointer and a soft highlight follows it across the surface.

@@ -42,6 +42,8 @@
    title fly between pages, the header stays put, and the new page wipes in over deep space. */
 @view-transition { navigation: auto; }
 [data-site-header] { view-transition-name: site-header; }
+/* ARIS-1's dock on every page (webgl/index.ts hands the name to the live robot as a page leaves). */
+[data-aris-slot] { view-transition-name: aris-1; }
 ::view-transition { background: var(--color-void); }
 ::view-transition-group(*) { animation-duration: 760ms; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
 ::view-transition-old(root) { animation: vt-out 380ms cubic-bezier(.4, 0, 1, 1) both; }
@@ -358,7 +360,8 @@
 .aris-fly--full:active { cursor: grabbing; }
 /* The robot is fixed, so a hit area follows it for clicks (behind it the page stays clickable). */
 .aris-hit { position: fixed; left: 0; top: 0; z-index: 37; border: 0; padding: 0; background: transparent; border-radius: 40%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.aris-beam { position: fixed; inset: 0; z-index: 35; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+/* Under the sticky header (z-30), so a beam to a heading scrolling away slips beneath it. */
+.aris-beam { position: fixed; inset: 0; z-index: 29; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 
 /* ARIS-1's status callout: a short line next to the robot while it works. */
 .aris-callout {

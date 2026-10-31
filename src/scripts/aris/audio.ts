@@ -21,6 +21,18 @@ function pickVoice() {
 }
 if (speechAvailable) speechSynthesis.addEventListener?.('voiceschanged', () => { chosen = pickVoice(); });
 
+function utter(text: string, onEnd?: () => void) {
+  chosen ??= pickVoice();
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if (chosen) u.voice = chosen;
+  u.lang = chosen?.lang ?? 'en-US';
+  u.rate = 1.02;
+  u.pitch = 0.82;
+  if (onEnd) { u.onend = onEnd; u.onerror = onEnd; }
+  speechSynthesis.speak(u);
+}
+
 export const voice = {
   available: speechAvailable,
   get on() { return voiceOn && speechAvailable; },
@@ -29,16 +41,14 @@ export const voice = {
     store.set('aris:voice', on ? 'on' : 'off');
     if (!on) voice.stop();
   },
+  /** Automatic narration: only when the voice is switched on. */
   speak(text: string) {
-    if (!voice.on) return;
-    chosen ??= pickVoice();
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    if (chosen) u.voice = chosen;
-    u.lang = chosen?.lang ?? 'en-US';
-    u.rate = 1.02;
-    u.pitch = 0.82;
-    speechSynthesis.speak(u);
+    if (voice.on) utter(text);
+  },
+  /** An explicit "read this" request: speaks even with the voice switched off. */
+  read(text: string, onEnd?: () => void) {
+    if (speechAvailable) utter(text, onEnd);
+    else onEnd?.();
   },
   stop() { if (speechAvailable) speechSynthesis.cancel(); },
 };
@@ -143,3 +153,23 @@ export const sfx = {
     sounds[name](c.currentTime + 0.01);
   },
 };
+
+/** Wire the voice and sound toggles ([data-audio-toggle="voice" | "sfx"]) in the header and HUD. */
+export function bindAudioToggles(onChange?: (kind: 'voice' | 'sfx', on: boolean) => void) {
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-audio-toggle]');
+  const sync = () => buttons.forEach((b) => {
+    const on = b.dataset.audioToggle === 'voice' ? voice.on : sfx.on;
+    b.setAttribute('aria-pressed', String(on));
+    b.querySelectorAll('[data-audio-state]').forEach((s) => { s.textContent = on ? 'On' : 'Off'; });
+  });
+  buttons.forEach((b) => {
+    const kind = b.dataset.audioToggle === 'voice' ? 'voice' : 'sfx';
+    if (kind === 'voice' && !voice.available) { b.disabled = true; b.title = 'This browser has no speech synthesis.'; }
+    b.addEventListener('click', () => {
+      if (kind === 'voice') voice.set(!voice.on); else sfx.set(!sfx.on);
+      sync();
+      onChange?.(kind, kind === 'voice' ? voice.on : sfx.on);
+    });
+  });
+  sync();
+}

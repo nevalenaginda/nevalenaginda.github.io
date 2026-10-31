@@ -1,0 +1,43 @@
+---
+// The end of a case study: a debrief, and the next mission in the log. The next mission's picture
+// and title carry its view-transition names, so opening it morphs them into the next page's hero.
+import type { CollectionEntry } from 'astro:content';
+import { ArrowLeft, ArrowUpRight } from 'lucide-astro';
+
+interface Props { next: CollectionEntry<'projects'> | null; code: string; nextCode: string; parts: number; }
+const { next, code, nextCode, parts } = Astro.props;
+---
+<section class="panel brackets mt-16 overflow-hidden" aria-labelledby="debrief-title" data-debrief data-reveal>
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-void/40 px-5 py-3">
+    <p class="hud-label flex items-center gap-2"><span class="led"></span> Mission debrief · {code}</p>
+    <p class="hud-label">{parts} of {parts} parts</p>
+  </div>
+  <div class="grid gap-6 p-5 sm:p-6 md:grid-cols-[1fr_1.15fr] md:items-center">
+    <div>
+      <h2 id="debrief-title" class="text-2xl sm:text-3xl">End of brief.</h2>
+      {next
+        ? <p class="mt-3 text-body">Next in the log is {nextCode}: {next.data.title}, {next.data.released}.</p>
+        : <p class="mt-3 text-body">That is the whole log for now.</p>}
+      <a class="btn btn--ghost mt-6" href="/#missions"><ArrowLeft size={16} aria-hidden="true" /> All missions</a>
+    </div>
+    {next && <a class="next-mission group relative block overflow-hidden rounded-xl border border-line bg-space/60 no-underline" href={`/projects/${next.id}/`} data-next-mission data-aris-point>
+      <span class="block overflow-hidden">
+        <img
+          class="aspect-[16/9] w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+          src={next.data.image}
+          alt={next.data.imageAlt}
+          width="1200"
+          height="750"
+          loading="lazy"
+          decoding="async"
+          style={`view-transition-name: shot-${next.id}`}
+        />
+      </span>
+      <span class="block p-4">
+        <span class="block font-mono text-xs tracking-[.2em] text-teal">{nextCode} · {next.data.released}</span>
+        <span class="mt-1 block text-lg font-semibold text-ink" style={`view-transition-name: title-${next.id}`}>{next.data.title}</span>
+        <span class="mt-2 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[.14em] text-teal">Open next brief <ArrowUpRight class="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" size={15} aria-hidden="true" /></span>
+      </span>
+    </a>}
+  </div>
+</section>

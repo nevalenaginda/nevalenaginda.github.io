@@ -2,7 +2,7 @@
 // valid signal is handed to the visitor's own mail app as a pre-filled email; nothing is sent to
 // a server. The log says so, and the address can be copied as a fallback.
 import { sfx } from './audio';
-import { narrate } from './controller';
+import { narrate } from './narration';
 
 const form = document.querySelector<HTMLFormElement>('[data-terminal]');
 const log = document.querySelector<HTMLOListElement>('[data-terminal-log]');
