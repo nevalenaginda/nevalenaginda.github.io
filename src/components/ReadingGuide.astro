@@ -1,0 +1,265 @@
+---
+// Byte as a reading guide for a case study: where you are, what is left, and a jump to any part.
+// Desktop: a sticky card in the sidebar. Phones and tablets: a floating Byte with a progress ring
+// that opens the same guide in a bottom sheet. Without JS the card is a plain table of contents.
+import { Check, X } from 'lucide-astro';
+
+interface Props { headings: { slug: string; text: string }[]; minutes: number; }
+const { headings, minutes } = Astro.props;
+const intro = `${minutes} min read · ${headings.length} parts`;
+---
+<nav class="guide hidden rounded-3xl border-2 border-line bg-panel p-4 lg:sticky lg:top-28 lg:block" aria-label="On this page" data-guide data-intro={intro}>
+  <div data-guide-body>
+    <div class="flex items-center gap-3">
+      <img class="guide-byte size-16 shrink-0" src="/byte/poster-480.webp" width="480" height="480" alt="" loading="lazy" decoding="async" data-guide-byte />
+      <p class="guide-bubble font-display" data-guide-say>{intro}</p>
+    </div>
+    <ol class="mt-4 space-y-1">
+      {headings.map((h) => <li>
+        <a class="guide-link" href={`#${h.slug}`} data-guide-link={h.slug}>
+          <span class="guide-dot" aria-hidden="true"><Check size={12} stroke-width={3} /></span>{h.text}
+        </a>
+      </li>)}
+    </ol>
+    <div class="guide-track" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-guide-progress>
+      <span class="guide-bar" data-guide-bar></span>
+    </div>
+  </div>
+</nav>
+
+<button type="button" class="guide-fab no-print lg:hidden" hidden aria-haspopup="dialog" aria-controls="reading-guide-sheet" aria-label={`Reading guide: ${intro}`} data-guide-fab>
+  <svg class="guide-ring" viewBox="0 0 64 64" aria-hidden="true">
+    <circle class="guide-ring__track" cx="32" cy="32" r="29" />
+    <circle class="guide-ring__fill" cx="32" cy="32" r="29" pathLength="100" data-guide-ring />
+  </svg>
+  <img src="/byte/poster-480.webp" width="480" height="480" alt="" loading="lazy" decoding="async" />
+</button>
+<dialog id="reading-guide-sheet" class="guide-sheet no-print lg:hidden" aria-label="On this page" data-guide-sheet>
+  <button type="button" class="guide-close" aria-label="Close the reading guide" data-guide-close><X size={20} aria-hidden="true" /></button>
+  <div data-guide-sheet-body></div>
+</dialog>
+
+<script>
+  const guide = document.querySelector<HTMLElement>('[data-guide]');
+  const article = document.querySelector<HTMLElement>('.case-study');
+  const sheet = document.querySelector<HTMLDialogElement>('[data-guide-sheet]');
+  const fab = document.querySelector<HTMLButtonElement>('[data-guide-fab]');
+  if (guide && article && sheet && fab) {
+    // One copy of the guide lives in the sidebar; the sheet gets a clone, kept in step below.
+    const body = guide.querySelector('[data-guide-body]');
+    if (body) sheet.querySelector('[data-guide-sheet-body]')?.append(body.cloneNode(true));
+
+    const heads = [...article.querySelectorAll<HTMLElement>('h2[id]')];
+    const intro = guide.dataset.intro ?? '';
+    const links = () => document.querySelectorAll<HTMLAnchorElement>('[data-guide-link]');
+    const says = () => document.querySelectorAll<HTMLElement>('[data-guide-say]');
+    let current = -2;
+    let shown = -1;
+    let footerVisible = false;
+    let forced = '';
+
+    const render = () => {
+      // The part being read is the last heading above a reading line at 35% of the screen. Over the
+      // last screen of the page the line slides down to 95%, so the final parts, which can never
+      // scroll up that far, still take their turn.
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const remaining = Math.max(0, max - scrollY);
+      const tail = remaining < innerHeight ? 1 - remaining / innerHeight : 0;
+      const line = innerHeight * (0.35 + 0.6 * tail);
+      let idx = -1;
+      heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+      // A part picked in the guide stays current until the reader scrolls on by hand.
+      if (forced) idx = heads.findIndex((h) => h.id === forced);
+      // Progress runs from the article reaching the reading line to the end of the page.
+      const r = article.getBoundingClientRect();
+      const startY = r.top + scrollY - innerHeight * 0.35;
+      const p = max > startY ? Math.min(1, Math.max(0, (scrollY - startY) / (max - startY))) : 1;
+      const done = remaining <= 2 && idx === heads.length - 1;
+      const pct = Math.round(p * 100);
+
+      document.querySelectorAll<HTMLElement>('[data-guide-bar]').forEach((bar) => { bar.style.transform = `scaleX(${p})`; });
+      document.querySelectorAll<HTMLElement>('[data-guide-progress]').forEach((el) => el.setAttribute('aria-valuenow', String(pct)));
+      document.querySelector<SVGCircleElement>('[data-guide-ring]')?.style.setProperty('stroke-dashoffset', String(100 - pct));
+
+      const state = done ? heads.length : idx;
+      if (state !== current) {
+        const first = current === -2;
+        current = state;
+        links().forEach((a) => {
+          const i = heads.findIndex((h) => h.id === a.dataset.guideLink);
+          if (i === idx && !done) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+          a.classList.toggle('is-done', done || i < idx);
+        });
+        const text = done ? 'All done, thanks for reading!' : idx < 0 ? intro : `Now: ${heads[idx].textContent?.trim()} · ${idx + 1} of ${heads.length}`;
+        says().forEach((s) => { s.textContent = text; });
+        fab.setAttribute('aria-label', `Reading guide: ${done ? 'finished' : idx < 0 ? intro : `${heads[idx].textContent?.trim()}, part ${idx + 1} of ${heads.length}`}`);
+        // Byte nods each time you move on to a new part.
+        if (!first) document.querySelectorAll<HTMLElement>('[data-guide-byte]').forEach((b) => {
+          b.classList.remove('is-nodding');
+          void b.offsetWidth;
+          b.classList.add('is-nodding');
+        });
+      }
+
+      // The floating Byte shows while the article is being read, and steps aside for the footer.
+      const show = r.top < innerHeight * 0.75 && !footerVisible ? 1 : 0;
+      if (show !== shown) {
+        shown = show;
+        fab.toggleAttribute('data-show', !!show);
+        fab.inert = !show;
+      }
+    };
+
+    let queued = false;
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; render(); });
+    };
+    addEventListener('scroll', schedule, { passive: true });
+    addEventListener('resize', schedule, { passive: true });
+    const footer = document.querySelector('footer');
+    if (footer) new IntersectionObserver(([entry]) => { footerVisible = entry.isIntersecting; schedule(); }).observe(footer);
+
+    fab.hidden = false;
+    render();
+
+    document.addEventListener('click', (e) => {
+      const link = (e.target as Element).closest<HTMLAnchorElement>('[data-guide-link]');
+      if (!link) return;
+      forced = link.dataset.guideLink ?? '';
+      schedule();
+    });
+    // Any scrolling the reader does themselves hands the guide back to the scroll position.
+    const release = () => { if (forced) { forced = ''; schedule(); } };
+    for (const type of ['wheel', 'touchmove', 'pointerdown']) addEventListener(type, release, { passive: true });
+    addEventListener('keydown', (e) => { if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) release(); });
+    fab.addEventListener('click', () => sheet.showModal());
+    sheet.querySelector('[data-guide-close]')?.addEventListener('click', () => sheet.close());
+    // A tap on the dimmed backdrop (the dialog itself, outside its content) closes the sheet.
+    sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
+    // Choosing a part closes the sheet; the anchor then scrolls to it.
+    sheet.addEventListener('click', (e) => { if ((e.target as Element).closest('[data-guide-link]')) sheet.close(); });
+  }
+</script>
+
+<style>
+  .guide-bubble {
+    position: relative;
+    flex: 1;
+    border-radius: 1rem;
+    border-bottom-left-radius: .25rem;
+    background: var(--color-mint-soft);
+    color: var(--color-mint-ink);
+    padding: .5rem .75rem;
+    font-size: .95rem;
+    line-height: 1.3;
+  }
+  .guide-byte { transform-origin: 50% 85%; }
+  .guide-byte.is-nodding { animation: guide-nod 600ms cubic-bezier(.16, 1, .3, 1); }
+  @keyframes guide-nod { 30% { transform: rotate(-8deg) translateY(2px); } 60% { transform: rotate(5deg); } }
+
+  .guide-link {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .6rem;
+    border-radius: 1rem;
+    padding: .35rem .6rem;
+    color: var(--color-body);
+    font-weight: 600;
+    font-size: .95rem;
+    text-decoration: none;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+  .guide-link:hover { background: var(--color-paper); color: var(--color-ink); }
+  .guide-link[aria-current] { background: var(--color-mint-soft); color: var(--color-mint-ink); }
+  .guide-dot {
+    display: grid;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 9999px;
+    border: 2px solid var(--color-line);
+    color: transparent;
+    transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+  }
+  .guide-link[aria-current] .guide-dot { border-color: var(--color-mint); background: var(--color-panel); }
+  .guide-link.is-done .guide-dot { border-color: var(--color-mint); background: var(--color-mint); color: var(--color-ink); }
+
+  .guide-track { margin-top: 1rem; height: .5rem; overflow: hidden; border-radius: 9999px; background: var(--color-mint-soft); }
+  .guide-bar { display: block; height: 100%; border-radius: inherit; background: var(--color-mint); transform: scaleX(0); transform-origin: left; transition: transform 200ms linear; }
+
+  .guide-fab {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 25;
+    display: grid;
+    width: 3.75rem;
+    height: 3.75rem;
+    place-items: center;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--color-panel);
+    box-shadow: 0 10px 30px -12px rgb(19 41 61 / .45);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(1rem) scale(.9);
+    transition: opacity 300ms ease, transform 400ms cubic-bezier(.16, 1, .3, 1), visibility 0s linear 300ms;
+  }
+  .guide-fab[data-show] { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .guide-fab:active { transform: scale(.94); }
+  .guide-fab img { width: 2.9rem; height: 2.9rem; grid-area: 1 / 1; }
+  .guide-ring { grid-area: 1 / 1; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .guide-ring circle { fill: none; stroke-width: 4; }
+  .guide-ring__track { stroke: var(--color-mint-soft); }
+  .guide-ring__fill { stroke: var(--color-mint); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 200ms linear; }
+
+  .guide-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: 85vh;
+    margin: 0;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 2rem 2rem 0 0;
+    background: var(--color-panel);
+    color: var(--color-ink);
+    padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -20px 50px -20px rgb(19 41 61 / .4);
+  }
+  .guide-sheet[open] { animation: guide-sheet-up 420ms cubic-bezier(.16, 1, .3, 1); }
+  .guide-sheet::backdrop { background: rgb(19 41 61 / .4); }
+  .guide-sheet[open]::backdrop { animation: guide-fade 300ms ease; }
+  @keyframes guide-sheet-up { from { transform: translateY(100%); } }
+  @keyframes guide-fade { from { opacity: 0; } }
+  .guide-close {
+    float: right;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    margin: -.25rem -.25rem .25rem .5rem;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  /* Scoped (unlayered) rules outrank Tailwind's lg:hidden, so wide screens hide these here. */
+  @media (min-width: 1024px) {
+    .guide-fab, .guide-sheet { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .guide-byte.is-nodding, .guide-sheet[open], .guide-sheet[open]::backdrop { animation: none; }
+    .guide-fab { transition: opacity 150ms ease, visibility 0s linear 150ms; transform: none; }
+    .guide-bar, .guide-ring__fill { transition: none; }
+  }
+</style>

@@ -32,4 +32,12 @@ for (const file of walk(dist).filter((path) => path.endsWith('.html'))) {
     if (/WebGLRenderer/.test(js)) fail(`Three.js is loaded eagerly by ${file}`);
   }
 }
-if (!process.exitCode) console.log('verify: source clean; internal links resolve; Three.js stays lazy');
+// In-page anchors (the reading guide, skip links) must point at an id on the same page.
+for (const file of walk(dist).filter((path) => path.endsWith('.html'))) {
+  const body = readFileSync(file, 'utf8');
+  const ids = new Set([...body.matchAll(/\sid=["']([^"']+)["']/g)].map((m) => m[1]));
+  for (const m of body.matchAll(/href=["']#([^"']+)["']/g)) {
+    if (!ids.has(m[1])) fail(`anchor #${m[1]} has no target in ${file}`);
+  }
+}
+if (!process.exitCode) console.log('verify: source clean; internal links and anchors resolve; Three.js stays lazy');

@@ -5,14 +5,17 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import CommandPalette from '../../components/CommandPalette.astro';
 import Footer from '../../components/Footer.astro';
-import RobotPoster from '../../components/RobotPoster.astro';
+import ReadingGuide from '../../components/ReadingGuide.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
   return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
 }
 const { project } = Astro.props;
-const { Content } = await render(project);
+const { Content, headings } = await render(project);
+// Byte's reading guide: the case study's parts, and a reading time at about 220 words a minute.
+const parts = headings.filter((h) => h.depth === 2).map(({ slug, text }) => ({ slug, text }));
+const minutes = Math.max(1, Math.ceil((project.body ?? '').split(/\s+/).filter(Boolean).length / 220));
 const facts = [
   { term: 'Company', value: project.data.company, icon: Briefcase, bg: 'bg-mint-soft', ink: 'text-mint-ink' },
   { term: 'Role', value: project.data.role, icon: UserRound, bg: 'bg-coral-soft', ink: 'text-coral-ink' },
@@ -22,7 +25,7 @@ const facts = [
 <BaseLayout title={`${project.data.title} — Nevalen Aginda Prasetyo`} description={project.data.summary}>
   <Header />
   <CommandPalette />
-  <main id="main" class="relative overflow-hidden">
+  <main id="main" class="relative overflow-x-clip">
     <div class="blob blob--mint -right-24 -top-10 size-[24rem]" data-parallax="0.15" aria-hidden="true"></div>
     <div class="blob blob--lemon -left-28 top-[28rem] size-[20rem]" data-parallax="-0.1" aria-hidden="true"></div>
     <div class="relative mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
@@ -47,7 +50,7 @@ const facts = [
           <p class="mt-3 font-mono text-xs text-muted">Public product page — no internal data or interface.</p>
           <div class="case-study mt-14 max-w-[65ch] text-body"><Content /></div>
         </div>
-        <aside class="h-fit space-y-3 lg:sticky lg:top-28">
+        <aside class="space-y-3">
           <dl class="space-y-3">
             {facts.map(({ term, value, icon: Icon, bg, ink }) => <div class={`rounded-3xl ${bg} p-4`} data-reveal>
               <dt class={`flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-wide ${ink}`}><Icon size={15} aria-hidden="true" /> {term}</dt>
@@ -62,9 +65,7 @@ const facts = [
             </ul>
             {project.data.stores.every(({ store }) => store === 'Google Play') && <p class="mt-2 text-center text-xs text-muted">Available on Android only.</p>}
           </div>}
-          <div class="hidden rounded-3xl bg-panel p-4 lg:block" aria-hidden="true">
-            <RobotPoster class="mx-auto h-44 w-auto" sizes="176px" />
-          </div>
+          <ReadingGuide headings={parts} minutes={minutes} />
         </aside>
       </article>
     </div>
@@ -73,6 +74,7 @@ const facts = [
 </BaseLayout>
 <style>
   .case-study :global(h2) {
+    scroll-margin-top: 7rem;
     display: flex;
     align-items: center;
     gap: .6rem;
